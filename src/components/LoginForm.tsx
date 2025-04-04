@@ -9,6 +9,7 @@ export const LoginForm: React.FC = () => {
   const activeTab = location.pathname === "/register" ? "register" : "login";
 
   return (
+
     <section className="flex flex-col items-center px-20 py-8 w-6/12 max-md:px-5 max-md:py-6 max-md:w-full h-screen">
       <header className="mb-6 text-base">
         <span>Welcome to </span>
@@ -37,5 +38,6 @@ export const LoginForm: React.FC = () => {
         </div>
       </form>
     </section>
+
   );
 };
