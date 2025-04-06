@@ -4,23 +4,28 @@ interface ButtonProps {
   text: string;
   type?: "primary" | "secondary" | "tertiary";
   onClick: () => void;
+  customStyle?: React.CSSProperties;
 }
 
-const Button: React.FC<ButtonProps> = ({ text, type = "primary", onClick }) => {
+const Button: React.FC<ButtonProps> = ({
+  text,
+  type = "primary",
+  onClick,
+  customStyle,
+}) => {
   const baseStyle =
-    "w-full max-w-[600px] mx-auto h-[50px] text-3xl font-bold rounded-xl transition-all duration-300 focus:outline-none max-sm:text-2xl max-sm:h-[70px]";
+    "font-semibold text-white h-[50px] rounded-[110px] shadow-[0px_0px_4.3px_rgba(0,0,0,0.25)] transition-all duration-300 focus:outline-none";
 
-  // Define styles for primary and secondary buttons
   const styles: Record<string, string> = {
-    primary: `${baseStyle} bg-orange-500 text-white shadow-md hover:bg-orange-600 active:bg-orange-700`,
-    secondary: `${baseStyle} bg-gray-500 text-white hover:bg-gray-600 active:bg-gray-700`,
-    tertiary: `${baseStyle} bg-orange-500 text-white shadow-md hover:bg-orange-600 active:bg-orange-700 h-[30px] w-[300px]`,
+    primary: `${baseStyle} bg-amber-500 hover:bg-amber-600 active:bg-amber-700 w-[180px] text-lg`,
+    secondary: `${baseStyle} bg-gray-500 hover:bg-gray-600 active:bg-gray-700 w-[180px] text-lg`,
+    tertiary: `${baseStyle} bg-amber-500 hover:bg-amber-600 active:bg-amber-700 w-[180px] text-lg`,
   };
 
   const buttonClass = styles[type] || styles.primary;
 
   return (
-    <button className={buttonClass} onClick={onClick}>
+    <button className={buttonClass} onClick={onClick} style={customStyle}>
       {text}
     </button>
   );

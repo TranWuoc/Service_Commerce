@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom/client";  // Quan trọng: dùng 'react-dom/client'
+import ReactDOM from "react-dom/client"; // Quan trọng: dùng 'react-dom/client'
 import { BrowserRouter } from "react-router-dom";
 import { AppRouter } from "./router/AppRouter";
 import "./index.css"; 

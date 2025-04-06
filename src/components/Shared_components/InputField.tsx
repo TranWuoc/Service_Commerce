@@ -4,22 +4,44 @@ interface InputFieldProps {
   label: string;
   type: string;
   placeholder: string;
+  value: string;
+  name?: string;
+  required?: boolean;
+  disabled?: boolean;
+  style?: React.CSSProperties;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
   label,
   type,
   placeholder,
+  value,
+  name,
+  required = false,
+  disabled = false,
+  style,
+  onChange,
 }) => {
   return (
-    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto mb-6">
+    <div
+      className="flex flex-col items-center w-full max-w-[600px] mx-auto mb-6"
+      style={style}
+    >
       <label className="self-start mb-2 text-xl text-black max-sm:text-xl">
         {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <input
         type={type}
+        name={name}
         placeholder={placeholder}
-        className="px-8 py-0 w-full text-2xl bg-white rounded-xl border-solid border-[2.5px] border-neutral-300 h-[40px] text-black-300 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500"
+        value={value}
+        required={required}
+        disabled={disabled}
+        onChange={onChange}
+        className="px-8 py-0 w-full text-2xl bg-white rounded-xl border-solid border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        style={style}
       />
     </div>
   );

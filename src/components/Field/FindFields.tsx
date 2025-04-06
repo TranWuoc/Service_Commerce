@@ -1,8 +1,8 @@
 "use client";
 import * as React from "react";
-import { InputField } from "./Shared_components/InputField";
+import { InputField } from "../Shared_components/InputField";
 import { useLocation } from "react-router-dom";
-import Button from "./Button";
+import Button from "../Shared_components/Button";
 export const FindFieldForm: React.FC = () => {
   const location = useLocation();
 

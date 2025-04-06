@@ -1,8 +1,8 @@
 import React from "react";
-import Headerbar from "../components/Headerbar";
+import Headerbar from "../components/Shared_components/Headerbar";
 import Footer from "../components/Shared_components/Footer";
-import Button from "../components/Button";
-import { FindFieldForm } from "../components/FindFields";
+import Button from "../components/Shared_components/Button";
+import { FindFieldForm } from "../components/Field/FindFields";
 
 const LandingPage: React.FC = () => {
   return (
@@ -26,7 +26,9 @@ const LandingPage: React.FC = () => {
                 <div className="flex justify-center items-center mt-10 gap-5 w-full">
                   <Button
                     text="Đặt sân ngay"
-                    type="primary"
+                    type="tertiary"
+                    className="w-[50px] h-[60px] text-xl font-bold"
+                    
                     onClick={() => alert("Đặt sân ngay")}
                   />
                   <Button
