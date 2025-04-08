@@ -3,28 +3,31 @@ import * as React from "react";
 import { InputField } from "./Shared_components/InputField";
 import { useLocation } from "react-router-dom";
 import Button from "./Button";
+import { ComboboxDemo } from "./Shared_components/Combobox";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 export const FindFieldForm: React.FC = () => {
   const location = useLocation();
 
   return (
-    <section className="flex flex-col items-center px-20 py-8 w-6/12 max-md:px-5 max-md:py-6 max-md:w-full h-screen">
-      <form className="bg-white dark:bg-zinc-900 shadow-2xl rounded-2xl overflow-hidden border-4 border-blue-400 dark:border-blue-800">
+    
+      <form className="flex flex-row bg-white dark:bg-zinc-900 shadow-2xl rounded-2xl overflow-hidden border-4 border-orange-400 dark:border-blue-800 ">
         <div className="px-8 py-10 md:px-10">
           <h2 className="text-4xl font-extrabold text-center text-orange-400 dark:text-white">
             Tìm sân nhanh
           </h2>
-          <p className="text-center text-zinc-600 dark:text-zinc-400 mt-3">
-            We missed you, sign in to continue.
-          </p>
           <div className="mt-10">
-            <div className="relative">
-            <InputField label="Vị trí" type="Vị trí" placeholder="Full Name" />
+            <div className=" flex flex-col gap-2">
+            <Label htmlFor="Vị trí">Vị trí</Label>
+            <Input type="Nhập vị trí cần tìm " id="address" placeholder="Nhập vị trí cần tìm" />
+            </div>
+            <div className="mt-6 flex flex-col gap-2">
+            <Label htmlFor="Vị trí">Kiểu sân </Label>
+            <ComboboxDemo />
             </div>
             <div className="mt-6">
-            <InputField label="Loại sân" type="Loại sân" placeholder="Full Name" />
-            </div>
-            <div className="mt-6">
-            <InputField label="Giá sân" type="Giá sân" placeholder="Full Name" />
+            <Label htmlFor="Vị trí">Thời gian</Label>
+            <Input type="date" id="date" placeholder="Chọn thời gian" />
             </div>
             <div className="mt-10 flex justify-center ">
               <Button
@@ -36,15 +39,11 @@ export const FindFieldForm: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="px-8 py-4 bg-blue-200 dark:bg-zinc-800">
-          <div className="text-sm text-blue-900 dark:text-blue-300 text-center">
-            Don't have an account?
-            <a className="font-medium underline" href="#">
-              Sign up
-            </a>
-          </div>
-        </div>
+        <img
+          src="/Mu.jpg"
+          alt="Stadium"
+          className="w-[500px] h-[600px] m-0 p-0"
+        />
       </form>
-    </section>
   );
 };

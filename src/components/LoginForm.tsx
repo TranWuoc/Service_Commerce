@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
-import { InputField } from "./InputField";
-import { AuthToggle } from "./AuthToggle";
+import { InputField } from "./Shared_components/InputField";
+import { AuthToggle } from "./Auth/AuthToggle";
 import { useLocation } from "react-router-dom";
 
 export const LoginForm: React.FC = () => {

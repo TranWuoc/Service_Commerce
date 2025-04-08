@@ -9,32 +9,36 @@ export function BookingForm() {
         <div>
           <InputField
             label="Pick Up Address"
+            type="text"
             placeholder="Start Destination"
-            icon="send"
+            // icon="send"
             className="text-sm py-2 px-3"
           />
         </div>
         <div>
           <InputField
             label="Drop off Address"
+            type="text"
             placeholder="End Destination"
-            icon="search"
+            // icon="search"
             className="text-sm py-2 px-3"
           />
         </div>
         <div>
           <InputField
             label="Passengers"
+            type="text"
             placeholder="Total Passengers Count"
-            icon="users"
+            // icon="users"
             className="text-sm py-2 px-3"
           />
         </div>
         <div>
           <InputField
             label="User Current Location"
+            type="text"
             placeholder="Where is the user now"
-            icon="map-pin"
+            // icon="map-pin"
             className="text-sm py-2 px-3"
           />
         </div>
