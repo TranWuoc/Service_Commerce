@@ -78,19 +78,19 @@ export function FieldList() {
         Available Fields Overview
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-        {MOCK_FIELDS.map((field, index) => (
-          <FieldCard
-            key={index}
-            name={field.name}
-            type={field.type}
-            price={field.price}
-            location={field.location}
-            status={field.status}
-            usage={field.usage}
-            imageUrl={field.imageUrl}
-          />
-        ))}
-      </div>
+  {MOCK_FIELDS.map((field, index) => (
+    <FieldCard
+      key={index}
+      name={field.name}
+      type={field.type}
+      price={field.price}
+      location={field.location}
+      status={field.status}
+      usage={field.usage}
+      imageUrl={field.imageUrl}
+    />
+  ))}
+</div>
     </section>
   );
 }

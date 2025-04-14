@@ -3,7 +3,7 @@ import * as React from "react";
 import { useState } from "react";
 import { InputField } from "./Shared_components/InputField";
 import Button from "./Shared_components/Button";
-
+import { useLocation } from "react-router-dom";
 interface TimeSlot {
   value: string;
   label: string;
@@ -30,13 +30,14 @@ export const BookingForm = () => {
     { value: "20-22", label: "20:00 - 22:00", startHour: 20, endHour: 22 },
     { value: "22-24", label: "22:00 - 24:00", startHour: 22, endHour: 24 },
   ];
-
+  const location = useLocation();
   const [formData, setFormData] = useState({
     name: "",
-    fieldId: "",
+    fieldId: location.state?.fieldName || "", // Lấy tên sân từ state nếu có
     date: "",
     timeSlot: "",
   });
+
 
   // Assuming these would come from props or context in a real application
   const accountId = "USER_123"; // This should come from authentication context

@@ -7,6 +7,7 @@ import LandingPage from "../views/Landingpage";
 import { DashboardLayout } from "../views/DashboardLayout";
 import { FieldsSummary} from "../components/Field/FieldsSummary";
 import FieldDetails from "../views/FieldDetails";
+import BookHistory from "../views/BookHistory";
 import {Booking} from "../views/Booking";
 export const AppRouter: React.FC = () => {
   return (
@@ -15,10 +16,11 @@ export const AppRouter: React.FC = () => {
       <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
       <Route path="/landingpage" element={<LandingPage />} />
       <Route path="/dashboard" element={<DashboardLayout><FieldsSummary /></DashboardLayout>} />
-      <Route path="/FieldInfo" element={<DashboardLayout><FieldDetails/></DashboardLayout>} />
-      <Route path="/Dashboard/Booking" element={<DashboardLayout><Booking/></DashboardLayout>} />
+      <Route path="/dashboard/FieldInfo" element={<DashboardLayout><FieldDetails/></DashboardLayout>} />
+      <Route path="/dashboard/Booking" element={<DashboardLayout><Booking/></DashboardLayout>} />
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
+      <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
       
     </Routes>
   );
