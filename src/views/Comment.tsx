@@ -5,8 +5,7 @@ import { CommentInput } from "../components/Comments/CommentInput";
 
 export const Comment: React.FC = () => {
   return (
-    <section className="overflow-hidden pb-6 bg-white border border-solid border-white border-opacity-0 rounded-[50px]">
-    
+    <section className="overflow-hidden pb-6 bg-white border border-solid border-white border-opacity-0 rounded-b-[50px]">
       <div className="flex flex-col items-start pr-10 pl-4 mt-5 w-full max-md:pr-5 max-md:max-w-full">
         <CommentItem
           imageUrl="https://cdn.builder.io/api/v1/image/assets/TEMP/837d7f25e2104c6c140b5a1ca2d15724d91bebb1?placeholderIfAbsent=true&apiKey=47da06657b0341d7b84c9cc9467a69da"
@@ -27,5 +26,3 @@ export const Comment: React.FC = () => {
     </section>
   );
 };
-
-

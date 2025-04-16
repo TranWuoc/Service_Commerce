@@ -19,8 +19,8 @@ const SidebarCustomer = () => {
             <Home className="mr-2" /> Trang chủ
           </li>
           <li 
-            className={`flex items-center py-3 cursor-pointer ${isActive("/booked-fields") ? "text-orange-500" : "hover:text-orange-500 active:text-orange-500"} mb-4`}
-            onClick={() => navigate("/booked-fields")}
+            className={`flex items-center py-3 cursor-pointer ${isActive("/dashboard/history") ? "text-orange-500" : "hover:text-orange-500 active:text-orange-500"} mb-4`}
+            onClick={() => navigate("/dashboard/history")}
           >
             <CalendarMonth className="mr-2" /> Sân bóng đã đặt
           </li>

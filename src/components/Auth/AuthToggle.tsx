@@ -8,10 +8,9 @@ interface AuthToggleProps {
 
 export const AuthToggle: React.FC<AuthToggleProps> = ({ activeTab }) => {
   const navigate = useNavigate();
-  const location = useLocation(); // Ensure component reacts to path changes
+  const location = useLocation(); 
 
   React.useEffect(() => {
-    // Ensure AuthToggle always reflects current path
   }, [location.pathname]);
 
   const handleClick = (tab: "login" | "register") => {
@@ -21,7 +20,7 @@ export const AuthToggle: React.FC<AuthToggleProps> = ({ activeTab }) => {
   };
 
   return (
-    <div className="flex relative mb-12 bg-black h-[100px] rounded-[35px] w-[400px] max-sm:h-[60px] max-sm:w-[320px]">
+    <div className="flex relative mb-12 bg-black h-[80px] rounded-[35px] w-[400px] max-sm:h-[60px] max-sm:w-[320px]">
       <div
         className={`absolute top-0 h-full w-1/2 bg-amber-500 rounded-[35px] transition-transform duration-300 ${
           activeTab === "register" ? "translate-x-full" : "translate-x-0"

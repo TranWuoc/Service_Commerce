@@ -20,7 +20,7 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="relative w-[60%] max-h-[90%] bg-white rounded-[20px] overflow-y-auto">
+      <div className="relative w-[60%] max-h-[90%]  rounded-[20px] overflow-y-auto">
         <CommentHeader onClose={onClose} fieldInfo={fieldInfo} />
         <Comment />
       </div>

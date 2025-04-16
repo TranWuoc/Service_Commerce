@@ -1,5 +1,5 @@
 import React from "react";
-import { FieldsTable } from "../components/Shared_components/FieldTable";
+import { FieldsTable } from "../components/Field/FieldTable";
 // Giả sử SearchBar nằm trong cùng thư mục hoặc một thư mục khác
 import { SearchBar } from "../components/Shared_components/SearchBar";
 

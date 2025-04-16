@@ -1,5 +1,5 @@
 "use client";
-import { BookingForm } from "../components/BookingForm";
+import { BookingForm } from "../components/Field/BookingForm";
 
 export const Booking = () => {
   return (

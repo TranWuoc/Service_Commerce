@@ -1,8 +1,8 @@
 "use client";
 import * as React from "react";
 import { useState } from "react";
-import { InputField } from "./Shared_components/InputField";
-import Button from "./Shared_components/Button";
+import { InputField } from "../Shared_components/InputField";
+import Button from "../Shared_components/Button";
 import { useLocation } from "react-router-dom";
 interface TimeSlot {
   value: string;
@@ -103,8 +103,7 @@ export const BookingForm = () => {
         endDateTime: bookingData.endDateTime.toISOString(),
       });
 
-      // Example API call (commented out)
-      // await api.createBooking(bookingData);
+
     } catch (error) {
       console.error("Error submitting booking:", error);
     }
