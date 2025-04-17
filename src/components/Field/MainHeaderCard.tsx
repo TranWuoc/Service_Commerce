@@ -1,7 +1,7 @@
 import Button from "../Shared_components/Button";
 import { useNavigate } from "react-router-dom";
 
-interface FieldCardProps {
+interface MainHeaderCardProps {
   name: string;
   type: string;
   location: string;
@@ -12,7 +12,7 @@ interface FieldCardProps {
   style?: React.CSSProperties; // Định nghĩa kiểu style
 }
 
-export function FieldCard({
+export function MainHeaderCard({
   name,
   type,
   location,
@@ -21,7 +21,7 @@ export function FieldCard({
   price,
   imageUrl,
   style,
-}: FieldCardProps) {
+}: MainHeaderCardProps) {
   const navigate = useNavigate();
   return (
 <article className="flex flex-col p-4 bg-white rounded-xl shadow-lg h-[420px]" style={style}>

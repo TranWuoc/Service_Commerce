@@ -56,7 +56,7 @@ export const ProfileInput: React.FC = () => {
   return (
     <section className="rounded-2xl border border-solid border-slate-100 bg-white p-6">
       <ProfileHeader
-        name={formData.name} // Dùng đúng thuộc tính tên
+        name={formData.name} 
         memberSince="January 2024"
         imageUrl="profile-image.jpg"
         onImageChange={handleImageChange}

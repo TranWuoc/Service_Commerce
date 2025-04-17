@@ -1,6 +1,6 @@
 "use client";
 
-import { FieldCard } from "../Field/FieldCard";
+import { MainHeaderCard } from "./MainHeaderCard";
 
 // Example of more dynamic mock data
 const MOCK_FIELDS = [
@@ -79,7 +79,7 @@ export function FieldList() {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
   {MOCK_FIELDS.map((field, index) => (
-    <FieldCard
+    <MainHeaderCard
       key={index}
       name={field.name}
       type={field.type}

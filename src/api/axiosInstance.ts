@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000/api", // Thay bằng URL API của bạn
+  baseURL: "http://localhost:8000/api",
   timeout: 10000, // Thời gian chờ (timeout) cho mỗi yêu cầu
 });
 
@@ -10,7 +10,7 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
 
-    // Chỉ thêm token nếu không phải là yêu cầu đến endpoint công khai
+
     if (token && config.url && !config.url.includes("/auth/login")) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,7 +24,7 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response Interceptor
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -40,7 +40,7 @@ axiosInstance.interceptors.response.use(
             refreshToken,
           });
 
-          console.log("Refresh Token Response:", response.data); // Kiểm tra phản hồi từ API
+          console.log("Refresh Token Response:", response.data); 
 
           // Lưu token mới vào localStorage
           if (response.data.access_token) {
@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
             console.error("AccessToken is missing in the refresh response.");
           }
 
-          // Thử lại yêu cầu ban đầu với token mới
+       
           error.config.headers.Authorization = `Bearer ${response.data.access_token}`;
           return axiosInstance.request(error.config);
         } catch (refreshError) {
@@ -59,7 +59,7 @@ axiosInstance.interceptors.response.use(
           localStorage.removeItem("authToken");
           localStorage.removeItem("refreshToken");
           if (window.location.pathname !== "/login") {
-            window.location.href = "/login"; // hoặc dùng navigate("/login")
+            window.location.href = "/login"; 
           }
         }
       } else {
@@ -68,7 +68,7 @@ axiosInstance.interceptors.response.use(
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
         if (window.location.pathname !== "/login") {
-          window.location.href = "/login"; // hoặc dùng navigate("/login")
+          window.location.href = "/login";
         }
       }
     }

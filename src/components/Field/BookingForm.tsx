@@ -128,18 +128,7 @@ export const BookingForm = () => {
           <h2 className="mb-3 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
           <div className="flex flex-col gap-2">
-            <InputField
-              label="Tên người đặt sân"
-              type="text"
-              placeholder="Điền tên người đặt ..."
-              value={formData.name}
-              required
-              name="bookerName"
-              style={{ marginBottom: "0.75rem" }}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
+           
 
             <InputField
               label="Tên sân"

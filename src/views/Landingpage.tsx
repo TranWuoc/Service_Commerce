@@ -4,7 +4,7 @@ import Footer from "../components/Shared_components/Footer";
 import Button from "../components/Shared_components/Button";
 import { FindFieldForm } from "../components/FindFields";
 import { Badge } from "../components/ui/badge";
-import { FieldCard } from "../components/Field/FieldCard";
+import { MainHeaderCard } from "../components/Field/MainHeaderCard";
 const LandingPage: React.FC = () => {
   return (
     <div className="flex flex-col w-full min-h-screen">
@@ -94,7 +94,7 @@ const LandingPage: React.FC = () => {
         className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân Futsal</Badge>
         </div>
         <div className="flex flex-row  gap-8">
-        <FieldCard 
+        <MainHeaderCard 
         name="Sân Futsal Hà Đông"
         type="Sân 7"
         price={1.5}
@@ -103,7 +103,7 @@ const LandingPage: React.FC = () => {
         usage={50}
         imageUrl="/football-field.jpg"
         />
-        <FieldCard
+        <MainHeaderCard
         name="Sân 2"
         type="Sân 11"
         price={2.0}
@@ -112,7 +112,7 @@ const LandingPage: React.FC = () => {
         usage={80}
         imageUrl="/football-field.jpg"
         />
-        <FieldCard
+        <MainHeaderCard
         name="Sân 3"
         type="Sân 7"
         price={1.0}
@@ -121,7 +121,7 @@ const LandingPage: React.FC = () => {
         usage={30}
         imageUrl="/football-field.jpg"
         />
-        <FieldCard
+        <MainHeaderCard
         name="Sân 4"
         type="Sân 11"
         price={2.5}
