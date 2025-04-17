@@ -1,11 +1,18 @@
 import React from "react";
 import Headerbar from "../components/Headerbar";
 import Footer from "../components/Shared_components/Footer";
+<<<<<<< HEAD
 import Button from "../components/Button";
 // import Button from "../components/Shared_components/Button";
 import { FindFieldForm } from "../components/FindFields";
 import { Badge } from "../components/ui/badge";
 import { FieldCard } from "../components/Customer/FieldCard";
+=======
+import Button from "../components/Shared_components/Button";
+import { FindFieldForm } from "../components/FindFields";
+import { Badge } from "../components/ui/badge";
+import { MainHeaderCard } from "../components/Field/MainHeaderCard";
+>>>>>>> master
 const LandingPage: React.FC = () => {
   const items = [
     "Dưới 5km",
@@ -114,6 +121,7 @@ const LandingPage: React.FC = () => {
       {/* Main Content - Screen 3 */}
       <div className="flex flex-col justify-center items-center w-full h-[1250px] gap-6 bg-gray-800 ">
         <div className="flex flex-row">
+<<<<<<< HEAD
           <FindFieldForm />
         </div>
         <div className="flex flex-row justify-around items-center w-full h-[100px] gap-8">
@@ -141,10 +149,75 @@ const LandingPage: React.FC = () => {
             />
           ))}
           </div>
+=======
+        <FindFieldForm />
+        </div>
+        <div className="flex flex-row justify-around items-center w-full h-[100px] gap-8">
+        <Badge 
+        variant="outline"
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Dưới 5km</Badge>
+        <Badge 
+        variant="outline"
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân 7</Badge>
+        <Badge 
+        variant="outline"        
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân 11</Badge>
+        <Badge 
+        variant="outline"        
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Từ 350k/90p</Badge>
+        <Badge 
+        variant="outline"
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Dưới 10km</Badge>
+        <Badge 
+        variant="outline"
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân cỏ tự nhiên </Badge>
+        <Badge 
+        variant="outline"
+        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân Futsal</Badge>
+        </div>
+        <div className="flex flex-row  gap-8">
+        <MainHeaderCard 
+        name="Sân Futsal Hà Đông"
+        type="Sân 7"
+        price={1.5}
+        location="Hà Đông"
+        status="Còn trống"
+        usage={50}
+        imageUrl="/football-field.jpg"
+        />
+        <MainHeaderCard
+        name="Sân 2"
+        type="Sân 11"
+        price={2.0}
+        location="Hà Nội"
+        status="Đã đặt"
+        usage={80}
+        imageUrl="/football-field.jpg"
+        />
+        <MainHeaderCard
+        name="Sân 3"
+        type="Sân 7"
+        price={1.0}
+        location="Hà Nội"
+        status="Còn trống"
+        usage={30}
+        imageUrl="/football-field.jpg"
+        />
+        <MainHeaderCard
+        name="Sân 4"
+        type="Sân 11"
+        price={2.5}
+        location="Hà Nội"
+        status="Đã đặt"
+        usage={90}
+        imageUrl="/football-field.jpg"
+        />
+>>>>>>> master
         </div>
       </div>
       {/* Main Content - Screen 4 */}
       <div className="flex flex-row justify-around items-center  w-full h-[500px] bg-stone-950 text-cyan-50 text-6xl font-bold font-['Russo_One'] gap-10">
+<<<<<<< HEAD
         <h1>
           Đăng ký ngay để trở thành hội viên
           <br />
@@ -164,6 +237,25 @@ const LandingPage: React.FC = () => {
             className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
           />
         </div>
+=======
+      <h1>Đăng ký ngay để trở thành hội viên 
+        <br/> 
+        với nhiều ưu đãi</h1>
+      <div className = "flex flex-row gap-8" >
+      <Button
+        text="Đăng ký"
+        type="primary"
+        onClick={() => alert("Đăng ký ngay")}
+        className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
+      />
+      <Button 
+        text="Đăng nhập"
+        type="secondary"
+        onClick={() => alert("Đăng nhập")}
+        className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
+      />
+      </div>
+>>>>>>> master
       </div>
       {/* Footer */}
       <Footer />

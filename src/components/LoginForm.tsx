@@ -3,13 +3,13 @@ import * as React from "react";
 import { InputField } from "./Shared_components/InputField";
 import { AuthToggle } from "./Auth/AuthToggle";
 import { useLocation } from "react-router-dom";
+import Button from "./Shared_components/Button"; 
 
 export const LoginForm: React.FC = () => {
   const location = useLocation(); // Track pathname updates
   const activeTab = location.pathname === "/register" ? "register" : "login";
 
   return (
-
     <section className="flex flex-col items-center px-20 py-8 w-6/12 max-md:px-5 max-md:py-6 max-md:w-full h-screen">
       <header className="mb-6 text-base">
         <span>Welcome to </span>
@@ -32,12 +32,14 @@ export const LoginForm: React.FC = () => {
         </div>
 
         <div className="mt-auto">
-          <button type="submit" className="h-20 text-3xl bg-amber-500 rounded-xl cursor-pointer border-[none] text-neutral-50 w-[480px] max-md:w-full max-md:max-w-[480px] max-sm:text-2xl max-sm:h-[60px]">
-            Login
-          </button>
+
+          <Button
+            text="Login"
+            type="primary"
+            onClick={() => alert("Login button clicked")}
+          />
         </div>
       </form>
     </section>
-
   );
 };

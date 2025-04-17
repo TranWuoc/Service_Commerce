@@ -18,11 +18,15 @@
     "@hookform/resolvers": "^5.0.1",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
+<<<<<<< HEAD
     "@radix-ui/react-avatar": "^1.1.3",
+=======
+>>>>>>> master
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-popover": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
+<<<<<<< HEAD
     "@radix-ui/react-toast": "^1.2.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -35,6 +39,19 @@
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
+=======
+    "@radix-ui/react-toast": "^1.2.7",
+    "axios": "^1.8.4",
+    "class-variance-authority": "^0.7.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.487.0",
+    "react": "^19.0.0",
+    "react-datepicker": "^8.2.1",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.4.1",
+    "tailwind-merge": "^3.2.0"
+>>>>>>> master
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

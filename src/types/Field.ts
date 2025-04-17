@@ -5,7 +5,7 @@ export interface FieldInfo {
     type: string;
     status: string;
     imageUrl: string;
-    address: string;
+    location: string;
   }
   
   export interface FieldApiResponse {

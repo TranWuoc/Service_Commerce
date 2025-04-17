@@ -2,9 +2,9 @@ import * as React from "react";
 
 export const ImageOverlay: React.FC = () => {
   return (
-    <div className="relative w-full h-screen overflow-hidden"> 
+    <div className=" flex relative w-full h-[100vh] overflow-hidden"> 
       <img
-        src="https://cdn-i2.vtcnews.vn/upload/2024/12/06/4693654565446164950565166172323134218851978n-11101528.jpg"
+        src="https://upload.wikimedia.org/wikipedia/commons/1/1d/Football_Pallo_valmiina-cropped.jpg"
         className="object-cover w-full h-full"
         alt="Yellow taxis"
       />
