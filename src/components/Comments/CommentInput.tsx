@@ -17,8 +17,8 @@ export const CommentInput: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-wrap gap-4 self-end px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] max-md:px-5">
-      <div className="flex-1">
+    <section className="relative flex items-center justify-start px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] h-[200px] max-md:px-5">
+      <div className="absolute left-7 top-1/2 -translate-y-1/2 w-[600px] h-[130px]">
         <InputField
           label=""
           type="text"
@@ -26,28 +26,30 @@ export const CommentInput: React.FC = () => {
           value={comment}
           onChange={handleCommentChange}
           style={{
-            marginBottom: 0,
-            width: "100%", // Chiều rộng đầy đủ
-            height: "70px", // Tăng chiều cao
-            fontSize: "1.2rem", // Tăng kích thước chữ
-            padding: "10px 15px", // Thêm padding để nội dung thoải mái hơn
+            width: "100%",
+            height: "100%",
+            fontSize: "1.2rem",
+            padding: "15px 20px",
+            borderRadius: "1rem",
           }}
         />
       </div>
-      <Button
-        text="Gửi"
-        type="tertiary"
-        onClick={handleSendComment}
-        customStyle={{
-          width: "85px",
-          height: "85px",
-          borderRadius: "100%",
-          padding: "0",
-          backgroundSize: "50%",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-        }}
-      />
+      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+        <Button
+          text="Gửi"
+          type="tertiary"
+          onClick={handleSendComment}
+          customStyle={{
+            width: "90px",
+            height: "90px",
+            borderRadius: "100%",
+            padding: "0",
+            backgroundSize: "50%",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }}
+        />
+      </div>
     </section>
   );
 };

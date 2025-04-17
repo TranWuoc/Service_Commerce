@@ -1,9 +1,10 @@
-"use client";
 import * as React from "react";
 import { useState } from "react";
 import { InputField } from "../Shared_components/InputField";
 import Button from "../Shared_components/Button";
 import { useLocation } from "react-router-dom";
+import { useUser } from "../../Context/UserContext";  // Import custom hook
+
 interface TimeSlot {
   value: string;
   label: string;
@@ -30,17 +31,16 @@ export const BookingForm = () => {
     { value: "20-22", label: "20:00 - 22:00", startHour: 20, endHour: 22 },
     { value: "22-24", label: "22:00 - 24:00", startHour: 22, endHour: 24 },
   ];
+
   const location = useLocation();
+  const { user } = useUser();  // Get user from context
+
   const [formData, setFormData] = useState({
     name: "",
     fieldId: location.state?.fieldName || "", // Lấy tên sân từ state nếu có
     date: "",
     timeSlot: "",
   });
-
-
-  // Assuming these would come from props or context in a real application
-  const accountId = "USER_123"; // This should come from authentication context
 
   const getMinDate = () => {
     const today = new Date();
@@ -59,7 +59,7 @@ export const BookingForm = () => {
   };
 
   const createBookingData = (): BookingData | null => {
-    if (!formData.date || !formData.timeSlot) return null;
+    if (!formData.date || !formData.timeSlot || !user) return null;  // Ensure user is available
 
     const selectedTimeSlot = timeSlots.find(
       (slot) => slot.value === formData.timeSlot,
@@ -77,7 +77,7 @@ export const BookingForm = () => {
     endDateTime.setHours(selectedTimeSlot.endHour, 0, 0, 0);
 
     return {
-      accountId,
+      accountId: user.id,  // Use user.id from context
       bookerName: formData.name,
       fieldId: formData.fieldId,
       startDateTime,
@@ -103,7 +103,7 @@ export const BookingForm = () => {
         endDateTime: bookingData.endDateTime.toISOString(),
       });
 
-
+      // Make your API call here
     } catch (error) {
       console.error("Error submitting booking:", error);
     }
@@ -128,8 +128,6 @@ export const BookingForm = () => {
           <h2 className="mb-3 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
           <div className="flex flex-col gap-2">
-           
-
             <InputField
               label="Tên sân"
               type="text"
