@@ -2,11 +2,7 @@
 import * as React from "react";
 import { InputField } from "./Shared_components/InputField";
 import { useLocation } from "react-router-dom";
-<<<<<<< HEAD
-import Button from "./Button";
-=======
 import Button from "./Shared_components/Button";
->>>>>>> master
 import { ComboboxDemo } from "./Shared_components/Combobox";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
