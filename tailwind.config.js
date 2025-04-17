@@ -19,6 +19,38 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+		keyframes: {
+			"infinity-scroll":{
+				"0%": {
+					transform: "translateX(0)"
+				},
+				"100%": {
+					transform: "translateX(-30%)"
+				},
+			},
+			'scroll-marquee': {
+				to : {
+					left: '-100px',
+				},
+      			'0%': { transform: 'translateX(0%)' },
+      			'100%': { transform: 'translateX(-100%)' }, 
+    		},
+			'scroll-track': {
+        		'0%': { transform: 'translateX(0)' },
+        		'100%': { transform: 'translateX(-100%)' }, 
+			},
+			'scroll-left': {
+				to: {
+					left: '-200px'
+				},
+			},
+		},
+		animation: {
+			"infinity-scroll": "infinity-scroll 5s linear infinite",
+			'scroll-marquee': 'scroll-marquee 10s linear infinite',
+			'scroll-track': 'scroll-track 10s linear infinite',
+			'scroll-left': 'scroll-left 10s linear infinite',
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -60,8 +92,9 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
-  		}
-  	}
+  		},
+	}
+	
   },
   plugins: [require("tailwindcss-animate")],
 }

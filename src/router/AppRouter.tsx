@@ -9,6 +9,7 @@ import LandingPage from "../views/Landingpage";
 import {DashboardLayout}from "../views/DashboardLayout";
 import  {BookingForm}   from "../components/Customer/BookingForm";
 import FieldInfo from "../views/FieldInfo";
+import { TestPage } from "../views/test";
 
 
 interface AppRouterProps {
@@ -24,7 +25,7 @@ export const AppRouter: React.FC = () => {
         <Route path="/dashboard" element={<DashboardLayout><BookingForm /></DashboardLayout>} />
         <Route path="/FieldInfo" element={<DashboardLayout><FieldInfo/></DashboardLayout>}/>
         <Route path="/" element={<Navigate to="/landingpage" replace />} />
-
+        <Route path="/test" element={<TestPage />}/>
         
       </Routes>
   );
