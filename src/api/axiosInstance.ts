@@ -2,8 +2,8 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8000/api",
-  timeout: 10000, // Thời gian chờ (timeout) cho mỗi yêu cầu
-});
+  timeout: 10000, 
+})
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
