@@ -10,6 +10,8 @@ import FieldDetails from "../views/FieldDetails";
 import BookHistory from "../views/BookHistory";
 import {Booking} from "../views/Booking";
 import ProfileInput from "../components/Profile/ProfileInput";
+import Admin from "../views/AdminDashboard";
+import AdminManager from "../views/AdminManager";
 export const AppRouter: React.FC = () => {
   return (
     <Routes>
@@ -23,6 +25,8 @@ export const AppRouter: React.FC = () => {
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
       <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
       <Route path ="/dashboard/Profile" element ={<DashboardLayout><ProfileInput/></DashboardLayout>} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="/admin/manager" element={<AdminManager />} />
     </Routes>
   );
 };

@@ -4,6 +4,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../Context/UserContext";
 import axiosInstance from "../../api/axiosInstance"; // Import useUser từ UserContext
+import { toast, useToast } from "../../hooks/use-toast";
 
 export const AvatarMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -58,6 +59,11 @@ export const AvatarMenu = () => {
     setUser(null); // Đặt lại thông tin người dùng trong context
     navigate("/login");
     handleClose();
+    toast({
+      variant: "destructive",
+      title: "Đăng xuất thành công",
+      description: "Bạn đã đăng xuất khỏi tài khoản của mình.",
+    });
   };
 
   return (
@@ -78,7 +84,19 @@ export const AvatarMenu = () => {
           horizontal: "center",
         }}
       >
-        <MenuItem onClick={handleViewProfile}>Xem thông tin tài khoản</MenuItem>
+        {/* Hiển thị menu dựa trên vai trò */}
+        {user?.is_admin ? (
+          <>
+            <MenuItem onClick={() => navigate("/admin")}>Quản lý hệ thống</MenuItem>
+            <MenuItem onClick={() => navigate("/admin/users")}>Quản lý người dùng</MenuItem>
+            <MenuItem onClick={() => navigate("/admin/settings")}>Cài đặt</MenuItem>
+          </>
+        ) : (
+          <>
+            <MenuItem onClick={handleViewProfile}>Xem thông tin tài khoản</MenuItem>
+            <MenuItem onClick={() => navigate("/dashboard/bookings")}>Lịch sử đặt sân</MenuItem>
+          </>
+        )}
         <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
       </Menu>
     </div>

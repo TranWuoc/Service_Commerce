@@ -35,6 +35,7 @@ export const LoginForm: React.FC = () => {
         localStorage.setItem("user", JSON.stringify(user)); 
   
         toast.toast({
+          variant: "sucess",
           title: "Đăng nhập thành công",
           description: "Chào mừng bạn trở lại!",
          
@@ -50,27 +51,28 @@ export const LoginForm: React.FC = () => {
 
         if (is_admin || role === "1") {
           console.log("Admin user detected, redirecting to admin dashboard.");
+          navigate("/admin"); // Điều hướng đến trang Admin
         } else {
-          navigate("/dashboard");
+          console.log("Non-admin user detected, redirecting to user dashboard.");
+          navigate("/dashboard"); // Điều hướng đến trang người dùng
         }
       } else {
         toast.toast({
+          variant: "destructive",
           title: "Đăng nhập thất bại",
           description: "Không tìm thấy token trong phản hồi.",
-          
         });
       }
     } catch (error: any) {
       console.error("Login Error:", error.response?.data?.message || error.message);
   
       toast.toast({
+        variant: "destructive",
         title: "Đăng nhập thất bại",
         description: error.response?.data?.message || "Sai tài khoản hoặc mật khẩu.",
-       
       });
     }
   };
-  
 
   return (
     <section className="flex flex-col items-center px-20 py-8 w-full max-md:px-5 max-md:py-6 max-md:w-full h-screen">

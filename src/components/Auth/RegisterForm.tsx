@@ -18,13 +18,13 @@ export const RegisterForm: React.FC = () => {
 
       <form className="w-full flex flex-col justify-between flex-1">
         <div className="space-y-2">
-          <InputField label="Name" type="text" placeholder="Full Name" />
-          <InputField label="Phone number" type="text" placeholder="Personal Phone Number" />
-          <InputField label="Email" type="email" placeholder="Email Address" />
+          <InputField label="Name" type="text" placeholder="Full Name" value="" />
+          <InputField label="Phone number" type="text" placeholder="Personal Phone Number" value="" />
+          <InputField label="Email" type="email" placeholder="Email Address" value="" />
          
         </div>
 
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col items-center">
           <p className="mb-2 text-sm text-center">
             <span>By signing up you agree to </span>
             <a href="#" className="text-amber-500">terms and conditions</a>
@@ -33,10 +33,12 @@ export const RegisterForm: React.FC = () => {
           <Button
             text="Register"
             type="primary"
+            customStyle={{ width: "50%", height: "60px" }}
             onClick={() => {
               // Handle register action here
               console.log("Register button clicked");
             }
+            
             }
           />
         </div>

@@ -1,5 +1,6 @@
 import Button from "../Shared_components/Button";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../Context/UserContext";
 
 interface Field {
   id: string;
@@ -25,6 +26,7 @@ interface MainHeaderCardProps {
 export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const navigate = useNavigate();
   const imageUrl = field?.images?.[0] || "https://placehold.co/400x400/333/333";
+  const {user} = useUser();
 
   return (
     <article className="flex flex-col p-4 bg-white rounded-xl shadow-lg h-[420px]">
@@ -52,6 +54,17 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
       </div>
 
       <div className="flex justify-center mt-auto">
+        {user?.is_admin ? (
+          <Button
+            text="Edit Field"
+            type="primary"
+            onClick={() =>
+              navigate("/admin/manager", {
+                state: { fieldId: field.id },
+              })
+            }
+          />
+        ) : (
         <Button
           text="Select Field"
           type="primary"
@@ -64,6 +77,7 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
             })
           }
         />
+        )}
       </div>
     </article>
   );

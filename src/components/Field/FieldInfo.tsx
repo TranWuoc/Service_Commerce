@@ -9,6 +9,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Button from "../Shared_components/Button";
 import { useNavigate } from "react-router-dom";
 import { CommentOverlay } from "../Comments/CommentsOverLay";
+import { useUser } from "../../Context/UserContext";
 
 interface FieldInfoProps {
   fieldInfo: FieldInfo;
@@ -17,6 +18,7 @@ interface FieldInfoProps {
 const FieldInfo: React.FC<FieldInfoProps> = ({ fieldInfo }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useUser();
   const [showComments, setShowComments] = useState(false);
 
   // Lấy fieldInfo từ state hoặc prop
@@ -72,30 +74,51 @@ const FieldInfo: React.FC<FieldInfoProps> = ({ fieldInfo }) => {
               />
             )}
           </div>
-
-         
-
           </div>
         </div>
 
         <div className="flex gap-2 justify-between mt-2">
-          <Button
-              onClick={() =>
-                navigate("/dashboard/booking", {
-                  state: { fieldId: currentFieldInfo.id, fieldName: currentFieldInfo.name },
-                  replace: true,
-                })
-              }
-              text="Đặt sân"
-              variant="tertiary"
-              className="flex-1 py-2 bg-amber-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-amber-600 transition-colors"
-          />
-          <Button
-            onClick={() => setShowComments(true)}
-            text="Bình luận"
-            variant="tertiary"
-            className="flex-1 py-2 bg-amber-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-amber-600 transition-colors"
-          />
+        {user?.is_admin ? (
+            <>
+              <Button
+                onClick={() => navigate("/admin/manager", { state: { fieldId: currentFieldInfo.id } })}
+                text="Chỉnh sửa"
+                variant="primary"
+                className="flex-1 py-2 bg-blue-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-blue-600 transition-colors"
+              />
+              <Button
+                onClick={() => {
+                  if (window.confirm("Bạn có chắc chắn muốn xoá sân này?")) {
+                    console.log("Xoá sân:", currentFieldInfo.id);
+                    // Thêm logic xoá sân tại đây
+                  }
+                }}
+                text="Xoá sân"
+                variant="danger"
+                className="flex-1 py-2 bg-red-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-red-600 transition-colors"
+              />
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={() =>
+                  navigate("/dashboard/booking", {
+                    state: { fieldId: currentFieldInfo.id, fieldName: currentFieldInfo.name },
+                    replace: true,
+                  })
+                }
+                text="Đặt sân"
+                variant="tertiary"
+                className="flex-1 py-2 bg-amber-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-amber-600 transition-colors"
+              />
+              <Button
+                onClick={() => setShowComments(true)}
+                text="Bình luận"
+                variant="tertiary"
+                className="flex-1 py-2 bg-amber-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-amber-600 transition-colors"
+              />
+            </>
+          )}
         </div>
       </div>
 

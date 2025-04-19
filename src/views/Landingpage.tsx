@@ -1,12 +1,41 @@
-import React from "react";
+import React, { useState, useEffect, use } from "react";
 import Headerbar from "../components/Headerbar";
 import Footer from "../components/Shared_components/Footer";
-import {Button} from "../components/ui/button";
+import { Button } from "../components/ui/button";
 // import Button from "../components/Shared_components/Button";
 import { FindFieldForm } from "../components/FindFields";
 import { Badge } from "../components/ui/badge";
 import { MainHeaderCard } from "../components/Field/MainHeaderCard";
+
+
+
 const LandingPage: React.FC = () => {
+  const [fields, setFields] = useState([]); 
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/fields");
+        const result = await response.json(); // Lấy dữ liệu trả về từ API 
+        console.log(result); // In ra dữ liệu để kiểm tra
+        // Truy cập vào `result.data` nếu API trả về dữ liệu trong thuộc tính `data`
+        if (Array.isArray(result.data)) {
+          setFields(result.data.slice(0, 4)); // Lấy 4 sân đầu tiên
+        } else {
+          console.error("Dữ liệu trả về không hợp lệ:");
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu sân bóng:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchFields();
+  }, []);
+
+  
   const items = [
     "Dưới 5km",
     "Sân 7",
@@ -17,44 +46,7 @@ const LandingPage: React.FC = () => {
     "Sân Futsal",
   ];
 
-  const itemsfieldcard = [
-    {
-      name: "Sân Futsal Hà Đông",
-      type: "Sân 7",
-      location: "Hà Đông",
-      status: "Còn trống",
-      usage: 50,
-      price: 350000,
-      imageUrl: "/football-field.jpg",
-    },
-    {
-      name: "Sân 2",
-      type: "Sân 11",
-      location: "Hà Nội",
-      status: "Đã đặt",
-      usage: 80,
-      price: 400000,
-      imageUrl: "/football-field.jpg",
-    },
-    {
-      name: "Sân 3",
-      type: "Sân 7",
-      location: "Hà Nội",
-      status: "Còn trống",
-      usage: 30,
-      price: 300000,
-      imageUrl: "/football-field.jpg",
-    },
-    {
-      name: "Sân 4",
-      type: "Sân 11",
-      location: "Hà Nội",
-      status: "Đã đặt",
-      usage: 90,
-      price: 450000,
-      imageUrl: "/football-field.jpg",
-    },
-  ];
+  
 
   return (
     <div className="flex flex-col w-full min-h-screen">
@@ -76,15 +68,21 @@ const LandingPage: React.FC = () => {
                   nhất!!
                   <div className="flex justify-center items-center mt-10 gap-5 w-full">
                     <Button
-                      text="Đặt sân ngay"
-                      type="primary"
+                      size={"lg"}
+                      variant={"default"}
+                      className="bg-gray-400 text-white hover:bg-gray-500"
                       onClick={() => alert("Đặt sân ngay")}
-                    />
+                    >
+                      Đặt sân ngay
+                    </Button>
                     <Button
-                      text="Đăng ký tài khoản"
-                      type="secondary"
+                      size={"lg"}
+                      variant={"secondary"}
+                      className="bg-orange-400 text-white hover:bg-orange-500"
                       onClick={() => alert("Đăng ký tài khoản")}
-                    />
+                    >
+                      Đăng ký tài khoản
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -131,20 +129,16 @@ const LandingPage: React.FC = () => {
             </Badge>
           ))}
         </div>
+        
         <div className="relative w-[1500px] overflow-hidden">
           <div className="flex animate-scroll-marquee w-max gap-3">
-          {[...itemsfieldcard].map((field, idx) => (
-            <MainHeaderCard
-              key={idx}
-              name={field.name}
-              type={field.type}
-              location={field.location}
-              price={field.price}
-              status={field.status}
-              usage={field.usage}
-              imageUrl={field.imageUrl}
-            />
-          ))}
+            {isLoading ? (
+              <p>Đang tải dữ liệu...</p>
+            ) : (
+              fields.map((field, idx) => (
+                <MainHeaderCard key={idx} field={field} />
+              ))
+            )}
           </div>
         </div>
       </div>
