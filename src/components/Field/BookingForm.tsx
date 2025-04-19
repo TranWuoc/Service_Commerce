@@ -3,8 +3,9 @@ import { useState } from "react";
 import { InputField } from "../Shared_components/InputField";
 import Button from "../Shared_components/Button";
 import { useLocation } from "react-router-dom";
-import { useUser } from "../../Context/UserContext";  // Import custom hook
-
+import { useUser } from "../../Context/UserContext";  
+import { useField } from "../../hooks/useField";
+import { useToast } from "../ui/use-toast";  
 interface TimeSlot {
   value: string;
   label: string;
@@ -36,8 +37,8 @@ export const BookingForm = () => {
   const { user } = useUser();  // Get user from context
 
   const [formData, setFormData] = useState({
-    name: "",
-    fieldId: location.state?.fieldName || "", // Lấy tên sân từ state nếu có
+    name: location.state?.fieldName || "",
+    fieldId: location.state?.fieldId || "", // Lấy tên sân từ state nếu có
     date: "",
     timeSlot: "",
   });
@@ -132,7 +133,7 @@ export const BookingForm = () => {
               label="Tên sân"
               type="text"
               placeholder="Điền tên sân ..."
-              value={formData.fieldId}
+              value={formData.name}
               required
               name="fieldId"
               style={{ marginBottom: "1.5rem" }}

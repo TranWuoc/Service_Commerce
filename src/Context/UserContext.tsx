@@ -1,31 +1,12 @@
-// src/context/UserContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+// UserContext.ts
+import { createContext, useContext } from 'react';
+import { User } from '../types/User'; // Import kiểu dữ liệu người dùng từ UserType
 
-// Định nghĩa kiểu dữ liệu của người dùng
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  email_verified_at: string | null;
-  phone_number: string;
-  address: string;
-  status: string;
-  is_admin: boolean;
-}
-
-// Khởi tạo context cho người dùng
-const UserContext = createContext<{ user: User | null; setUser: React.Dispatch<React.SetStateAction<User | null>> } | undefined>(undefined);
-
-// Tạo provider để cung cấp state người dùng cho toàn bộ ứng dụng
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null); // Ban đầu người dùng là null (chưa đăng nhập)
-
-  return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
-  );
-};
+// Định nghĩa context cho người dùng
+const UserContext = createContext<{
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+} | undefined>(undefined);
 
 // Custom hook để dễ dàng truy cập thông tin người dùng
 export const useUser = () => {
@@ -35,3 +16,5 @@ export const useUser = () => {
   }
   return context;
 };
+
+export default UserContext;
