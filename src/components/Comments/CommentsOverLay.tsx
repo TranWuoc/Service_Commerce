@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Comment } from "../../views/Comment";
-import Button from "../Shared_components/Button";
+
 import { CommentHeader } from "./CommentHeader";
 
 interface CommentOverlayProps {

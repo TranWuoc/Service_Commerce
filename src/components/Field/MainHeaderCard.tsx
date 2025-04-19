@@ -1,32 +1,23 @@
 import Button from "../Shared_components/Button";
 import { useNavigate } from "react-router-dom";
+import { useField } from "../../hooks/useField";// Sử dụng context mới
+import { Field } from "../../types/Field";
 import { useUser } from "../../Context/UserContext";
-
-interface Field {
-  id: string;
-  name: string;
-  address: string;
-  price: number;
-  category: {
-    id: string;
-    name: string;
-  };
-  state: {
-    id: string;
-    name: string;
-  };
-  images: string[];
-
-}
-
 interface MainHeaderCardProps {
   field: Field;
 }
 
 export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const navigate = useNavigate();
+  const { setSelectedField} = useField();
+
   const imageUrl = field?.images?.[0] || "https://placehold.co/400x400/333/333";
   const {user} = useUser();
+
+  const handleSelectField = () => {
+    setSelectedField(field); // Chỉ set vào context
+    navigate("/dashboard/FieldInfo"); // Không cần truyền state nữa
+  };
 
   return (
     <article className="flex flex-col p-4 bg-white rounded-xl shadow-lg h-[420px]">
@@ -34,7 +25,6 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
         <img
           src={imageUrl}
           alt={`Field ${field?.name || "Unknown"}`}
-
           className="w-full h-[200px] object-cover flex-shrink-0"
         />
       </div>
@@ -44,7 +34,6 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
 
       <div className="flex text-sm text-gray-500 mb-4 gap-2 min-h-[2.5rem]">
         <div className="flex-1 line-clamp-2">{field?.address || "No Address"}</div>
-
       </div>
 
       <div className="flex justify-between text-sm text-gray-500 mb-4 mt-auto">
@@ -68,14 +57,7 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
         <Button
           text="Select Field"
           type="primary"
-          onClick={() =>
-            navigate("/dashboard/FieldInfo", {
-              state: {
-                ...field,
-                imageUrl,
-              },
-            })
-          }
+          onClick={handleSelectField}
         />
         )}
       </div>
