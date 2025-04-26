@@ -19,7 +19,7 @@ const LandingPage: React.FC = () => {
       try {
         const response = await fetch("http://127.0.0.1:8000/api/fields");
         const result = await response.json(); // Lấy dữ liệu trả về từ API 
-        console.log(result); // In ra dữ liệu để kiểm tra
+        // console.log(result); // In ra dữ liệu để kiểm tra
         // Truy cập vào `result.data` nếu API trả về dữ liệu trong thuộc tính `data`
         if (Array.isArray(result.data)) {
           setFields(result.data.slice(0, 4)); // Lấy 4 sân đầu tiên

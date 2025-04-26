@@ -7,6 +7,7 @@ import { useField } from "../hooks/useField"; // Sử dụng context
 
 function FieldDetails() {
   const { selectedField } = useField(); // Lấy field từ context
+
   const fieldImages = selectedField?.images?.length
     ? selectedField.images
     : [
@@ -26,7 +27,7 @@ function FieldDetails() {
       <div className="flex flex-col w-full max-w-[1000px] mx-auto">
         <div className="flex w-full gap-8 max-md:flex-col max-md:gap-4 items-center">
           <div className="flex-shrink-0 w-[30%] max-md:w-full max-md:mb-4">
-            <FieldInfo /> 
+            <FieldInfo />
           </div>
           <div className="flex-grow w-full h-[80vh]">
             <FieldPictureGallery images={fieldImages} />
