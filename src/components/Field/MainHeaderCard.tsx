@@ -11,18 +11,22 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const navigate = useNavigate();
   const { setSelectedField} = useField();
 
-  const imageUrl = field?.images?.[0] || "https://placehold.co/400x400/333/333";
-
+  const getImageUrl = (field: Field) => {
+    if (field?.images && field.images.length > 0 && field.images[0].images_url) {
+      return `http://127.0.0.1:8000/${field.images[0].images_url}`;
+    }
+    return "https://placehold.co/400x400/333/333";
+  };
   const handleSelectField = () => {
-    setSelectedField(field); // Chỉ set vào context
-    navigate("/dashboard/FieldInfo"); // Không cần truyền state nữa
+    setSelectedField(field); 
+    navigate("/dashboard/FieldInfo"); 
   };
 
   return (
     <article className="flex flex-col p-4 bg-white rounded-xl shadow-lg h-[420px]">
       <div className="overflow-hidden mb-4 rounded-xl">
         <img
-          src={imageUrl}
+          src={getImageUrl(field)}
           alt={`Field ${field?.name || "Unknown"}`}
           className="w-full h-[200px] object-cover flex-shrink-0"
         />

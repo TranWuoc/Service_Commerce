@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Button from "../Shared_components/Button";
 import { CommentOverlay } from "../Comments/CommentsOverLay";
 import { useField } from "../../hooks/useField";
+import { Field } from "../../types/Field"; // Cập nhật đường dẫn cho đúng
+import FieldPictureGallery from "./FieldPictureGallery"; 
 
 const FieldInfo: React.FC = () => {
   const navigate = useNavigate();
-  const [showComments, setShowComments] = React.useState(false);
+  const [showComments, setShowComments] = useState(false);
   const { selectedField, setSelectedField } = useField();
 
   // ✅ Khôi phục selectedField từ localStorage nếu mất context
@@ -41,24 +43,28 @@ const FieldInfo: React.FC = () => {
       <div className={`self-stretch w-full max-md:mt-8 ${showComments ? "blur-sm" : ""}`}>
         <div className="flex flex-col py-2 px-4 w-full bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
           <div className="flex flex-col w-full">
-            <div className="flex gap-1 text-lg text-slate-800">
-              <div className="font-medium">{selectedField.name}</div>
+            {/* Tên sân */}
+            <div className="flex gap-1 text-lg text-slate-800 font-medium">
+              {selectedField.name}
             </div>
 
+            {/* Số điện thoại */}
             <div className="flex items-center gap-1 mt-2 text-base text-gray-600">
               <PhoneIcon className="w-5 h-5 text-gray-600" />
-              <span>{"0933290303"}</span>
+              <span>0933290303</span>
             </div>
 
+            {/* Địa chỉ */}
             <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
               <LocationOnIcon className="w-5 h-5 text-yellow-500" />
               <span>{selectedField.address}</span>
             </div>
 
-            <div className="flex flex-col gap-1 mt-2">
-              <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+            {/* Giá sân và Kiểu sân */}
+            <div className="flex flex-col gap-1 mt-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-800">
-                  Giá sân: {selectedField.price} VND
+                  Giá sân: {selectedField.price.toLocaleString()} VND
                 </span>
                 <span className="font-bold text-slate-800">
                   Kiểu sân: {selectedField.category?.name}
@@ -66,18 +72,20 @@ const FieldInfo: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative mt-2 w-3/5 pb-[15%] rounded-lg overflow-hidden">
-              {selectedField.images && selectedField.images.length > 0 && (
-                <img
-                  src={selectedField.images[0]}
-                  alt={selectedField.name}
-                  className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
-                />
-              )}
+            {/* Ảnh sân */}
+            <div className="relative mt-4 w-full h-[400px]">
+              <FieldPictureGallery
+                images={
+                  selectedField.images && selectedField.images.length > 0
+                    ? selectedField.images.map((imgObj) => `http://127.0.0.1:8000/${imgObj.images_url}`)
+                    : ["https://placehold.co/600x400"]
+                }
+              />
             </div>
           </div>
         </div>
 
+        {/* Các nút */}
         <div className="flex gap-2 justify-between mt-2">
           <Button
             onClick={() =>
@@ -102,6 +110,7 @@ const FieldInfo: React.FC = () => {
         </div>
       </div>
 
+      {/* Overlay bình luận */}
       <CommentOverlay
         isOpen={showComments}
         onClose={() => setShowComments(false)}

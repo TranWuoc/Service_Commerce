@@ -1,28 +1,54 @@
 "use client";
 
-import * as React from "react";
-import { InputField } from "../Shared_components/InputField";
-import Button from "../Shared_components/Button";
+import React, { useState } from "react";
+import { InputField } from "../Shared_components/InputField"; 
+import Button from "../Shared_components/Button"; 
+import axiosInstance from "../../api/axiosInstance"; 
+import { useParams } from "react-router-dom"; 
 
-export const CommentInput: React.FC = () => {
-  const [comment, setComment] = React.useState("");
+interface CommentInputProps {
+  fieldId: number;
+  userId: number;
+}
+
+export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) => {
+  const { fieldId: urlFieldId } = useParams(); // Lấy fieldId từ URL params nếu có
+  const [comment, setComment] = useState("");
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
   };
 
-  const handleSendComment = () => {
-    console.log("Comment sent:", comment);
-    setComment(""); // Reset comment field after sending
+  const handleSendComment = async () => {
+    if (!comment.trim()) {
+      alert("Bình luận không thể để trống!");
+      return;
+    }
+
+    try {
+      // Gửi API tạo bình luận
+      const response = await axiosInstance.post("/comment/create", {
+        user_id: userId,
+        field_id: fieldId || urlFieldId, // Dùng fieldId từ prop hoặc từ URL params
+        content: comment,
+        status: "active", // Hoặc có thể thay đổi nếu cần
+      });
+
+      console.log("Bình luận đã được gửi:", response.data);
+      setComment(""); // Reset trường input sau khi gửi thành công
+    } catch (error) {
+      console.error("Lỗi khi gửi bình luận:", error);
+      alert("Đã có lỗi xảy ra, vui lòng thử lại.");
+    }
   };
 
   return (
-    <section className="relative flex items-center justify-start px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] h-[200px] max-md:px-5">
+    <div className="relative flex items-center justify-start px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] h-[200px] max-md:px-5">
       <div className="absolute left-7 top-1/2 -translate-y-1/2 w-[600px] h-[130px]">
         <InputField
           label=""
           type="text"
-          placeholder="Viết bình luận của bạn ....."
+          placeholder="Viết bình luận của bạn ..."
           value={comment}
           onChange={handleCommentChange}
           style={{
@@ -50,6 +76,6 @@ export const CommentInput: React.FC = () => {
           }}
         />
       </div>
-    </section>
+    </div>
   );
 };
