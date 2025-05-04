@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Menu, MenuItem, Avatar, IconButton } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../../Context/UserContext";
+import { useUser } from "../../hooks/useUser";
 import axiosInstance from "../../api/axiosInstance"; // Import axiosInstance
 
 export const AvatarMenu = () => {
@@ -13,34 +13,20 @@ export const AvatarMenu = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("authToken"); // Get token from localStorage
-
-      if (!token) {
-        console.warn("No auth token found. Redirecting to login...");
-        navigate("/login");
-        return;
-      }
-
       try {
-        const response = await axiosInstance.get("/auth/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Use token to fetch user data
-          },
-        });
-        const userData = response.data;
-        setUser(userData); // Set user data in context
-
-        // Save user data to localStorage
-        localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
+        const userData = JSON.parse(localStorage.getItem("user") || "null");
+        if (userData) {
+          setUser(userData); // Set user data from localStorage
+        }
       } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        console.error("Failed to fetch user data from localStorage:", error);
       } finally {
-        setLoading(false); // Set loading state to false
+        setLoading(false);
       }
     };
 
     fetchUserData();
-  }, [navigate, setUser]);
+  }, [setUser]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget); // Open the menu
@@ -50,13 +36,44 @@ export const AvatarMenu = () => {
     setAnchorEl(null); // Close the menu
   };
 
-  const handleViewProfile = () => {
-    navigate("/dashboard/Profile", { state: user }); // Navigate to user profile page
-    handleClose();
+  const handleViewProfile = async () => {
+    const token = localStorage.getItem("authToken"); // Get token from localStorage
+
+    if (!token) {
+      console.warn("No auth token found. Redirecting to login...");
+      navigate("/login"); // Redirect to login if no token
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get("/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Use token to fetch user data
+        },
+      });
+
+      const userData = response.data;
+      setUser(userData); // Set user data in context
+
+      // Save user data to localStorage
+      localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
+
+      navigate("/dashboard/Profile", { state: userData }); // Navigate to user profile page
+      handleClose(); // Close the menu
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+      if (error.response?.status === 401) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        // Optionally, redirect to login page if token is invalid
+        navigate("/login");
+      }
+    }
   };
 
   const handleLogout = async () => {
-    const token = localStorage.getItem("authToken"); // Get token from localStorage
+    const token = localStorage.getItem("authToken");
 
     if (!token) {
       console.warn("No auth token found. Cannot logout.");

@@ -1,10 +1,9 @@
-"use client";
-
-import React, { useState } from "react";
-import { InputField } from "../Shared_components/InputField"; 
-import Button from "../Shared_components/Button"; 
-import axiosInstance from "../../api/axiosInstance"; 
-import { useParams } from "react-router-dom"; 
+import React, { useEffect, useState } from "react";
+import { InputField } from "../Shared_components/InputField";
+import Button from "../Shared_components/Button";
+import axiosInstance from "../../api/axiosInstance";
+import { useParams } from "react-router-dom";
+import echo from "../../lib/echo"; // import Echo
 
 interface CommentInputProps {
   fieldId: number;
@@ -14,6 +13,7 @@ interface CommentInputProps {
 export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) => {
   const { fieldId: urlFieldId } = useParams(); // Lấy fieldId từ URL params nếu có
   const [comment, setComment] = useState("");
+  const [comments, setComments] = useState<any[]>([]); // Thêm state để lưu trữ bình luận
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
@@ -36,11 +36,28 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) =
 
       console.log("Bình luận đã được gửi:", response.data);
       setComment(""); // Reset trường input sau khi gửi thành công
+
     } catch (error) {
       console.error("Lỗi khi gửi bình luận:", error);
       alert("Đã có lỗi xảy ra, vui lòng thử lại.");
     }
   };
+
+  useEffect(() => {
+    // Lắng nghe sự kiện bình luận được tạo
+    const channelName = `comments`;
+    const channel = echo.channel(channelName);
+
+    channel.listen(".CommentCreated", (e: any) => {
+      // Thêm bình luận mới vào state
+      setComments((prev) => [...prev, e.content]);
+    });
+
+    // Cleanup khi component unmount
+    return () => {
+      echo.leave(channelName);
+    };
+  }, []);
 
   return (
     <div className="relative flex items-center justify-start px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] h-[200px] max-md:px-5">
@@ -75,6 +92,16 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) =
             backgroundPosition: "center",
           }}
         />
+      </div>
+
+      {/* Hiển thị danh sách bình luận */}
+      <div className="flex flex-col gap-4 mt-4">
+        {comments.map((comment, index) => (
+          <div key={index} className="border-b py-2">
+            <strong>{comment.user.name}</strong>
+            <p>{comment.content}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

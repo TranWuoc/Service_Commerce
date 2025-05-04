@@ -3,22 +3,15 @@ import { useState } from "react";
 import { InputField } from "../Shared_components/InputField";
 import Button from "../Shared_components/Button";
 import { useLocation } from "react-router-dom";
-import { useUser } from "../../Context/UserContext";  
-import { useField } from "../../hooks/useField";
-import { useToast } from "../ui/use-toast";  
+import { useUser } from "../../hooks/useUser";
+import { useToast } from "../../hooks/use-toast";
+import axiosInstance from "../../api/axiosInstance"; // Đảm bảo bạn đã import axiosInstance đúng cách
+
 interface TimeSlot {
   value: string;
   label: string;
   startHour: number;
   endHour: number;
-}
-
-interface BookingData {
-  accountId: string;
-  bookerName: string;
-  fieldId: string;
-  startDateTime: Date;
-  endDateTime: Date;
 }
 
 export const BookingForm = () => {
@@ -34,14 +27,17 @@ export const BookingForm = () => {
   ];
 
   const location = useLocation();
-  const { user } = useUser();  // Get user from context
+  const { user } = useUser();
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     name: location.state?.fieldName || "",
-    fieldId: location.state?.fieldId || "", // Lấy tên sân từ state nếu có
+    fieldId: location.state?.fieldId || "",
     date: "",
     timeSlot: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getMinDate = () => {
     const today = new Date();
@@ -59,30 +55,37 @@ export const BookingForm = () => {
     }
   };
 
-  const createBookingData = (): BookingData | null => {
-    if (!formData.date || !formData.timeSlot || !user) return null;  // Ensure user is available
-
+  const createBookingData = () => {
+    if (!formData.date || !formData.timeSlot) return null;
+  
     const selectedTimeSlot = timeSlots.find(
-      (slot) => slot.value === formData.timeSlot,
+      (slot) => slot.value === formData.timeSlot
     );
     if (!selectedTimeSlot) return null;
-
+  
     const baseDate = new Date(formData.date);
-
-    // Create start datetime
+  
     const startDateTime = new Date(baseDate);
     startDateTime.setHours(selectedTimeSlot.startHour, 0, 0, 0);
-
-    // Create end datetime
+  
     const endDateTime = new Date(baseDate);
     endDateTime.setHours(selectedTimeSlot.endHour, 0, 0, 0);
-
+  
+    // Định dạng thời gian về chuẩn MySQL DATETIME
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+  
     return {
-      accountId: user.id,  // Use user.id from context
-      bookerName: formData.name,
-      fieldId: formData.fieldId,
-      startDateTime,
-      endDateTime,
+      field_id: formData.fieldId,
+      date_start: formatDate(startDateTime),  // Định dạng lại thời gian
+      date_end: formatDate(endDateTime),      // Định dạng lại thời gian
     };
   };
 
@@ -91,22 +94,43 @@ export const BookingForm = () => {
 
     const bookingData = createBookingData();
     if (!bookingData) {
-      console.error("Invalid form data");
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng điền đầy đủ thông tin đặt sân.",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
-      console.log("Booking data to be submitted:", {
-        accountId: bookingData.accountId,
-        bookerName: bookingData.bookerName,
-        fieldId: bookingData.fieldId,
-        startDateTime: bookingData.startDateTime.toISOString(),
-        endDateTime: bookingData.endDateTime.toISOString(),
+      setIsSubmitting(true);
+
+      const response = await axiosInstance.post(
+        "/bookings", 
+        bookingData,
+      );
+
+      const { payUrl, token } = response.data.data;  // Giả sử API trả về token trong response
+
+      // Lưu token vào sessionStorage
+      sessionStorage.setItem("authToken", token);
+
+      toast({
+        title: "Đặt sân thành công!",
+        description: "Đang chuyển đến trang thanh toán...",
       });
 
-      // Make your API call here
-    } catch (error) {
+      // Chuyển hướng đến trang thanh toán
+      window.location.href = payUrl;
+    } catch (error: any) {
       console.error("Error submitting booking:", error);
+      toast({
+        title: "Đặt sân thất bại",
+        description: error.response?.data?.message || "Có lỗi xảy ra!",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -189,8 +213,18 @@ export const BookingForm = () => {
         </div>
 
         <div className="flex gap-4 justify-center mt-auto pt-4">
-          <Button variant="tertiary" text="Đặt sân" onClick={handleSubmit} />
-          <Button variant="tertiary" text="Huỷ" onClick={handleCancel} />
+          <Button
+            variant="tertiary"
+            text={isSubmitting ? "Đang đặt sân..." : "Đặt sân"}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          />
+          <Button
+            variant="tertiary"
+            text="Huỷ"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+          />
         </div>
       </form>
     </div>

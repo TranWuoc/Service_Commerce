@@ -73,15 +73,7 @@ const FieldInfo: React.FC = () => {
             </div>
 
             {/* Ảnh sân */}
-            <div className="relative mt-4 w-full h-[400px]">
-              <FieldPictureGallery
-                images={
-                  selectedField.images && selectedField.images.length > 0
-                    ? selectedField.images.map((imgObj) => `http://127.0.0.1:8000/${imgObj.images_url}`)
-                    : ["https://placehold.co/600x400"]
-                }
-              />
-            </div>
+        
           </div>
         </div>
 

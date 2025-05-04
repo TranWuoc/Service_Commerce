@@ -1,8 +1,8 @@
 import React from "react";
-import { useUser } from "../../Context/UserContext"; // Đảm bảo import useUser
+import { useUser } from "../../hooks/useUser"; 
 
 export const FieldHeader: React.FC = () => {
-  const { user } = useUser(); // Lấy thông tin người dùng từ context
+  const { user } = useUser(); 
 
   return (
     <div>

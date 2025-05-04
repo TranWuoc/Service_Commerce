@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CommentInput } from "../Comments/CommentInput";
 import { CommentHeader } from "./CommentHeader";
 import { CommentItem } from "./CommentItems";
-import echo from "../../lib/echo"; // nhớ import Echo nè
+import echo from "../../lib/echo"; // nhớ import Echo
 import axiosInstance from "../../api/axiosInstance";
 import { Comment } from "../../types/comment";
 
@@ -28,7 +28,7 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
     // 1. Lấy comment lần đầu
     const fetchComments = async () => {
       try {
-        const res = await axiosInstance.get(`/fields/${fieldInfo.id}/comments`);
+        const res = await axiosInstance.get(`/comment/${fieldInfo.id}`);
         setComments(res.data);
       } catch (error) {
         console.error("Lỗi fetch comments:", error);
@@ -37,27 +37,32 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
 
     fetchComments();
 
-
     const channelName = `field.${fieldInfo.id}`;
     const channel = echo.channel(channelName);
 
+    // Lắng nghe sự kiện CommentCreated
     channel.listen(".CommentCreated", (e: any) => {
-      setComments((prev) => [...prev, e.comment]);
+      console.log("New comment created", e);
+      setComments((prev) => [...prev, e.content]); // Lắng nghe và cập nhật list comment
     });
 
+    // Lắng nghe sự kiện CommentUpdated
     channel.listen(".CommentUpdated", (e: any) => {
+      console.log("Comment updated", e);
       setComments((prev) =>
         prev.map((comment) =>
-          comment.id === e.comment.id ? { ...comment, content: e.comment.content } : comment
+          comment.id === e.content.id ? { ...comment, content: e.content.content } : comment
         )
       );
     });
 
+    // Lắng nghe sự kiện CommentDeleted
     channel.listen(".CommentDeleted", (e: any) => {
-      setComments((prev) => prev.filter((comment) => comment.id !== e.commentId));
+      console.log("Comment deleted", e);
+      setComments((prev) => prev.filter((comment) => comment.id !== e.content.id));
     });
 
-    // Cleanup khi đóng overlay
+
     return () => {
       echo.leave(channelName);
     };

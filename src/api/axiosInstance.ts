@@ -2,18 +2,28 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8000/api",
-  timeout: 10000, // 10 giây
+  timeout: 10000,
 });
 
-let isRefreshing = false; // Biến đánh dấu xem có đang làm mới token hay không
-let failedQueue: { resolve: Function; reject: Function }[] = []; // Hàng đợi các yêu cầu bị lỗi 401
+let isRefreshing = false;
+let failedQueue: { resolve: Function; reject: Function }[] = [];
+
+const openRoutes = ["/", "/login", "/register","/dashboard/vnpay-return", "/dashboard", "/dashboard/fieldinfo"];
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
+    const currentPath = window.location.pathname;
+    const isOpenRoute = openRoutes.includes(currentPath);
 
-    if (token && config.url && !config.url.includes("/auth/login")) {
+    if (!isOpenRoute && !token) {
+      console.warn("🚫 Không có token. Chuyển hướng login.");
+      window.location.href = "/login";
+      return Promise.reject(new Error("Chưa đăng nhập"));
+    }
+
+    if (!isOpenRoute && token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -31,17 +41,18 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const currentPath = window.location.pathname;
+    const isOpenRoute = openRoutes.includes(currentPath);
 
-    // Nếu nhận được lỗi 401 và yêu cầu chưa thử làm mới token, cũng không phải yêu cầu refresh token
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/refresh")
+      !originalRequest.url.includes("/auth/refresh") &&
+      !isOpenRoute
     ) {
       console.warn("⚠️ Token hết hạn. Đang thử refresh...");
 
       if (isRefreshing) {
-        // Nếu đang refresh, thêm yêu cầu vào hàng đợi
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         });
@@ -52,7 +63,7 @@ axiosInstance.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          isRefreshing = true; // Đánh dấu là đang làm mới token
+          isRefreshing = true;
 
           const res = await axios.post("http://localhost:8000/api/auth/refresh", {
             access_token: accessToken,
@@ -67,47 +78,33 @@ axiosInstance.interceptors.response.use(
           console.log("✅ Refresh thành công:", res.data);
 
           const newToken = res.data.access_token;
-          localStorage.setItem("authToken", res.data.access_token);
+          localStorage.setItem("authToken", newToken);
           localStorage.setItem("refreshToken", res.data.refresh_token);
 
-          // Cập nhật token vào headers mặc định
           axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
 
-          // Retry tất cả các yêu cầu trong hàng đợi
           failedQueue.forEach(({ resolve }) => resolve(axiosInstance(originalRequest)));
-          failedQueue = []; // Xóa hàng đợi
-
-          return axiosInstance(originalRequest); // Gửi lại yêu cầu gốc với token mới
+          failedQueue = [];
+          return axiosInstance(originalRequest);
         } catch (refreshError) {
           console.error("❌ Refresh token lỗi:", refreshError);
-
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("refreshToken");
-
-          // Điều hướng đến trang đăng nhập nếu có lỗi
-          if (window.location.pathname !== "/login") {
-            window.location.href = "/login";
-          }
-
-          // Reject tất cả các yêu cầu trong hàng đợi
-          failedQueue.forEach(({ reject }) => reject(refreshError));
-          failedQueue = []; // Xóa hàng đợi
         } finally {
-          isRefreshing = false; // Reset trạng thái sau khi làm mới token xong
+          isRefreshing = false;
         }
-      } else {
-        console.warn("❌ Không có refresh token. Chuyển hướng login.");
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("refreshToken");
-
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
-        }
-
-        // Reject tất cả các yêu cầu trong hàng đợi
-        failedQueue.forEach(({ reject }) => reject(error));
-        failedQueue = []; // Xóa hàng đợi
       }
+
+      console.warn("❌ Không thể refresh. Chuyển hướng login.");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("refreshToken");
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+
+      failedQueue.forEach(({ reject }) => reject(error));
+      failedQueue = [];
+
+      return Promise.reject(error);
     }
 
     return Promise.reject(error);

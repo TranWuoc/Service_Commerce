@@ -1,6 +1,7 @@
 import axiosInstance from "../api/axiosInstance";
 import { useToast } from "./use-toast";
 import { useNavigate } from "react-router-dom";
+import { ErrorCode, ErrorMessage } from "../enum/enum"; // Import Enum và thông điệp lỗi
 
 export const useLogin = () => {
   const toast = useToast();
@@ -9,17 +10,15 @@ export const useLogin = () => {
   const login = async (email: string, password: string) => {
     try {
       const response = await axiosInstance.post("/auth/login", { email, password });
-      const { access_token, refresh_token} = response.data;
+      const { access_token, refresh_token } = response.data;
 
       // Kiểm tra nếu không có token hoặc user
-      if (!access_token || !refresh_token ) {
+      if (!access_token || !refresh_token) {
         throw new Error("Dữ liệu đăng nhập không hợp lệ.");
       }
 
-      // Lưu thông tin vào localStorage
       localStorage.setItem("authToken", access_token);
       localStorage.setItem("refreshToken", refresh_token);
-   
 
       toast.toast({
         title: "Đăng nhập thành công",
@@ -41,10 +40,15 @@ export const useLogin = () => {
       }
 
     } catch (error: any) {
-      console.error("Login error:", error.response?.data?.message || error.message);
+      const errorCode = error.response?.data?.code || ErrorCode.UNCATEGORIZED_EXCEPTION;
+      const errorMessage = error.response?.data?.message || ErrorMessage[errorCode];
+
+      console.error("Login error:", errorMessage);
+
       toast.toast({
+        variant: "destructive",
         title: "Đăng nhập thất bại",
-        description: error.response?.data?.message || "Sai tài khoản hoặc mật khẩu.",
+        description: errorMessage || "Sai tài khoản hoặc mật khẩu, vui lòng thử lại.",
       });
     }
   };
