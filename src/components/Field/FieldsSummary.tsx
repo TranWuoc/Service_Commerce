@@ -138,7 +138,7 @@ export function FieldsSummary({
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Danh sách sân bóng</h2>
+        <h2 className="text-2xl pl-5 font-bold text-gray-800">Danh sách sân bóng</h2>
 
         <div className="flex items-center gap-3 relative">
           <button

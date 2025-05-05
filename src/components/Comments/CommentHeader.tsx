@@ -13,9 +13,6 @@ export const CommentHeader: React.FC<CommentHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleBackClick = () => {
-    navigate("/fieldinfo", { state: { fieldInfo } }); // Chuyển hướng về FieldInfo với state
-  };
 
   return (
     <header className="relative pt-9 pr-16 pb-14 pl-20 w-full text-4xl font-semibold text-center text-amber-500 bg-black shadow-none rounded-[50px_50px_0px_0px] max-md:px-5 max-md:max-w-full border-none m-0">

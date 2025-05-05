@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { TableRow } from "../Shared_components/TableRow";
 import axiosInstance from "../../api/axiosInstance";
+import { ConfirmModal } from "../Shared_components/ConfirmModal";
+
 export const FieldsTable: React.FC = () => {
   const [rows, setRows] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBookings();
@@ -13,27 +16,21 @@ export const FieldsTable: React.FC = () => {
   const fetchBookings = async () => {
     try {
       const res = await axiosInstance.get("/bookings/user");
-      ;
-      console.log("Kết quả API:", res.data);
-  
       const bookings = res.data.data;
+
       setRows(
         bookings.map((booking: any) => ({
+          id: booking.id,
           name: booking.field.name,
           date: formatDate(booking.date_start),
-          price: booking.field.price.toLocaleString(),
+          rawDate: booking.date_start,
+          price: booking.field.price,
           status: "Đã thuê",
           review: "Chưa có đánh giá",
         }))
       );
     } catch (err) {
       console.error("Lỗi khi tải lịch sử đặt sân:", err);
-      if (err.response) {
-        console.error("Response Error:", err.response);
-        console.error("Response Data:", err.response.data);
-        console.error("Response Status:", err.response.status);
-        console.error("Response Headers:", err.response.headers);
-      }
     }
   };
 
@@ -46,10 +43,42 @@ export const FieldsTable: React.FC = () => {
     });
   };
 
+  const handleCancelRequest = (id: string) => {
+    setSelectedId(id);
+    setShowConfirm(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedId) return;
+    try {
+      await axiosInstance.delete(`/bookings/${selectedId}`);
+      setRows((prev) => {
+        const newRows = prev.filter((row) => row.id !== selectedId);
+        // nếu sau khi xóa mà trang hiện tại không đủ 5 mục thì cố gắng đẩy lên 1 mục từ trang sau
+        const missing = itemsPerPage - newRows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).length;
+        if (missing > 0 && currentPage < Math.ceil(newRows.length / itemsPerPage)) {
+          const extra = newRows.slice(currentPage * itemsPerPage, currentPage * itemsPerPage + missing);
+          const result = [
+            ...newRows.slice(0, currentPage * itemsPerPage),
+            ...extra,
+            ...newRows.slice(currentPage * itemsPerPage + missing),
+          ];
+          return result;
+        }
+        return newRows;
+      });
+    } catch (err) {
+      console.error("Lỗi khi hủy đặt sân:", err);
+    } finally {
+      setShowConfirm(false);
+      setSelectedId(null);
+    }
+  };
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentRows = rows.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(rows.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(rows.length / itemsPerPage));
 
   const handlePrevious = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -57,6 +86,13 @@ export const FieldsTable: React.FC = () => {
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const isCancelable = (dateStr: string) => {
+    const startDate = new Date(dateStr);
+    const nowPlus2Days = new Date();
+    nowPlus2Days.setDate(nowPlus2Days.getDate() + 2);
+    return startDate > nowPlus2Days;
   };
 
   return (
@@ -69,18 +105,34 @@ export const FieldsTable: React.FC = () => {
         <div>Trạng thái</div>
         <div>Hành động</div>
       </div>
+
       <div className="overflow-y-auto h-[calc(100%-100px)]">
         {currentRows.map((row, index) => (
-          <TableRow
+          <div
             key={index}
-            name={row.name}
-            date={row.date}
-            price={row.price}
-            status={row.status}
-            review={row.review}
-          />
+            className="grid py-4 text-sm border-b border-dashed border-slate-200 grid-cols-[2fr_1fr_1fr_3fr_1fr_1fr] items-center max-sm:grid-cols-[1fr] max-sm:gap-2"
+          >
+            <div>{row.name}</div>
+            <div>{row.date}</div>
+            <div>{row.price.toLocaleString()}₫</div>
+            <div>{row.review}</div>
+            <div>{row.status}</div>
+            <div className="flex items-center ">
+              {isCancelable(row.rawDate) ? (
+               <button 
+               onClick={() => handleCancelRequest(row.id)}
+               className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
+               >
+               Hủy
+               </button>
+              ) : (
+                <span className="text-gray-400">—</span>
+              )}
+            </div>
+          </div>
         ))}
       </div>
+
       <div className="flex justify-between items-center pt-5 text-xs text-neutral-500">
         <button
           onClick={handlePrevious}
@@ -93,9 +145,11 @@ export const FieldsTable: React.FC = () => {
         >
           Trước
         </button>
+
         <div className="text-sm font-medium">
           Trang {currentPage} / {totalPages}
         </div>
+
         <button
           onClick={handleNext}
           disabled={currentPage === totalPages}
@@ -108,6 +162,19 @@ export const FieldsTable: React.FC = () => {
           Tiếp
         </button>
       </div>
+
+      <ConfirmModal
+        visible={showConfirm}
+        title="Xác nhận hủy sân"
+        message="Bạn có chắc chắn muốn hủy đặt sân này không?"
+        onCancel={() => {
+          setShowConfirm(false);
+          setSelectedId(null);
+        }}
+        onConfirm={handleDelete}
+        confirmText="Hủy sân"
+      />
     </section>
   );
 };
+

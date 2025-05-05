@@ -1,7 +1,7 @@
 export interface Comment {
-    id: number;
+    id: string;
     user_id: number;
-    field_id: number;
+    fieldId: number;
     content: string;
     status: string;
     created_at: Date;

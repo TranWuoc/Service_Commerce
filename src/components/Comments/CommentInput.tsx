@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { InputField } from "../Shared_components/InputField";
 import Button from "../Shared_components/Button";
 import axiosInstance from "../../api/axiosInstance";
 import { useParams } from "react-router-dom";
-import echo from "../../lib/echo"; // import Echo
 
 interface CommentInputProps {
   fieldId: number;
@@ -11,9 +10,8 @@ interface CommentInputProps {
 }
 
 export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) => {
-  const { fieldId: urlFieldId } = useParams(); // Lấy fieldId từ URL params nếu có
+  const { fieldId: urlFieldId } = useParams(); // fallback nếu cần
   const [comment, setComment] = useState("");
-  const [comments, setComments] = useState<any[]>([]); // Thêm state để lưu trữ bình luận
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
@@ -26,38 +24,19 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) =
     }
 
     try {
-      // Gửi API tạo bình luận
-      const response = await axiosInstance.post("/comment/create", {
+      await axiosInstance.post("/comment/create", {
         user_id: userId,
-        field_id: fieldId || urlFieldId, // Dùng fieldId từ prop hoặc từ URL params
+        field_id: fieldId || urlFieldId,
         content: comment,
-        status: "active", // Hoặc có thể thay đổi nếu cần
+        status: "active",
       });
 
-      console.log("Bình luận đã được gửi:", response.data);
-      setComment(""); // Reset trường input sau khi gửi thành công
-
+      setComment(""); // reset sau khi gửi thành công
     } catch (error) {
       console.error("Lỗi khi gửi bình luận:", error);
       alert("Đã có lỗi xảy ra, vui lòng thử lại.");
     }
   };
-
-  useEffect(() => {
-    // Lắng nghe sự kiện bình luận được tạo
-    const channelName = `comments`;
-    const channel = echo.channel(channelName);
-
-    channel.listen(".CommentCreated", (e: any) => {
-      // Thêm bình luận mới vào state
-      setComments((prev) => [...prev, e.content]);
-    });
-
-    // Cleanup khi component unmount
-    return () => {
-      echo.leave(channelName);
-    };
-  }, []);
 
   return (
     <div className="relative flex items-center justify-start px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] h-[200px] max-md:px-5">
@@ -92,16 +71,6 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) =
             backgroundPosition: "center",
           }}
         />
-      </div>
-
-      {/* Hiển thị danh sách bình luận */}
-      <div className="flex flex-col gap-4 mt-4">
-        {comments.map((comment, index) => (
-          <div key={index} className="border-b py-2">
-            <strong>{comment.user.name}</strong>
-            <p>{comment.content}</p>
-          </div>
-        ))}
       </div>
     </div>
   );

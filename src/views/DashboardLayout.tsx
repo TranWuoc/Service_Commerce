@@ -103,7 +103,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             </div>
           {/* Main content */}
           <div className="flex flex-col w-full max-md:max-w-full">
-            <div className="relative flex-1 mt-10">
+            <div className="relative flex-1 pl-5 mt-10">
               {React.isValidElement(children)
                   ? React.cloneElement(children, {
               onStartLoading: handleStartLoading,

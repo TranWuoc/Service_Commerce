@@ -9,7 +9,7 @@ const SidebarCustomer = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="w-64 h-screen bg-gray-50 text-gray-600 flex flex-col p-4">
+    <div className=" flex w-64 h-screen bg-gray-50 text-gray-600 flex flex-col p-4">
       <nav className="mt-6">
         <ul>
           <li 
