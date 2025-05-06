@@ -47,7 +47,11 @@
     };
 
     const handleViewProfile = () => {
-      navigate("/dashboard/Profile", { state: user });
+      if (user?.is_admin) {
+        navigate("/admin/Profile", { state: user }); // Điều hướng đến trang admin
+      } else {
+        navigate("/dashboard/Profile", { state: user }); // Điều hướng đến trang người dùng
+      }
       handleClose();
     };
 

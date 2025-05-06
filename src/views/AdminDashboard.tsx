@@ -36,15 +36,6 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col bg-gray-100 p-6 gap-5">
-      <div className="flex items-center mb-6">
-        <img 
-          src="/ic_dashboard.svg"
-          alt="Logo"
-          className="w-16 h-16 mr-4"
-        />
-        <h1 className="text-4xl font-bold text-gray-800">Trang chủ Admin</h1>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-2">Quản lý thông tin sân</h2>

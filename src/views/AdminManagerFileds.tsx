@@ -8,7 +8,8 @@ const ManageFields: React.FC = () => {
   const { fields, setFields } = useField(); // Lấy dữ liệu từ FieldContext
   const [searchTerm, setSearchTerm] = useState(""); // State để lưu giá trị tìm kiếm
   const [filteredFields, setFilteredFields] = useState<Field[]>([]); // State để lưu danh sách sân đã lọc
-  const navigate = useNavigate(); // Khai báo useNavigate để chuyển hướng
+  const navigate = useNavigate(); 
+  const { setSelectedField } = useField(); 
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/fields?per_page=100") // Gọi API để lấy danh sách sân
@@ -46,10 +47,13 @@ const ManageFields: React.FC = () => {
     }
   }, [searchTerm, fields]);
   const handleFieldClick = (field: Field) => {
-    // console.log("Chi tiết sân:", field);
-    localStorage.setItem("selectedField", JSON.stringify(field)); // Lưu thông tin sân vào localStorage
-    navigate("/admin/FieldInfo");
+    setSelectedField(field);
+    navigate("/admin/manage/FieldInfo");
     };
+
+  const handleAddField = () => {
+    navigate("/admin/manage/addField"); // Điều hướng đến trang thêm sân
+  };
 
   return (
     <div className="p-6 bg-gray-100">
@@ -79,8 +83,14 @@ const ManageFields: React.FC = () => {
             </svg>
           </span>
         </div>
+        <button
+          onClick={handleAddField}
+          className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition hover-"
+          
+        >
+          Thêm mới sân
+        </button>
       </div>
-      <h1 className="text-2xl font-bold mb-4">Danh sách sân</h1>
 
       {/* Hiển thị dữ liệu */}
       {filteredFields.length === 0 ? (

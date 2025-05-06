@@ -29,6 +29,21 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     // Cleanup khi component unmount
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case "/admin":
+        return "Trang chính Admin";
+      case "/admin/manage":
+        return "Quản lý thông sân";
+      case "/admin/manage/addField":
+        return "Thêm sân mới";
+      case "/admin/Profile":
+        return "Hồ sơ Admin";
+      // default:
+      //   return "Trang quản lý Admin";
+    }
+  };
   return (
     <div className="flex h-screen bg-neutral-100">
       {/* Sidebar */}
@@ -55,7 +70,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div className="flex items-end justify-end py-4 px-6">
             <AvatarMenu />
           </div>
-        <div className="mt-6">{children}</div>
+        <div className="mt-6">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">{getPageTitle()}</h1>
+          {children}
+        </div>
         </div>
 
         {/* Main content */}

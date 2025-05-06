@@ -16,7 +16,7 @@ import Statistics from "../views/AdminStatistic";
 import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
 import { useUser } from "../Context/UserContext";
-
+import {Form} from "../views/FieldForm";
 export const AppRouter: React.FC = () => {
   const { user } = useUser(); // Lấy thông tin người dùng từ UserContext
   const isAdmin = user?.is_admin; // Kiểm tra vai trò người dùng
@@ -28,7 +28,7 @@ export const AppRouter: React.FC = () => {
       <Route path="/landingpage" element={<LandingPage />} />
       <Route path="/dashboard" element={<DashboardLayout><FieldsSummary /></DashboardLayout>} />
       <Route
-        path={isAdmin ? "/admin/FieldInfo" : "/dashboard/FieldInfo"} // Thay đổi path dựa trên vai trò
+        path={isAdmin ? "/admin/manage/FieldInfo" : "/dashboard/FieldInfo"} // Thay đổi path dựa trên vai trò
         element={
           isAdmin ? (
             <AdminLayout>
@@ -44,12 +44,26 @@ export const AppRouter: React.FC = () => {
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
       <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
-      <Route path ="/dashboard/Profile" element ={<DashboardLayout><ProfileInput/></DashboardLayout>} />
+      {/* <Route path ="/dashboard/Profile" element ={<DashboardLayout><ProfileInput/></DashboardLayout>} /> */}
+      <Route 
+        path={isAdmin ? "admin/Profile" : "dashboard/Profile"} // Thay đổi path dựa trên vai trò
+        element={
+          isAdmin ? (
+            <AdminLayout>
+              <ProfileInput />
+            </AdminLayout>
+          ) : (
+            <DashboardLayout>
+              <ProfileInput />
+            </DashboardLayout>
+          )
+        }
+      />
       <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-      <Route path="/admin/manager" element={<AdminLayout><ManageFields /></AdminLayout>} />
+      <Route path="/admin/manage" element={<AdminLayout><ManageFields /></AdminLayout>} />
       <Route path="/admin/fileds" element={<AdminLayout><FieldList /></AdminLayout>} />
       <Route path="/admin/statistic" element={<AdminLayout><Statistics /></AdminLayout>} />
-      
+      <Route path="admin/manage/addField" element={<AdminLayout><Form /></AdminLayout>} />
     </Routes>
   );
 };

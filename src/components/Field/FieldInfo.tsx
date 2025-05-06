@@ -8,6 +8,7 @@ import Button from "../Shared_components/Button";
 import { CommentOverlay } from "../Comments/CommentsOverLay";
 import { useField } from "../../hooks/useField";
 import { useUser } from "../../Context/UserContext";
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 const FieldInfo: React.FC = () => {
   const navigate = useNavigate();
   const [showComments, setShowComments] = React.useState(false);
@@ -54,6 +55,25 @@ const FieldInfo: React.FC = () => {
               <span>{selectedField.address}</span>
             </div>
 
+            <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+              <AssignmentTurnedInIcon className="w-5 h-5 text-yellow-500" />
+              <span
+                  className={`inline-block w-16 h-3 rounded ${
+                    selectedField.state.name === "Hoạt động"
+                      ? "bg-green-500"
+                      : selectedField.state.name === "Bảo trì"
+                        ? "bg-amber-400"
+                        : selectedField.state.name === "Ngưng sử dụng"
+                          ? "bg-red-600"
+                          : selectedField.state.name === "Đang đặt lịch"
+                            ? "bg-blue-400"
+                            : selectedField.state.name === "Tạm ngưng"
+                              ? "bg-gray-400"
+                              : "bg-gray-500"
+                  }`}
+                ></span>
+            </div>
+
             <div className="flex flex-col gap-1 mt-2">
               <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
                 <span className="font-bold text-slate-800">
@@ -78,8 +98,8 @@ const FieldInfo: React.FC = () => {
       </div>
         <div className="flex gap-4 mt-4">
           <Button
-            onClick={() => navigate("/admin/manager")}
-            text="Quản lý sân"
+            onClick={() => navigate("/admin/manage/addField")}
+            text="Chỉnh sửa sân"
             variant="primary"
             className="flex-1 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition"
           />

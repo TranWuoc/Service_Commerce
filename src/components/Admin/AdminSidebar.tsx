@@ -70,14 +70,18 @@ const AdminSidebar = () => {
           </li>
           <li
             className={`flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500 ${
-              location.pathname === "/admin/manager" ? "text-orange-500" : ""
+              location.pathname === "/admin/manage" ||
+              location.pathname === "/admin/manage/FieldInfo" ||
+              location.pathname === "/admin/manage/addField"
+                ? "text-orange-500"
+                : ""
             }`}
           >
             <a
-              href="/admin/manager"
+              href="/admin/manage"
               onClick={(e) => {
                 e.preventDefault();
-                navigate("/admin/manager");
+                navigate("/admin/manage");
               }}
               className="flex items-center w-full"
             >
