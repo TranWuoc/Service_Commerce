@@ -4,7 +4,7 @@ import { UserProfile } from "./UserProfile";
 import axiosInstance from "../../api/axiosInstance";
 import { Comment } from "../../types/comment";
 import { User } from "../../types/user";
-
+import { useToast } from "../../hooks/use-toast";
 interface CommentItemProps extends Comment {
   onCommentUpdated?: (updatedComment: Comment) => void;
   onCommentDeleted?: (commentId: string) => void;  // Đảm bảo sử dụng ID đúng kiểu
@@ -25,7 +25,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const [showConfirm, setShowConfirm] = useState(false);
-
+  const toast = useToast();
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   // useEffect(() => {
@@ -48,6 +48,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       const response = await axiosInstance.post(`/comment/update/${id}`, {
         content: editedContent,
       });
+      toast.toast({
+        variant: "success",
+        title: "Thành công!",
+        description: "Bình luận đã được cập nhật.",
+      });
       
       const updatedComment = response.data.data;
       
@@ -64,14 +69,23 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       
       setIsEditing(false);
     } catch (err) {
-      console.error("Update error:", err.response?.data || err.message);
+      const backendMessage = err.response?.data?.message;
+      toast.toast({
+        variant: "destructive",
+        title: `Lỗi ${1}`,
+        description: backendMessage,
+      });
     }
   };
 
   const handleDelete = async () => {
     try {
       const response = await axiosInstance.delete(`/comment/${id}`);
-
+      toast.toast({
+        variant: "success",
+        title: "Thành công!",
+        description: "Bình luận đã được xóa.",
+      });
       if (response.data.message === "Thành công!") {
         // Thực hiện xóa bình luận trong component cha
         if (onCommentDeleted) {
@@ -81,7 +95,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         setShowConfirm(false);
       }
     } catch (err) {
-      console.error("Không thể xóa bình luận:", err);
+      const backendMessage = err.response?.data?.message;
+      toast.toast({
+        variant: "destructive",
+        title: `Lỗi ${1}`,
+        description: backendMessage,
+      });
     }
   };
 

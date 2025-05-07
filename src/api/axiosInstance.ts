@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
 let isRefreshing = false;
 let failedQueue: { resolve: Function; reject: Function }[] = [];
 
-const openRoutes = ["/", "/login", "/register","/dashboard/vnpay-return", "/dashboard", "/dashboard/fieldinfo"];
+const openRoutes = ["/", "/login", "/register", "/dashboard/vnpay-return", "/dashboard", "/dashboard/fieldinfo"];
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
@@ -97,9 +97,15 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("authToken");
       localStorage.removeItem("refreshToken");
 
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
-      }
+      if (window.location.pathname === "/login") {
+        const authToken = localStorage.getItem("authToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+      
+        if (authToken && refreshToken) {
+          // Nếu đã có token và refresh token, chuyển hướng về dashboard
+          window.location.href = "/dashboard";
+        }
+      } 
 
       failedQueue.forEach(({ reject }) => reject(error));
       failedQueue = [];

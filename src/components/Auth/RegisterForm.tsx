@@ -32,6 +32,7 @@ export const RegisterForm: React.FC = () => {
 
     if (password !== confirmPassword) {
       toast.toast({
+        variant: "destructive",
         title: "Mật khẩu không khớp",
         description: "Mật khẩu và xác nhận mật khẩu phải giống nhau.",
       });

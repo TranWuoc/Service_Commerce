@@ -40,15 +40,13 @@ export const useLogin = () => {
       }
 
     } catch (error: any) {
-      const errorCode = error.response?.data?.code || ErrorCode.UNCATEGORIZED_EXCEPTION;
-      const errorMessage = error.response?.data?.message || ErrorMessage[errorCode];
-
-      console.error("Login error:", errorMessage);
-
+      const backendCode = error.response?.data?.code || "UNKNOWN_ERROR";
+      const backendMessage = error.response?.data?.message || "Đã xảy ra lỗi không xác định.";
+    
       toast.toast({
         variant: "destructive",
-        title: "Đăng nhập thất bại",
-        description: errorMessage || "Sai tài khoản hoặc mật khẩu, vui lòng thử lại.",
+        title: `Lỗi ${backendCode}`,
+        description: backendMessage,
       });
     }
   };
