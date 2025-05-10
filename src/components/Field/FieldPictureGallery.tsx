@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
-interface FieldPictureGalleryProps {
-  images: string[]; // Danh sách ảnh được truyền vào
-}
+  interface FieldPictureGalleryProps {
+    images: string[]; // Danh sách ảnh được truyền vào
+  }
 
 const FieldPictureGallery: React.FC<FieldPictureGalleryProps> = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);

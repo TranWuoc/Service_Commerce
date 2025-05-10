@@ -8,7 +8,7 @@ import { useField } from "../hooks/useField"; // Sử dụng context
 function FieldDetails() {
   const { selectedField } = useField(); // Lấy field từ context
   const fieldImages = selectedField?.images?.length
-    ? selectedField.images
+    ? selectedField.images.map(image => 'http://localhost:8000/' + image.image_url)
     : [
         "https://randomwordgenerator.com/img/picture-generator/52e0d744435ba914f1dc8460962e33791c3ad6e04e507749712e79d29244c3_640.jpg",
         "https://randomwordgenerator.com/img/picture-generator/52e0d744435ba914f1dc8460962e33791c3ad6e04e507749712e79d29244c3_640.jpg",
@@ -16,7 +16,7 @@ function FieldDetails() {
         "/docs/images/carousel/carousel-4.svg",
         "/docs/images/carousel/carousel-5.svg",
       ];
-
+      
   if (!selectedField) {
     return <div className="text-center py-10 text-red-600 font-semibold">Không có thông tin sân được chọn.</div>;
   }

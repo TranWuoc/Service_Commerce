@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { InputField } from "../Shared_components/InputField";
-import Button from "../Shared_components/Button";
 import axiosInstance from "../../api/axiosInstance";
 import { useParams } from "react-router-dom";
+import Button from "../Shared_components/Button";
+import { useToast } from "../../hooks/use-toast"; // Thêm useToast
 
 interface CommentInputProps {
   fieldId: number;
@@ -10,65 +10,133 @@ interface CommentInputProps {
 }
 
 export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) => {
-  const { fieldId: urlFieldId } = useParams(); // fallback nếu cần
+  const { fieldId: urlFieldId } = useParams();
   const [comment, setComment] = useState("");
+  const [images, setImages] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const toast = useToast();
 
-  const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setComment(e.target.value);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const selected = files.slice(0, 3 - images.length); // Max 3 images
+    setImages((prev) => [...prev, ...selected]);
+
+    selected.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) setPreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSendComment = async () => {
-    if (!comment.trim()) {
-      alert("Bình luận không thể để trống!");
+    // Kiểm tra nếu không có nội dung bình luận và ảnh
+    if ( images.length === 0) {
+      toast.toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Vui lòng  thêm ảnh.",
+      });
       return;
     }
 
+    const formData = new FormData();
+    formData.append("user_id", userId.toString());
+    formData.append("field_id", String(fieldId || urlFieldId));
+    formData.append("content", comment);
+    formData.append("status", "active");
+
+    // Thêm ảnh vào formData
+    images.forEach((img) => {
+      formData.append("image", img);
+    });
+    
     try {
-      await axiosInstance.post("/comment/create", {
-        user_id: userId,
-        field_id: fieldId || urlFieldId,
-        content: comment,
-        status: "active",
+      // Gửi request API
+      const response = await axiosInstance.post("/comment/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      setComment(""); // reset sau khi gửi thành công
+      console.log("Response:", response);
+
+
+
+      toast.toast({
+        variant: "success",
+        title: "Bình luận thành công",
+        description: "Bình luận của bạn đã được gửi thành công!",
+      });
     } catch (error) {
-      console.error("Lỗi khi gửi bình luận:", error);
-      alert("Đã có lỗi xảy ra, vui lòng thử lại.");
+      console.error("Lỗi khi gửi:", error.response || error);
+      toast.toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Đã xảy ra lỗi, vui lòng thử lại.",
+      });
     }
   };
 
   return (
-    <div className="relative flex items-center justify-start px-7 pt-12 pb-5 mt-10 max-w-full bg-zinc-300 rounded-[50px] text-stone-300 w-[1143px] h-[200px] max-md:px-5">
-      <div className="absolute left-7 top-1/2 -translate-y-1/2 w-[600px] h-[130px]">
-        <InputField
-          label=""
-          type="text"
-          placeholder="Viết bình luận của bạn ..."
-          value={comment}
-          onChange={handleCommentChange}
-          style={{
-            width: "100%",
-            height: "100%",
-            fontSize: "1.2rem",
-            padding: "15px 20px",
-            borderRadius: "1rem",
-          }}
-        />
+    <div className="w-full max-w-4xl p-6 mt-10 rounded-2xl bg-zinc-100 shadow-md border border-zinc-200">
+      <textarea
+        value={comment}
+        onChange={handleCommentChange}
+        placeholder="Hãy chia sẻ cảm nhận của bạn..."
+        rows={4}
+        className="w-full resize-none border border-zinc-300 rounded-xl p-4 text-base text-zinc-800 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white placeholder-zinc-400"
+      />
+
+      <div className="mt-4 flex flex-wrap gap-3">
+        {previews.map((src, index) => (
+          <div key={index} className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-300">
+            <img src={src} alt={`preview-${index}`} className="w-full h-full object-cover" />
+            <button
+              onClick={() => handleRemoveImage(index)}
+              className="absolute top-1 right-1 bg-black bg-opacity-60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-opacity-80"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+
+        {images.length < 3 && (
+          <label className="w-24 h-24 border border-dashed border-zinc-400 rounded-lg flex items-center justify-center text-zinc-500 cursor-pointer hover:border-amber-400 hover:text-amber-500 bg-white">
+            +
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
+              multiple
+            />
+          </label>
+        )}
       </div>
-      <div className="absolute right-10 top-1/2 -translate-y-1/2">
+
+      <div className="flex justify-end mt-5">
         <Button
           text="Gửi"
-          type="tertiary"
+          type="primary"
           onClick={handleSendComment}
           customStyle={{
-            width: "90px",
-            height: "90px",
-            borderRadius: "100%",
-            padding: "0",
-            backgroundSize: "50%",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
+            padding: "12px 32px",
+            borderRadius: "999px",
+            fontWeight: 600,
+            backgroundColor: "#f59e0b",
+            color: "white",
+            fontSize: "1rem",
           }}
         />
       </div>

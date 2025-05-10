@@ -1,10 +1,17 @@
-"use client";
-
+import { useState } from "react";
 import Button from "./Button";
 import { InputField } from "./InputField";
 import { Search } from "@mui/icons-material";
 
 export const SearchBar: React.FC = () => {
+  // Khai báo state để lưu giá trị input
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Hàm xử lý sự thay đổi khi người dùng nhập vào ô tìm kiếm
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <div className="relative mb-6">
       <div className="flex items-center justify-between px-5 py-3 rounded-2xl w-full h-[70px] max-md:w-full">
@@ -13,7 +20,8 @@ export const SearchBar: React.FC = () => {
           <InputField
             type="text"
             placeholder="Tìm kiếm"
-            value=""
+            value={searchQuery} // Gắn giá trị từ state vào input
+            onChange={handleInputChange} // Cập nhật giá trị khi người dùng nhập
             style={{
               border: "none",
               boxShadow: "none",
@@ -25,7 +33,7 @@ export const SearchBar: React.FC = () => {
               backgroundColor: "transparent",
               display: "inline-block", // Change to inline-block
             }}
-            className="flex-1" 
+            className="flex-1"
           />
         </div>
         <Button variant="primary" text="Tìm kiếm" className="ml-4" />

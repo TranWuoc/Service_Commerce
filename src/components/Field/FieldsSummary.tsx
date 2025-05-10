@@ -24,7 +24,7 @@ export function FieldsSummary({
       setIsLoading(true);
       setFields([]);
       const response = await axiosInstance.get(`/fields`);
-      console.log("Dữ liệu sân từ BE:", response.data);
+     
       setFields(response.data.data);
     } catch (error) {
       console.error("Lỗi khi gửi request:", error);
@@ -53,7 +53,7 @@ export function FieldsSummary({
       setIsLoading(true);
       setFields([]);
       const response = await axiosInstance.post(`/fields/filter?${params.toString()}`);
-      console.log("Dữ liệu trả về từ BE:", response.data);
+     
       setFields(response.data.data);
     } catch (error) {
       console.error("Lỗi khi gửi request:", error);
@@ -124,7 +124,7 @@ export function FieldsSummary({
   const fieldTypes = [
     { id: "cat-uuid-001", name: "Sân 5" },
     { id: "cat-uuid-002", name: "Sân 7" },
-    { id: "cat-uuid-0033", name: "Sân 11" },
+    { id: "cat-uuid-003", name: "Sân 11" },
   ];
 
   const toggleFieldType = (typeId: string) => {

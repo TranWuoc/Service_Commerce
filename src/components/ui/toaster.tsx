@@ -10,7 +10,7 @@
 
   export function Toaster() {
     const { toasts } = useToast()
-    console.log("Current Toasts:", toasts);
+   
     return (
       <ToastProvider>
         {toasts.map(function ({ id, title, description, action, ...props }) {

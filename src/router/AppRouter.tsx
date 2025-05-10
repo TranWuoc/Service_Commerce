@@ -11,7 +11,7 @@ import BookHistory from "../views/BookHistory";
 import { Booking } from "../views/Booking";
 import ProfileInput from "../components/Profile/ProfileInput";
 import PaymentSuccessPage from "../views/paymentsuccess";
-
+import {GoogleCallback} from "../components/Auth/GoogleCallBack";
 export const AppRouter: React.FC = () => {
   return (
     <>
@@ -28,8 +28,8 @@ export const AppRouter: React.FC = () => {
         
         {/* THÊM ROUTE MỚI */}
         <Route path="/dashboard/vnpay-return"element={<DashboardLayout><PaymentSuccessPage /></DashboardLayout>} />
-        
-        {/* REDIRECT */}
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
+       
         <Route path="/" element={<Navigate to="/landingpage" replace />} />
         <Route path="*" element={<Navigate to="/landingpage" replace />} />
       </Routes>

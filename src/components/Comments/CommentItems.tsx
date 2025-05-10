@@ -1,78 +1,78 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { UserProfile } from "./UserProfile";
+import { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Comment } from "../../types/comment";
-import { User } from "../../types/user";
 import { useToast } from "../../hooks/use-toast";
+
 interface CommentItemProps extends Comment {
   onCommentUpdated?: (updatedComment: Comment) => void;
-  onCommentDeleted?: (commentId: string) => void;  // Đảm bảo sử dụng ID đúng kiểu
+  onCommentDeleted?: (commentId: string) => void;
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
   user_id,
   content,
-  status,
-  field_id,
+  fieldId,
   id,
-  created_at,
+  createdAt,
+  user,
+  image_url,
   onCommentUpdated,
   onCommentDeleted,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [newImage, setNewImage] = useState<File | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [showOldImage, setShowOldImage] = useState(true);
+
   const toast = useToast();
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const res = await axiosInstance.get(`/users/${user_id}`);
-  //       setUser(res.data.data);
-  //     } catch (error) {
-  //       console.error("Không thể lấy thông tin người dùng:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, [user_id]);
-
   const handleEdit = async () => {
     try {
-      const response = await axiosInstance.post(`/comment/update/${id}`, {
-        content: editedContent,
-      });
+      const formData = new FormData();
+      formData.append("content", editedContent);
+      if (newImage) {
+        formData.append("image", newImage);
+      }
+      if (!showOldImage) {
+        formData.append("image_status", "1");
+      } else {
+        formData.append("image_status", "0");
+      }
+      console.log("FormData:", formData.get("content"));
+      console.log("FormDataimage:", formData.get("image"));
+
+      const response = await axiosInstance.post(
+        `/comment/update/${id}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
       toast.toast({
         variant: "success",
         title: "Thành công!",
         description: "Bình luận đã được cập nhật.",
       });
-      
+
       const updatedComment = response.data.data;
-      
-      // Ensure we're passing a properly formatted comment object
       if (onCommentUpdated) {
-        onCommentUpdated({
-          ...updatedComment,
-          field_id: field_id,
-          id: id,
-          user_id: user_id,
-          created_at: created_at
-        });
+        onCommentUpdated(updatedComment);
       }
-      
+
       setIsEditing(false);
-    } catch (err) {
+      setNewImage(null);
+      setPreviewImageUrl(null);
+      setShowOldImage(true);
+    } catch (err: any) {
       const backendMessage = err.response?.data?.message;
       toast.toast({
         variant: "destructive",
-        title: `Lỗi ${1}`,
+        title: "Lỗi",
         description: backendMessage,
       });
     }
@@ -87,36 +87,24 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         description: "Bình luận đã được xóa.",
       });
       if (response.data.message === "Thành công!") {
-        // Thực hiện xóa bình luận trong component cha
         if (onCommentDeleted) {
-          onCommentDeleted(id); 
+          onCommentDeleted(id);
         }
-
         setShowConfirm(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       const backendMessage = err.response?.data?.message;
       toast.toast({
         variant: "destructive",
-        title: `Lỗi ${1}`,
+        title: "Lỗi",
         description: backendMessage,
       });
     }
   };
 
   return (
-    <article className="flex flex-col items-start w-full">
-      <div className="flex gap-6 items-center h-[45px] text-neutral-950">
-        {!loading && user && (
-          <UserProfile
-            imageUrl={user.avatar || "default-avatar.jpg"}
-            name={user.name}
-            role={user.role || "Người dùng"}
-          />
-        )}
-      </div>
-
-      <div className="flex flex-col items-start px-12 pt-4 pb-2 mt-1.5 ml-14 w-full font-semibold bg-zinc-300 max-w-[780px] rounded-[50px] max-md:px-5 max-md:max-w-full">
+    <article className="flex flex-col items-start w-full mb-4">
+      <div className="flex flex-col items-start px-12 pt-4 pb-2 mt-10 ml-14 w-full font-semibold bg-zinc-300 max-w-[780px] rounded-[50px] max-md:px-5 max-md:max-w-full">
         {isEditing ? (
           <>
             <textarea
@@ -124,6 +112,47 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
             />
+
+            {/* Image section */}
+            <div className="flex items-center gap-4 mt-2">
+              {showOldImage && image_url && (
+                <div className="relative">
+                  <img
+                    src={`http://localhost:8000/${image_url}`}
+                    alt="Ảnh cũ"
+                    className="w-32 h-32 object-cover rounded shadow-md"
+                  />
+                  <button
+                    onClick={() => setShowOldImage(false)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+
+              <div className="relative">
+                {previewImageUrl && (
+                  <img
+                    src={previewImageUrl}
+                    alt="Ảnh mới"
+                    className="w-32 h-32 object-cover rounded shadow-md"
+                  />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setNewImage(file);
+                      setPreviewImageUrl(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
             <div className="flex gap-2 mt-2">
               <button
                 onClick={handleEdit}
@@ -135,6 +164,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                 onClick={() => {
                   setIsEditing(false);
                   setEditedContent(content);
+                  setNewImage(null);
+                  setPreviewImageUrl(null);
+                  setShowOldImage(true);
                 }}
                 className="px-3 py-1 text-sm text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
               >
@@ -144,21 +176,35 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           </>
         ) : (
           <>
-            <p className="text-base text-black">{content}</p>
+            <h4 className="text-lg font-semibold mb-2">{user?.name || "Người dùng"}</h4>
+            <p className="text-base text-black mb-2">{content}</p>
+            {image_url && (
+              <div className="w-full mb-2">
+                <img
+                  src={`http://localhost:8000/${image_url}`}
+                  alt="Image comment"
+                  className="w-32 h-32 object-cover rounded shadow-md"
+                />
+              </div>
+            )}
             <div className="flex gap-1 mt-3 text-xs text-stone-300">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets/TEMP/e9cec473df0839e3f3c4212b90778e9706f278e9"
                 alt="Calendar icon"
                 className="object-contain shrink-0 aspect-[1.05] w-[21px]"
               />
-              <time className="text-gray-600">{new Date(created_at).toLocaleDateString()}</time>
+              <time className="text-gray-600">
+                {createdAt
+                  ? new Date(createdAt).toLocaleDateString()
+                  : "Invalid Date"}
+              </time>
             </div>
           </>
         )}
       </div>
 
-      {currentUser?.id === user_id && !isEditing && (
-        <div className="flex gap-3 mt-2 ml-14 justify-end w-[85%]">
+      {String(currentUser?.id) === String(user_id) && (
+        <div className="flex gap-3 mt-5 ml-14 justify-end w-[85%]">
           <button
             onClick={() => setIsEditing(true)}
             className="text-sm text-blue-500 hover:underline"

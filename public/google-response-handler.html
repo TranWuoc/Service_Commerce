@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Google Auth Handler</title>
+</head>
+<body>
+    <script>
+      (async () => {
+        try {
+          const res = await fetch(window.location.href, {
+            credentials: "include",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            window.opener.postMessage(data, "http://localhost:5173"); // Match your frontend origin
+          } else {
+            window.opener.postMessage({ error: data.message || "Login failed" }, "http://localhost:5173");
+          }
+          window.close();
+        } catch (e) {
+          console.error("Callback error:", e);
+          window.opener.postMessage({ error: "Failed to process login" }, "http://localhost:5173");
+          window.close();
+        }
+      })();
+    </script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <App /> {/* ✅ App sẽ tự chứa BrowserRouter và AppRouter */}
   </React.StrictMode>
 );

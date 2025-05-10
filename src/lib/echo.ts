@@ -12,12 +12,12 @@ window.Pusher = Pusher;
 
 const echo = new Echo({
   broadcaster: 'pusher',
-  key: '0beb714287d405b107bb',  // Lấy từ .env hoặc điền trực tiếp
-  cluster: 'ap1',   // Ví dụ: "ap1", "mt1", "eu"
-  forceTLS: true,       // Bắt buộc dùng HTTPS (Pusher yêu cầu)
-  encrypted: true,      // Mã hóa kết nối
+  key: '0beb714287d405b107bb',  
+  cluster: 'ap1',   
+  forceTLS: true,       
+  encrypted: true,      
   disableStats: true,
 });
 
-window.echo = echo;
+
 export default echo;

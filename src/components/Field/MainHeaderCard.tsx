@@ -12,9 +12,12 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const { setSelectedField} = useField();
 
   const getImageUrl = (field: Field) => {
-    if (field?.images && field.images.length > 0 && field.images[0].images_url) {
-      return `http://127.0.0.1:8000/${field.images[0].images_url}`;
+    
+    if (field?.images && field.images.length > 0 && field.images[0].image_url) {
+      
+      return `http://127.0.0.1:8000/${field.images[0].image_url}`;
     }
+    
     return "https://placehold.co/400x400/333/333";
   };
   const handleSelectField = () => {
