@@ -117,15 +117,13 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
           {comments.map((comment) => (
             <CommentItem
               key={`${comment.id}-${comment.created_at}`}
-              
               id={comment.id}
               content={comment.content}
               fieldIId={comment.fieldId}
-              updatedAt={comment.updatedAt}
+              createdAt={comment.createdAt}
               image_url={comment.image_url}
               user={comment.user}
               user_id={comment.user?.id}  
-              
               onCommentDeleted={(id) => setComments(prev => prev.filter(c => c.id !== id))}
             />
           ))}
