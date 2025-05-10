@@ -12,8 +12,13 @@ export interface Field {
       id: string;
       name: string;
     };
-    images: string[];
-  
+    images: {
+      id: string;
+      image_url: string;
+    }[];
+    description: string;
+    latitude?: number;
+    longitude?: number;
   }
   
   export interface FieldApiResponse {

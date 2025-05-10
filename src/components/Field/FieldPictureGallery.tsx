@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 interface FieldPictureGalleryProps {
-  images: string[]; // Danh sách ảnh được truyền vào
+  images: { id: string; image_url: string }[]; // Danh sách ảnh được truyền vào
+
 }
 
 const FieldPictureGallery: React.FC<FieldPictureGalleryProps> = ({ images }) => {
@@ -51,7 +52,7 @@ const FieldPictureGallery: React.FC<FieldPictureGalleryProps> = ({ images }) => 
             data-carousel-item
           >
             <img
-              src={image}
+              src={`http://localhost:8000/${image.image_url}`}
               className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
               alt={`Slide ${index + 1}`}
             />

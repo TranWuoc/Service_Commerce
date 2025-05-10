@@ -2,7 +2,7 @@ import * as React from "react";
 
 interface InputFieldProps {
   label: string;
-  type: string;
+  type: string | number;
   placeholder: string;
   value: string;
   name?: string;

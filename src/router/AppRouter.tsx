@@ -17,6 +17,7 @@ import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
 import { useUser } from "../Context/UserContext";
 import {Form} from "../views/FieldForm";
+import UpdateField from "../components/Field/updateField";
 export const AppRouter: React.FC = () => {
   const { user } = useUser(); // Lấy thông tin người dùng từ UserContext
   const isAdmin = user?.is_admin; // Kiểm tra vai trò người dùng
@@ -64,6 +65,14 @@ export const AppRouter: React.FC = () => {
       <Route path="/admin/fileds" element={<AdminLayout><FieldList /></AdminLayout>} />
       <Route path="/admin/statistic" element={<AdminLayout><Statistics /></AdminLayout>} />
       <Route path="admin/manage/addField" element={<AdminLayout><Form /></AdminLayout>} />
+      <Route 
+        path="/admin/manage/updateField/:fieldId" // Route mới cho UpdateField
+        element={
+          <AdminLayout>
+            <UpdateField />
+          </AdminLayout>
+        } 
+      />
     </Routes>
   );
 };
