@@ -135,6 +135,7 @@ export const BookingForm = () => {
     try {
       setIsSubmitting(true);
       const res = await axiosInstance.post("/bookings", data);
+      
       const { payUrl, token } = res.data.data;
       sessionStorage.setItem("authToken", token);
       toast({

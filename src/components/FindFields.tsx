@@ -19,22 +19,21 @@ export const FindFieldForm: React.FC = () => {
           <div className="mt-10">
             <div className=" flex flex-col gap-2">
             <Label htmlFor="Vị trí">Vị trí</Label>
-            <Input type="Nhập vị trí cần tìm " id="address" placeholder="Nhập vị trí cần tìm" />
+            <Input type="Nhập vị trí cần tìm ... " id="address" placeholder="Nhập vị trí cần tìm..." />
             </div>
             <div className="mt-6 flex flex-col gap-2">
             <Label htmlFor="Vị trí">Kiểu sân </Label>
             <ComboboxDemo />
             </div>
             <div className="mt-6">
-            <Label htmlFor="Vị trí">Thời gian</Label>
-            <Input type="date" id="date" placeholder="Chọn thời gian" />
+            <Label htmlFor="Vị trí">Giá tiền</Label>
+            <Input type="Nhập giá tiền ..." id="price" placeholder="Nhập giá tiền cần tìm..." />
             </div>
             <div className="mt-10 flex justify-center ">
               <Button
                 text="Tìm sân"
                 type="primary"
                 onClick={() => alert("Tìm sân")}
-                className="w-[250px] h-[60px] text-2xl font-bold"
               />
             </div>
           </div>
