@@ -7,6 +7,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Button from "../Shared_components/Button";
 import { CommentOverlay } from "../Comments/CommentsOverLay";
 import { useField } from "../../hooks/useField";
+import { useUser } from "../../hooks/useUser";
 
 const FieldInfo: React.FC = () => {
   const navigate = useNavigate();

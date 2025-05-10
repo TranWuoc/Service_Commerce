@@ -11,81 +11,59 @@ import BookHistory from "../views/BookHistory";
 import { Booking } from "../views/Booking";
 import ProfileInput from "../components/Profile/ProfileInput";
 import PaymentSuccessPage from "../views/paymentsuccess";
-import {GoogleCallback} from "../components/Auth/GoogleCallBack";
+import { GoogleCallback } from "../components/Auth/GoogleCallBack";
 import AdminLayout from "../views/AdminLayout";
 import AdminDashboard from "../views/AdminDashboard";
 import Statistics from "../views/AdminStatistic";
 import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
-import { useUser } from "../Context/UserContext";
-import {Form} from "../views/FieldForm";
+import { Form } from "../views/FieldForm";
+
 export const AppRouter: React.FC = () => {
-  const { user } = useUser(); // Lấy thông tin người dùng từ UserContext
-  const isAdmin = user?.is_admin; // Kiểm tra vai trò người dùng
+  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Kiểm tra vai trò người dùng
 
   return (
-    <>
-      {/* Không cần UrlInterceptor nữa */}
-      <Routes>
-        <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
-        <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
-        <Route path="/landingpage" element={<LandingPage />} />
-        <Route path="/dashboard" element={<DashboardLayout><FieldsSummary /></DashboardLayout>} />
-        <Route path="/dashboard/FieldInfo" element={<DashboardLayout><FieldDetails /></DashboardLayout>} />
-        <Route path="/dashboard/Booking" element={<DashboardLayout><Booking /></DashboardLayout>} />
-        <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
-        <Route path="/dashboard/Profile" element={<DashboardLayout><ProfileInput /></DashboardLayout>} />
-        
-        {/* THÊM ROUTE MỚI */}
-        <Route path="/dashboard/vnpay-return"element={<DashboardLayout><PaymentSuccessPage /></DashboardLayout>} />
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
-       
-        <Route path="/" element={<Navigate to="/landingpage" replace />} />
-        <Route path="*" element={<Navigate to="/landingpage" replace />} />
-      </Routes>
-    </>
     <Routes>
+      {/* Public Routes */}
       <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
       <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
       <Route path="/landingpage" element={<LandingPage />} />
+
+      {/* Dashboard Routes */}
       <Route path="/dashboard" element={<DashboardLayout><FieldsSummary /></DashboardLayout>} />
-      <Route
-        path={isAdmin ? "/admin/manage/FieldInfo" : "/dashboard/FieldInfo"} // Thay đổi path dựa trên vai trò
-        element={
-          isAdmin ? (
-            <AdminLayout>
-              <FieldDetails />
-            </AdminLayout>
-          ) : (
-            <DashboardLayout>
-              <FieldDetails />
-            </DashboardLayout>
-          )
-        }
-      />      <Route path="/dashboard/Booking" element={<DashboardLayout><Booking/></DashboardLayout>} />
+      <Route path="/dashboard/Booking" element={<DashboardLayout><Booking /></DashboardLayout>} />
+      <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
+      <Route path="/dashboard/Profile" element={<DashboardLayout><ProfileInput /></DashboardLayout>} />
+      <Route path="/dashboard/vnpay-return" element={<DashboardLayout><PaymentSuccessPage /></DashboardLayout>} />
+
+      {/* Google Callback */}
+      <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
+      {/* Admin Routes */}
+      {isAdmin && (
+        <>
+          <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+          <Route path="/admin/manage" element={<AdminLayout><ManageFields /></AdminLayout>} />
+          <Route path="/admin/fileds" element={<AdminLayout><FieldList /></AdminLayout>} />
+          <Route path="/admin/statistic" element={<AdminLayout><Statistics /></AdminLayout>} />
+          <Route path="/admin/manage/addField" element={<AdminLayout><Form /></AdminLayout>} />
+          <Route path="/admin/manage/FieldInfo" element={<AdminLayout><FieldDetails /></AdminLayout>} />
+        </>
+      )}
+
+      {/* Non-admin Routes - Redirect to Dashboard if not Admin */}
+      {!isAdmin && (
+        <>
+          <Route path="/dashboard/FieldInfo" element={<DashboardLayout><FieldDetails /></DashboardLayout>} />
+          <Route path="/dashboard/Profile" element={<DashboardLayout><ProfileInput /></DashboardLayout>} />
+          {/* Redirect non-admin users to Dashboard if trying to access admin routes */}
+          <Route path="/admin/*" element={<Navigate to="/dashboard" replace />} />
+        </>
+      )}
+
+      {/* Redirect to Landing Page if route is not found */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
-      <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
-      {/* <Route path ="/dashboard/Profile" element ={<DashboardLayout><ProfileInput/></DashboardLayout>} /> */}
-      <Route 
-        path={isAdmin ? "admin/Profile" : "dashboard/Profile"} // Thay đổi path dựa trên vai trò
-        element={
-          isAdmin ? (
-            <AdminLayout>
-              <ProfileInput />
-            </AdminLayout>
-          ) : (
-            <DashboardLayout>
-              <ProfileInput />
-            </DashboardLayout>
-          )
-        }
-      />
-      <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-      <Route path="/admin/manage" element={<AdminLayout><ManageFields /></AdminLayout>} />
-      <Route path="/admin/fileds" element={<AdminLayout><FieldList /></AdminLayout>} />
-      <Route path="/admin/statistic" element={<AdminLayout><Statistics /></AdminLayout>} />
-      <Route path="admin/manage/addField" element={<AdminLayout><Form /></AdminLayout>} />
     </Routes>
   );
 };

@@ -8,9 +8,8 @@ interface InputFieldProps {
   disabled?: boolean;
   style?: React.CSSProperties;
   customClass?: string; 
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  options?: { value: string; label: string }[]; // Thêm thuộc tính options
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  options?: { value: string; label: string }[]; // Thêm thuộc tính options
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -26,32 +25,17 @@ export const InputField: React.FC<InputFieldProps> = ({
   options,
   onChange,
 }) => {
-  return (
-    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto mb-6" style={style}>
-      <label className="self-start mb-2 text-xl text-black max-sm:text-xl">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <input
-        type={type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        required={required}
-        disabled={disabled}
-        onChange={onChange}
-        className={`px-8 py-0 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
-        style={style}
-      />
-      {options ? (
-        // Nếu có `options`, hiển thị combobox
+  // Render select nếu có options, nếu không sẽ render input
+  const renderInput = () => {
+    if (options) {
+      return (
         <select
           name={name}
           value={value}
           required={required}
           disabled={disabled}
           onChange={onChange}
-          className="px-8 py-0 w-full text-2xl bg-white rounded-xl border-solid border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className={`px-8 py-0 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
           style={style}
         >
           <option value="" disabled>
@@ -63,20 +47,31 @@ export const InputField: React.FC<InputFieldProps> = ({
             </option>
           ))}
         </select>
-      ) : (
-        // Nếu không có `options`, hiển thị input thông thường
-        <input
-          type="text"
-          name={name}
-          placeholder={placeholder}
-          value={value}
-          required={required}
-          disabled={disabled}
-          onChange={onChange}
-          className="px-8 py-0 w-full text-2xl bg-white rounded-xl border-solid border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-          style={style}
-        />
-      )}
+      );
+    }
+    
+    return (
+      <input
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        required={required}
+        disabled={disabled}
+        onChange={onChange}
+        className={`px-8 py-0 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
+        style={style}
+      />
+    );
+  };
+
+  return (
+    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto mb-6" style={style}>
+      <label className="self-start mb-2 text-xl text-black max-sm:text-xl">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      {renderInput()}
     </div>
   );
 };

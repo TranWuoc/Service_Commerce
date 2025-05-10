@@ -1,12 +1,13 @@
-import axiosInstance from "../api/axiosInstance";
-import { useToast } from "./use-toast";
+import { jwtDecode } from "jwt-decode";
+import { useToast} from "./use-toast";
+import { useUser } from "./useUser";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "./useUser"; 
-
+import axiosInstance from "../api/axiosInstance";
 export const useLogin = () => {
   const toast = useToast();
   const navigate = useNavigate();
-  const { setUser } = useUser(); 
+  const { setUser } = useUser();
+
   const login = async (email: string, password: string) => {
     try {
       const response = await axiosInstance.post("/auth/login", { email, password });
@@ -24,19 +25,24 @@ export const useLogin = () => {
         description: "Chào mừng bạn trở lại!",
       });
 
+      // Giải mã access_token
+      const decodedToken: any = jwtDecode(access_token);
+      console.log(decodedToken);
+
+      if (decodedToken.sub === "admin_000") {
+        localStorage.setItem("isAdmin", "true");
+        navigate("/admin");
+      } else {
+        localStorage.setItem("isAdmin", "false");
+        navigate("/dashboard");
+      }
+
       const userInfo = await axiosInstance.get("/auth/profile", {
         headers: { Authorization: `Bearer ${access_token}` },
       });
 
       localStorage.setItem("user", JSON.stringify(userInfo.data));
-      setUser(userInfo.data); // 👈 cập nhật context
-
-      const { is_admin, role } = userInfo.data;
-      if (is_admin || role === "1") {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      setUser(userInfo.data);
 
     } catch (error: any) {
       const backendCode = error.response?.data?.code || "UNKNOWN_ERROR";
@@ -52,4 +58,3 @@ export const useLogin = () => {
 
   return { login };
 };
-

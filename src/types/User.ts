@@ -6,5 +6,5 @@ export interface User {
     phone_number: string;
     address: string;
     status: string;
-    is_admin: boolean;
+    is_admin: number;
   }

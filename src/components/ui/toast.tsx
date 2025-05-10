@@ -32,17 +32,17 @@ const toastVariants = cva(
           "destructive group border-destructive bg-destructive text-destructive-foreground",
         success:
           "border-green-500 bg-green-50 text-green-900 dark:border-green-600 dark:bg-green-900/10 dark:text-green-100",
-        },
-
-        sucess:
-          "border-green-500 bg-green-500 text-green-foreground",
+        // Nếu bạn muốn thêm một kiểu success khác, hãy gộp lại ở đây
+        success2:
+          "border-green-500 bg-green-500 text-green-foreground", // hoặc sửa lại tên khác
       },
     },
     defaultVariants: {
       variant: "default",
     },
   }
-)
+);
+
 
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
