@@ -10,10 +10,8 @@ import FieldDetails from "../views/FieldDetails";
 import BookHistory from "../views/BookHistory";
 import { Booking } from "../views/Booking";
 import ProfileInput from "../components/Profile/ProfileInput";
-<<<<<<< HEAD
 import PaymentSuccessPage from "../views/paymentsuccess";
 import {GoogleCallback} from "../components/Auth/GoogleCallBack";
-=======
 import AdminLayout from "../views/AdminLayout";
 import AdminDashboard from "../views/AdminDashboard";
 import Statistics from "../views/AdminStatistic";
@@ -21,13 +19,11 @@ import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
 import { useUser } from "../Context/UserContext";
 import {Form} from "../views/FieldForm";
->>>>>>> quoc
 export const AppRouter: React.FC = () => {
   const { user } = useUser(); // Lấy thông tin người dùng từ UserContext
   const isAdmin = user?.is_admin; // Kiểm tra vai trò người dùng
 
   return (
-<<<<<<< HEAD
     <>
       {/* Không cần UrlInterceptor nữa */}
       <Routes>
@@ -48,7 +44,6 @@ export const AppRouter: React.FC = () => {
         <Route path="*" element={<Navigate to="/landingpage" replace />} />
       </Routes>
     </>
-=======
     <Routes>
       <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
       <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
@@ -92,6 +87,5 @@ export const AppRouter: React.FC = () => {
       <Route path="/admin/statistic" element={<AdminLayout><Statistics /></AdminLayout>} />
       <Route path="admin/manage/addField" element={<AdminLayout><Form /></AdminLayout>} />
     </Routes>
->>>>>>> quoc
   );
 };

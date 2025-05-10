@@ -11,7 +11,6 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const navigate = useNavigate();
   const { setSelectedField} = useField();
 
-<<<<<<< HEAD
   const getImageUrl = (field: Field) => {
     
     if (field?.images && field.images.length > 0 && field.images[0].image_url) {
@@ -21,11 +20,9 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
     
     return "https://placehold.co/400x400/333/333";
   };
-=======
   const imageUrl = field?.images?.[0] || "https://placehold.co/400x400/333/333";
   const {user} = useUser();
 
->>>>>>> quoc
   const handleSelectField = () => {
     setSelectedField(field); 
     navigate("/dashboard/FieldInfo"); 

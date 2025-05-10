@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-<<<<<<< HEAD
   darkMode: ["class"],
   content: [
   "./index.html",
@@ -94,7 +93,6 @@ theme: {
         '5': 'hsl(var(--chart-5))'
       }
     },
-=======
     darkMode: ["class"],
     content: [
     "./index.html",
@@ -192,7 +190,6 @@ theme: {
 	
   },
   plugins: [require("tailwindcss-animate")],
->>>>>>> quoc
 }
 
 },

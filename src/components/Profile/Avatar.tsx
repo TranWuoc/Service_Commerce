@@ -5,13 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import axiosInstance from "../../api/axiosInstance"; // Import axiosInstance
 
-<<<<<<< HEAD
 export const AvatarMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { user, setUser } = useUser(); // Get user from context
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-=======
   export const AvatarMenu = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const { user, setUser } = useUser(); // Get user from context
@@ -69,7 +67,6 @@ export const AvatarMenu = () => {
         console.warn("No auth token found. Cannot logout.");
         return;
       }
->>>>>>> quoc
 
   useEffect(() => {
     const fetchUserData = async () => {

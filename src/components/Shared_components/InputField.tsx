@@ -7,13 +7,10 @@ interface InputFieldProps {
   required?: boolean;
   disabled?: boolean;
   style?: React.CSSProperties;
-<<<<<<< HEAD
   customClass?: string; 
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-=======
   options?: { value: string; label: string }[]; // Thêm thuộc tính options
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
->>>>>>> quoc
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -25,11 +22,8 @@ export const InputField: React.FC<InputFieldProps> = ({
   required = false,
   disabled = false,
   style,
-<<<<<<< HEAD
   customClass = "", 
-=======
   options,
->>>>>>> quoc
   onChange,
 }) => {
   return (
@@ -38,7 +32,6 @@ export const InputField: React.FC<InputFieldProps> = ({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-<<<<<<< HEAD
       <input
         type={type}
         name={name}
@@ -50,7 +43,6 @@ export const InputField: React.FC<InputFieldProps> = ({
         className={`px-8 py-0 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
         style={style}
       />
-=======
       {options ? (
         // Nếu có `options`, hiển thị combobox
         <select
@@ -85,7 +77,6 @@ export const InputField: React.FC<InputFieldProps> = ({
           style={style}
         />
       )}
->>>>>>> quoc
     </div>
   );
 };
