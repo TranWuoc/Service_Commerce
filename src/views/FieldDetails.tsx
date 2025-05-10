@@ -14,13 +14,28 @@ function FieldDetails() {
       image_url: `http://localhost:8000/${img.image_url}`,
     }))
     : [
-          "https://images.unsplash.com/photo-1609788694280-5c66f9b2b805?auto=format&fit=crop&w=1170&q=80",
-  "https://images.unsplash.com/photo-1564518098550-cc3b6b8e8c62?auto=format&fit=crop&w=1170&q=80",
-  "https://images.unsplash.com/photo-1600369672747-059a59f5f63e?auto=format&fit=crop&w=1170&q=80",
-  "https://images.unsplash.com/photo-1625245002381-25046a74b15b?auto=format&fit=crop&w=1170&q=80",
-  "https://images.unsplash.com/photo-1583267743261-04b9f1a98ff5?auto=format&fit=crop&w=1170&q=80"
+          {
+            id: "1",
+            image_url: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80", // Sân cỏ tự nhiên rộng lớn
+          },
+          {
+            id: "2",
+            image_url: "https://images.pexels.com/photos/399187/pexels-photo-399187.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", // Sân cỏ xanh mướt
+          },
+          {
+            id: "3",
+            image_url: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80", // Sân có vạch kẻ trắng rõ nét
+          },
+          {
+            id: "4",
+            image_url: "https://images.pexels.com/photos/863105/pexels-photo-863105.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", // Sân với khung thành
+          },
+          {
+            id: "5",
+            image_url: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80", // Sân từ góc cao
+          },
       ];
-      
+
   if (!selectedField) {
     return <div className="text-center py-10 text-red-600 font-semibold">Không có thông tin sân được chọn.</div>;
   }

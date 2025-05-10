@@ -11,55 +11,67 @@ export const AvatarMenu = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  // Fetch user data when component mounts or token changes
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        console.warn("No auth token found. Redirecting to login...");
-        navigate("/login");
-        return;
-      }
-
       try {
-        const response = await axiosInstance.get("/auth/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUser(response.data); // Set user data in context
+        const userData = JSON.parse(localStorage.getItem("user") || "null");
+        if (userData) {
+          setUser(userData); // Set user data from localStorage
+        }
       } catch (error) {
-        console.error("Failed to fetch user data:", error);
+        console.error("Failed to fetch user data from localStorage:", error);
       } finally {
-        setLoading(false); // Set loading to false when data is fetched or an error occurs
+        setLoading(false);
       }
     };
 
     fetchUserData();
-  }, [navigate, setUser]);
+  }, [setUser]);
 
-  // Handle menu click
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget); // Open the menu
   };
 
-  // Close the menu
   const handleClose = () => {
     setAnchorEl(null); // Close the menu
   };
 
-  // View profile based on user role
-  const handleViewProfile = () => {
-    if (user?.is_admin) {
-      navigate("/admin/Profile", { state: user }); // Navigate to admin profile page
-    } else {
-      navigate("/dashboard/Profile", { state: user }); // Navigate to user profile page
+  const handleViewProfile = async () => {
+    const token = localStorage.getItem("authToken"); // Get token from localStorage
+
+    if (!token) {
+      console.warn("No auth token found. Redirecting to login...");
+      navigate("/login"); // Redirect to login if no token
+      return;
     }
-    handleClose(); // Close menu after navigation
+
+    try {
+      const response = await axiosInstance.get("/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Use token to fetch user data
+        },
+      });
+
+      const userData = response.data;
+      setUser(userData); // Set user data in context
+
+      // Save user data to localStorage
+      localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
+
+      navigate("/dashboard/Profile", { state: userData }); // Navigate to user profile page
+      handleClose(); // Close the menu
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+      if (error.response?.status === 401) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        // Optionally, redirect to login page if token is invalid
+        navigate("/login");
+      }
+    }
   };
 
-  // Handle logout
   const handleLogout = async () => {
     const token = localStorage.getItem("authToken");
 
@@ -75,12 +87,12 @@ export const AvatarMenu = () => {
         },
       });
 
-      // After successful logout, clear the localStorage and reset the user context
+      // After successful logout, remove tokens and user data from localStorage and context
       localStorage.removeItem("authToken");
       localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
-      setUser(null); // Reset user context
-      navigate("/login"); // Navigate to login page after logout
+      localStorage.removeItem("user"); // Remove user data from localStorage
+      setUser(null); // Reset user data in context
+      navigate("/login"); // Navigate to login page
     } catch (error) {
       console.error("Logout Error:", error.response?.data?.message || error.message);
     } finally {

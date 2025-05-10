@@ -17,11 +17,10 @@ import AdminDashboard from "../views/AdminDashboard";
 import Statistics from "../views/AdminStatistic";
 import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
-import { useUser } from "../hooks/useUser";
-import {Form} from "../views/FieldForm";
-export const AppRouter: React.FC = () => {
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Kiểm tra vai trò người dùng
+import { Form } from "../views/FieldForm";
+import { ProtectedRoute } from "./ProtectedRouter"; // thêm dòng này
 
+export const AppRouter: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
@@ -35,33 +34,62 @@ export const AppRouter: React.FC = () => {
       <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
       <Route path="/dashboard/Profile" element={<DashboardLayout><ProfileInput /></DashboardLayout>} />
       <Route path="/dashboard/vnpay-return" element={<DashboardLayout><PaymentSuccessPage /></DashboardLayout>} />
+      <Route path="/dashboard/FieldInfo" element={<DashboardLayout><FieldDetails /></DashboardLayout>} />
 
       {/* Google Callback */}
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
-      {/* Admin Routes */}
-      {isAdmin && (
-        <>
-          <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-          <Route path="/admin/manage" element={<AdminLayout><ManageFields /></AdminLayout>} />
-          <Route path="/admin/fileds" element={<AdminLayout><FieldList /></AdminLayout>} />
-          <Route path="/admin/statistic" element={<AdminLayout><Statistics /></AdminLayout>} />
-          <Route path="/admin/manage/addField" element={<AdminLayout><Form /></AdminLayout>} />
-          <Route path="/admin/manage/FieldInfo" element={<AdminLayout><FieldDetails /></AdminLayout>} />
-        </>
-      )}
+      {/* Admin Routes dùng ProtectedRoute */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><AdminDashboard /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/manage"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><ManageFields /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/fileds"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><FieldList /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/statistic"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><Statistics /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/manage/addField"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><Form /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/manage/FieldInfo"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><FieldDetails /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Non-admin Routes - Redirect to Dashboard if not Admin */}
-      {!isAdmin && (
-        <>
-          <Route path="/dashboard/FieldInfo" element={<DashboardLayout><FieldDetails /></DashboardLayout>} />
-          <Route path="/dashboard/Profile" element={<DashboardLayout><ProfileInput /></DashboardLayout>} />
-          {/* Redirect non-admin users to Dashboard if trying to access admin routes */}
-          <Route path="/admin/*" element={<Navigate to="/dashboard" replace />} />
-        </>
-      )}
-
-      {/* Redirect to Landing Page if route is not found */}
+      {/* Redirect fallback */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
     </Routes>
