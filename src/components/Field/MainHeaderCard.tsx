@@ -2,7 +2,7 @@ import Button from "../Shared_components/Button";
 import { useNavigate } from "react-router-dom";
 import { useField } from "../../hooks/useField";// Sử dụng context mới
 import { Field } from "../../types/Field";
-
+import { useUser } from "../../Context/UserContext";
 interface MainHeaderCardProps {
   field: Field;
 }
@@ -11,6 +11,7 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const navigate = useNavigate();
   const { setSelectedField} = useField();
 
+<<<<<<< HEAD
   const getImageUrl = (field: Field) => {
     
     if (field?.images && field.images.length > 0 && field.images[0].image_url) {
@@ -20,6 +21,11 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
     
     return "https://placehold.co/400x400/333/333";
   };
+=======
+  const imageUrl = field?.images?.[0] || "https://placehold.co/400x400/333/333";
+  const {user} = useUser();
+
+>>>>>>> quoc
   const handleSelectField = () => {
     setSelectedField(field); 
     navigate("/dashboard/FieldInfo"); 
@@ -49,11 +55,23 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
       </div>
 
       <div className="flex justify-center mt-auto">
+        {user?.is_admin ? (
+          <Button
+            text="Edit Field"
+            type="primary"
+            onClick={() =>
+              navigate("/admin/manager", {
+                state: { fieldId: field.id },
+              })
+            }
+          />
+        ) : (
         <Button
           text="Select Field"
           type="primary"
           onClick={handleSelectField}
         />
+        )}
       </div>
     </article>
   );

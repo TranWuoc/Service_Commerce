@@ -69,7 +69,7 @@ export const RegisterForm: React.FC = () => {
           />
         </div>
 
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col items-center">
           <p className="mb-2 text-sm text-center">
             <span>By signing up you agree to </span>
             <a href="#" className="text-amber-500">terms and conditions</a>

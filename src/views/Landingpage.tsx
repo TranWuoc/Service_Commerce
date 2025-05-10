@@ -1,11 +1,53 @@
-import React from "react";
+import React, { useState, useEffect, use } from "react";
 import Headerbar from "../components/Headerbar";
 import Footer from "../components/Shared_components/Footer";
-import Button from "../components/Shared_components/Button";
+import { Button } from "../components/ui/button";
+// import Button from "../components/Shared_components/Button";
 import { FindFieldForm } from "../components/FindFields";
 import { Badge } from "../components/ui/badge";
 import { MainHeaderCard } from "../components/Field/MainHeaderCard";
+
+
+
 const LandingPage: React.FC = () => {
+  const [fields, setFields] = useState([]); 
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/fields");
+        const result = await response.json(); // Lấy dữ liệu trả về từ API 
+        // console.log(result); // In ra dữ liệu để kiểm tra
+        // Truy cập vào `result.data` nếu API trả về dữ liệu trong thuộc tính `data`
+        if (Array.isArray(result.data)) {
+          setFields(result.data.slice(0, 4)); // Lấy 4 sân đầu tiên
+        } else {
+          console.error("Dữ liệu trả về không hợp lệ:");
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu sân bóng:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchFields();
+  }, []);
+
+  
+  const items = [
+    "Dưới 5km",
+    "Sân 7",
+    "Sân 11",
+    "Từ 350k/90p",
+    "Dưới 10km",
+    "Sân cỏ tự nhiên",
+    "Sân Futsal",
+  ];
+
+  
+
   return (
     <div className="flex flex-col w-full min-h-screen">
       {/* Header Section */}
@@ -26,15 +68,21 @@ const LandingPage: React.FC = () => {
                   nhất!!
                   <div className="flex justify-center items-center mt-10 gap-5 w-full">
                     <Button
-                      text="Đặt sân ngay"
-                      type="primary"
+                      size={"lg"}
+                      variant={"default"}
+                      className="bg-gray-400 text-white hover:bg-gray-500"
                       onClick={() => alert("Đặt sân ngay")}
-                    />
+                    >
+                      Đặt sân ngay
+                    </Button>
                     <Button
-                      text="Đăng ký tài khoản"
-                      type="secondary"
+                      size={"lg"}
+                      variant={"secondary"}
+                      className="bg-orange-400 text-white hover:bg-orange-500"
                       onClick={() => alert("Đăng ký tài khoản")}
-                    />
+                    >
+                      Đăng ký tài khoản
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -68,89 +116,53 @@ const LandingPage: React.FC = () => {
       {/* Main Content - Screen 3 */}
       <div className="flex flex-col justify-center items-center w-full h-[1250px] gap-6 bg-gray-800 ">
         <div className="flex flex-row">
-        <FindFieldForm />
+          <FindFieldForm />
         </div>
         <div className="flex flex-row justify-around items-center w-full h-[100px] gap-8">
-        <Badge 
-        variant="outline"
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Dưới 5km</Badge>
-        <Badge 
-        variant="outline"
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân 7</Badge>
-        <Badge 
-        variant="outline"        
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân 11</Badge>
-        <Badge 
-        variant="outline"        
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Từ 350k/90p</Badge>
-        <Badge 
-        variant="outline"
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Dưới 10km</Badge>
-        <Badge 
-        variant="outline"
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân cỏ tự nhiên </Badge>
-        <Badge 
-        variant="outline"
-        className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer">Sân Futsal</Badge>
+          {[...items].map((label, idx) => (
+            <Badge
+              key={idx}
+              variant="outline"
+              className="bg-black text-white font-bold text-[20px] rounded-lg hover:bg-orange-400 cursor-pointer mx-4"
+            >
+              {label}
+            </Badge>
+          ))}
         </div>
-        <div className="flex flex-row  gap-8">
-        <MainHeaderCard 
-        name="Sân Futsal Hà Đông"
-        type="Sân 7"
-        price={1.5}
-        location="Hà Đông"
-        status="Còn trống"
-        usage={50}
-        imageUrl="/football-field.jpg"
-        />
-        <MainHeaderCard
-        name="Sân 2"
-        type="Sân 11"
-        price={2.0}
-        location="Hà Nội"
-        status="Đã đặt"
-        usage={80}
-        imageUrl="/football-field.jpg"
-        />
-        <MainHeaderCard
-        name="Sân 3"
-        type="Sân 7"
-        price={1.0}
-        location="Hà Nội"
-        status="Còn trống"
-        usage={30}
-        imageUrl="/football-field.jpg"
-        />
-        <MainHeaderCard
-        name="Sân 4"
-        type="Sân 11"
-        price={2.5}
-        location="Hà Nội"
-        status="Đã đặt"
-        usage={90}
-        imageUrl="/football-field.jpg"
-        />
+        
+        <div className="relative w-[1500px] overflow-hidden">
+          <div className="flex animate-scroll-marquee w-max gap-3">
+            {isLoading ? (
+              <p>Đang tải dữ liệu...</p>
+            ) : (
+              fields.map((field, idx) => (
+                <MainHeaderCard key={idx} field={field} />
+              ))
+            )}
+          </div>
         </div>
       </div>
       {/* Main Content - Screen 4 */}
       <div className="flex flex-row justify-around items-center  w-full h-[500px] bg-stone-950 text-cyan-50 text-6xl font-bold font-['Russo_One'] gap-10">
-      <h1>Đăng ký ngay để trở thành hội viên 
-        <br/> 
-        với nhiều ưu đãi</h1>
-      <div className = "flex flex-row gap-8" >
-      <Button
-        text="Đăng ký"
-        type="primary"
-        onClick={() => alert("Đăng ký ngay")}
-        className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
-      />
-      <Button 
-        text="Đăng nhập"
-        type="secondary"
-        onClick={() => alert("Đăng nhập")}
-        className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
-      />
-      </div>
+        <h1>
+          Đăng ký ngay để trở thành hội viên
+          <br />
+          với nhiều ưu đãi
+        </h1>
+        <div className="flex flex-row gap-8">
+          <Button
+            text="Đăng ký"
+            type="primary"
+            onClick={() => alert("Đăng ký ngay")}
+            className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
+          />
+          <Button
+            text="Đăng nhập"
+            type="secondary"
+            onClick={() => alert("Đăng nhập")}
+            className="mt-5 w-[200px] h-[60px] text-2xl font-bold"
+          />
+        </div>
       </div>
       {/* Footer */}
       <Footer />

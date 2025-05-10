@@ -8,12 +8,12 @@ import Button from "../Shared_components/Button";
 import { CommentOverlay } from "../Comments/CommentsOverLay";
 import { useField } from "../../hooks/useField";
 
-
 const FieldInfo: React.FC = () => {
   const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const { selectedField, setSelectedField } = useField();
-
+  const { user } = useUser();
+  const isAdmin = user?.is_admin;
   // ✅ Khôi phục selectedField từ localStorage nếu mất context
   useEffect(() => {
     if (!selectedField) {
@@ -34,6 +34,82 @@ const FieldInfo: React.FC = () => {
       <div className="text-center text-red-500 mt-10">
         Không tìm thấy thông tin sân. Vui lòng quay lại và chọn lại.
       </div>
+    );
+  }
+  if (isAdmin) {
+    return ( 
+      <div className="self-stretch w-full max-md:mt-8">
+      <div className="flex flex-col py-4 px-6 w-full bg-gray-100 rounded-lg shadow-md">
+      <div className="flex gap-1 text-lg text-slate-800">
+              <div className="font-medium">{selectedField.name}</div>
+            </div>
+
+            <div className="flex items-center gap-1 mt-2 text-base text-gray-600">
+              <PhoneIcon className="w-5 h-5 text-gray-600" />
+              <span>{"0933290303"}</span>
+            </div>
+
+            <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+              <LocationOnIcon className="w-5 h-5 text-yellow-500" />
+              <span>{selectedField.address}</span>
+            </div>
+
+            <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+              <AssignmentTurnedInIcon className="w-5 h-5 text-yellow-500" />
+              <span
+                  className={`inline-block w-16 h-3 rounded ${
+                    selectedField.state.name === "Hoạt động"
+                      ? "bg-green-500"
+                      : selectedField.state.name === "Bảo trì"
+                        ? "bg-amber-400"
+                        : selectedField.state.name === "Ngưng sử dụng"
+                          ? "bg-red-600"
+                          : selectedField.state.name === "Đang đặt lịch"
+                            ? "bg-blue-400"
+                            : selectedField.state.name === "Tạm ngưng"
+                              ? "bg-gray-400"
+                              : "bg-gray-500"
+                  }`}
+                ></span>
+            </div>
+
+            <div className="flex flex-col gap-1 mt-2">
+              <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+                <span className="font-bold text-slate-800">
+                  Giá sân: {selectedField.price} VND
+                </span>
+                <span className="font-bold text-slate-800">
+                  Kiểu sân: {selectedField.category?.name}
+                </span>
+              </div>
+            </div>
+
+            
+        <div className="relative mt-4 w-full pb-[50%] rounded-lg overflow-hidden">
+          {selectedField.images && selectedField.images.length > 0 && (
+            <img
+              src={selectedField.images[0]}
+              alt={selectedField.name}
+              className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
+            />
+          )}
+        </div>
+      </div>
+        <div className="flex gap-4 mt-4">
+          <Button
+            onClick={() => navigate("/admin/manage/addField")}
+            text="Chỉnh sửa sân"
+            variant="primary"
+            className="flex-1 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition"
+          />
+          <Button
+            onClick={() => navigate("/admin/statistic")}
+            text="Xem thống kê"
+            variant="secondary"
+            className="flex-1 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition"
+          />
+        </div>
+    </div>
     );
   }
 

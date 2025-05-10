@@ -11,7 +11,7 @@ export const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       </div>
 
       <div className="w-1/2 h-screen flex items-center justify-center p-8">
-        {children}
+        {children}             
       </div>
    </main>
   );
