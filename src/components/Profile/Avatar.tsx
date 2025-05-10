@@ -58,7 +58,15 @@ export const AvatarMenu = () => {
       // Save user data to localStorage
       localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
 
-      navigate("/dashboard/Profile", { state: userData }); // Navigate to user profile page
+      console.log("userData:", userData);
+      if (userData.id === 'admin_000') {
+        console.log("Navigating to /admin/Profile");
+        navigate("/admin/Profile", { state: userData }); // Điều hướng đến trang admin
+      } else {
+        console.log("Navigating to /dashboard/Profile");
+        navigate("/dashboard/Profile", { state: userData }); // Điều hướng đến trang người dùng
+      }
+      handleClose();
       handleClose(); // Close the menu
     } catch (error) {
       console.error("Failed to fetch user data:", error);

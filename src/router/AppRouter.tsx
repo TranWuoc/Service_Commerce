@@ -115,6 +115,20 @@ export const AppRouter: React.FC = () => {
           )
         }
       />
+            <Route 
+        path={isAdmin ? "/admin/Profile" : "/dashboard/Profile"} 
+        element={
+          isAdmin ? (
+            <AdminLayout>
+              <ProfileInput />
+            </AdminLayout>
+          ) : (
+            <DashboardLayout>
+              <ProfileInput />
+            </DashboardLayout>
+          )
+        }
+      />
       <Route
         path="/admin/manage/updateField/:fieldId" 
         element={

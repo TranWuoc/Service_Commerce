@@ -3,6 +3,7 @@ import CustomerSidebar from "../components/Customer/CustomerSidebar";
 import { AvatarMenu } from "../components/Profile/Avatar";
 import { FieldHeader } from "../components/Field/FieldHeader";
 import { FieldsSummary } from "../components/Field/FieldsSummary";
+import { useUser } from "../hooks/useUser";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null
   );
+  const { user, setUser } = useUser(); 
+  
+  useEffect(() => {
+    // Lấy user từ localStorage khi component được mount
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser); // Cập nhật user vào context
+      } catch (error) {
+        console.error("Failed to parse user from localStorage:", error);
+      }
+    }
+    setIsLoading(false); // Dừng trạng thái loading
+  }, [setUser]);
+
   useEffect(() => {
     setIsLoading(true);
     // Giả lập thời gian tải dữ liệu khi trang được load
@@ -94,10 +111,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <div className="sticky top-0 z-50 bg-neutral-100">
               <div className="flex flex-wrap items-center py-6 px-4 sm:px-8 justify-between gap-4">
                 <div className="flex-1 min-w-[0px]">
-                  <FieldHeader />
+                  {user ? <FieldHeader /> : null}
                 </div>
                 <div className="flex-shrink-0">
-                  <AvatarMenu />
+                  {user ? <AvatarMenu /> :null}
                 </div>
               </div>
             </div>
