@@ -4,6 +4,7 @@ import axios from "axios";
 import { Field } from "../types/Field";
 import { Input } from "../components/ui/input";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Shared_components/Button";
 const ManageFields: React.FC = () => {
   const { fields, setFields } = useField(); // Lấy dữ liệu từ FieldContext
   const [searchTerm, setSearchTerm] = useState(""); // State để lưu giá trị tìm kiếm
@@ -83,13 +84,11 @@ const ManageFields: React.FC = () => {
             </svg>
           </span>
         </div>
-        <button
-          onClick={handleAddField}
-          className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition hover-"
-          
-        >
-          Thêm mới sân
-        </button>
+        <Button
+        text="Thêm mới sân"
+        type="primary"
+        onClick={handleAddField}
+        />
       </div>
 
       {/* Hiển thị dữ liệu */}

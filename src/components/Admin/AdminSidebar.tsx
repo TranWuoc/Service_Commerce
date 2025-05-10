@@ -6,7 +6,7 @@ import {
   Help,
   Settings,
 } from "@mui/icons-material";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, matchPath } from "react-router-dom";
 import { AvatarMenu } from "../Profile/Avatar";
 import { useState, useEffect } from "react";
 
@@ -72,7 +72,8 @@ const AdminSidebar = () => {
             className={`flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500 ${
               location.pathname === "/admin/manage" ||
               location.pathname === "/admin/manage/FieldInfo" ||
-              location.pathname === "/admin/manage/addField"
+              location.pathname === "/admin/manage/addField" ||
+              matchPath("/admin/manage/updateField/:fieldId", location.pathname)
                 ? "text-orange-500"
                 : ""
             }`}
