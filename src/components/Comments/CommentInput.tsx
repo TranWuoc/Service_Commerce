@@ -69,9 +69,9 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) =
         },
       });
 
-      console.log("Response:", response);
-
-
+      setComment("");
+      setImages([]);
+      setPreviews([]);
 
       toast.toast({
         variant: "success",

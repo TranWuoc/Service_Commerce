@@ -65,7 +65,7 @@ const FieldInfo: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-1 mt-2">
-            <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+            <div className="flex  items-center gap-1 mt-0 text-sm text-gray-600">
               <span className="font-bold text-slate-800">
                 Giá sân: {selectedField.price} VND
               </span>

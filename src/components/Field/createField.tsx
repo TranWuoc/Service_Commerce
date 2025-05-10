@@ -16,7 +16,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
     address: "",
     price: 0,
     category: { id: "", name: "" },
-    state: { id: "state-001", name: "Hoạt động" },
+    state: { id: "state-001", name: "Active" },
     images: [],
     description: "",
     latitude: 0,
