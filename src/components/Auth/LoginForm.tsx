@@ -23,7 +23,7 @@ export const LoginForm: React.FC = () => {
     <section className="flex flex-col items-center px-20 py-8 w-full max-md:px-5 max-md:py-6 h-screen">
       <header className="mb-4 text-base">
         <span>Welcome to </span>
-        <span className="text-amber-500">LGBT</span>
+        <span className="text-amber-500">SUPERBOWL</span>
       </header>
 
       <AuthToggle activeTab={activeTab} />

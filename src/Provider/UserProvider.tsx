@@ -1,6 +1,5 @@
 // UserProvider.tsx
 import React, { useState } from 'react';
-import { ReactNode } from 'react';
 import UserContext from '../Context/UserContext'; // Import kiểu dữ liệu người dùng từ UserType
 import { User } from '../types/User'; // Import context
 import { useEffect } from 'react';

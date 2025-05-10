@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, KeyboardEvent } from "react";
 import Button from "./Button";
 import { InputField } from "./InputField";
 import { Search } from "@mui/icons-material";
 
-export const SearchBar: React.FC = () => {
-  // Khai báo state để lưu giá trị input
-  const [searchQuery, setSearchQuery] = useState("");
+interface SearchBarProps {
+  searchQuery: string;
+  onInputChange: (value: string) => void;
+  onSearch: () => void;
+}
 
-  // Hàm xử lý sự thay đổi khi người dùng nhập vào ô tìm kiếm
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+export const SearchBar: React.FC<SearchBarProps> = ({
+  searchQuery,
+  onInputChange,
+  onSearch,
+}) => {
+  // Xử lý nhấn Enter
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      onSearch();
+    }
   };
 
   return (
@@ -20,8 +29,9 @@ export const SearchBar: React.FC = () => {
           <InputField
             type="text"
             placeholder="Tìm kiếm"
-            value={searchQuery} // Gắn giá trị từ state vào input
-            onChange={handleInputChange} // Cập nhật giá trị khi người dùng nhập
+            value={searchQuery}
+            onChange={(e) => onInputChange(e.target.value)}
+            onKeyDown={handleKeyDown}
             style={{
               border: "none",
               boxShadow: "none",
@@ -31,12 +41,17 @@ export const SearchBar: React.FC = () => {
               padding: "0",
               margin: "0",
               backgroundColor: "transparent",
-              display: "inline-block", // Change to inline-block
+              display: "inline-block",
             }}
             className="flex-1"
           />
         </div>
-        <Button variant="primary" text="Tìm kiếm" className="ml-4" />
+        <Button
+          variant="primary"
+          text="Tìm kiếm"
+          className="ml-4"
+          onClick={onSearch}
+        />
       </div>
     </div>
   );

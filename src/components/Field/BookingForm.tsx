@@ -74,6 +74,7 @@ export const BookingForm = () => {
 
   const getSuggestions = (value: string) => {
     const input = value.trim().toLowerCase();
+    // Tìm kiếm chỉ theo tên sân
     return fields.filter((field) => field.name.toLowerCase().includes(input));
   };
 
@@ -166,71 +167,70 @@ export const BookingForm = () => {
       >
         <h2 className="mb-3 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
-<div className="flex flex-col gap-2">
-  <div className="flex flex-col w-full">
-    <label className="mb-2 text-xl text-black">
-      Tên sân <span className="text-red-500 ml-1">*</span>
-    </label>
-    <Autosuggest
-      suggestions={suggestions}
-      onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-      onSuggestionsClearRequested={onSuggestionsClearRequested}
-      getSuggestionValue={(s: Field) => s.name}
-      renderSuggestion={(s: Field) => <div className="p-2">{s.name}</div>}
-      onSuggestionSelected={onSuggestionSelected}
-      inputProps={{
-        placeholder: "Nhập tên sân...",
-        value: inputValue,
-        onChange: (_, { newValue }) => setInputValue(newValue),
-        className:
-          "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
-      }}
-    />
-  </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col w-full">
+            <label className="mb-2 text-xl text-black">
+              Tên sân <span className="text-red-500 ml-1">*</span>
+            </label>
+            <Autosuggest
+              suggestions={suggestions}
+              onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+              onSuggestionsClearRequested={onSuggestionsClearRequested}
+              getSuggestionValue={(s: Field) => s.name}
+              renderSuggestion={(s: Field) => <div className="p-2">{s.name}</div>}
+              onSuggestionSelected={onSuggestionSelected}
+              inputProps={{
+                placeholder: "Nhập tên sân...",
+                value: inputValue,
+                onChange: (_, { newValue }) => setInputValue(newValue),
+                className:
+                  "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
+              }}
+            />
+          </div>
 
-  <div className="flex flex-col items-center w-full mx-auto">
-    {/* Bảng ngày và giờ */}
-    <div className="flex w-full gap-6">
-      <div className="flex-1">
-        <InputField
-          label="Ngày đặt sân"
-          type="date"
-          value={formData.date}
-          required
-          name="date"
-          style={{ margin: 0, maxWidth: "none" }}
-          onChange={handleDateChange}
-          min={getMinDate()}
-          onKeyDown={(e) => e.preventDefault()}
-          className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[35px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer"
-        ></InputField>
-        
-      </div>
+          <div className="flex flex-col items-center w-full mx-auto">
+            {/* Bảng ngày và giờ */}
+            <div className="flex w-full gap-6">
+              <div className="flex-1">
+                <InputField
+                  label="Ngày đặt sân"
+                  type="date"
+                  value={formData.date}
+                  required
+                  name="date"
+                  style={{ margin: 0, maxWidth: "none" }}
+                  onChange={handleDateChange}
+                  min={getMinDate()}
+                  onKeyDown={(e) => e.preventDefault()}
+                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[35px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer"
+                ></InputField>
+              </div>
 
-      <div className="flex-1">
-        <label className="self-start mb-2 text-xl text-black">
-          Giờ đặt <span className="text-red-500 ml-1">*</span>
-        </label>
-        <select
-          value={formData.timeSlot}
-          onChange={(e) =>
-            setFormData({ ...formData, timeSlot: e.target.value })
-          }
-          className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[43px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer mt-1"
-        >
-          <option value="" disabled>
-            Chọn khung giờ
-          </option>
-          {timeSlots.map((slot) => (
-            <option key={slot.value} value={slot.value}>
-              {slot.label}
-            </option>
-          ))}
-              </select>
+              <div className="flex-1">
+                <label className="self-start mb-2 text-xl text-black">
+                  Giờ đặt <span className="text-red-500 ml-1">*</span>
+                </label>
+                <select
+                  value={formData.timeSlot}
+                  onChange={(e) =>
+                    setFormData({ ...formData, timeSlot: e.target.value })
+                  }
+                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[43px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer mt-1"
+                >
+                  <option value="" disabled>
+                    Chọn khung giờ
+                  </option>
+                  {timeSlots.map((slot) => (
+                    <option key={slot.value} value={slot.value}>
+                      {slot.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
         <div className="flex gap-4 justify-center mt-auto pt-4">
           <Button

@@ -43,14 +43,6 @@ const BookHistoryForm: React.FC = () => {
     fetchBookings();
   }, []);
 
-  useEffect(() => {
-    const keyword = search.trim().toLowerCase();
-    const result = allRows.filter((r) =>
-      r.name.toLowerCase().includes(keyword)
-    );
-    setFilteredRows(result);
-  }, [search, allRows]);
-
   const handleCancel = (id: string) => {
     setSelectedId(id);
     setShowConfirm(true);
@@ -70,9 +62,21 @@ const BookHistoryForm: React.FC = () => {
     }
   };
 
+
+
   return (
     <div className="p-5 space-y-4">
-      <SearchBar onSearch={setSearch} />
+      <SearchBar
+  searchQuery={search}
+  onInputChange={setSearch}
+  onSearch={() => {
+    const keyword = search.trim().toLowerCase();
+    const result = allRows.filter((r) =>
+      r.name.toLowerCase().includes(keyword)
+    );
+    setFilteredRows(result);
+  }}
+/>
       <FieldsTable rows={filteredRows} onCancel={handleCancel} />
 
       <ConfirmModal

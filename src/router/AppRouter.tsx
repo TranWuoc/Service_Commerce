@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthLayout } from "../views/AuthLayout";
 import Login from "../views/Login";
@@ -19,8 +19,19 @@ import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
 import { Form } from "../views/FieldForm";
 import { ProtectedRoute } from "./ProtectedRouter"; // thêm dòng này
-
+import UpdateField from "../components/Field/updateField";
 export const AppRouter: React.FC = () => {
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const storedIsAdmin = localStorage.getItem("isAdmin");
+    setIsAdmin(storedIsAdmin === "true");
+  }, []);
+
+  if (isAdmin === null) {
+    return <div>Loading...</div>; // Hoặc có thể trả về loading spinner
+  }
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -89,9 +100,37 @@ export const AppRouter: React.FC = () => {
         }
       />
 
+   
+      <Route
+        path={isAdmin ? "/admin/manage/FieldInfo" : "/dashboard/FieldInfo"}
+        element={
+          isAdmin ? (
+            <AdminLayout>
+              <FieldDetails />
+            </AdminLayout>
+          ) : (
+            <DashboardLayout>
+              <FieldDetails />
+            </DashboardLayout>
+          )
+        }
+      />
+      <Route
+        path="/admin/manage/updateField/:fieldId" 
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout>
+              <UpdateField />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+
       {/* Redirect fallback */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
     </Routes>
   );
 };
+// export default AppRouter;

@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -9,12 +7,14 @@ import { CommentOverlay } from "../Comments/CommentsOverLay";
 import { useField } from "../../hooks/useField";
 import { useUser } from "../../hooks/useUser";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+
 const FieldInfo: React.FC = () => {
   const navigate = useNavigate();
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = React.useState(false);
   const { selectedField, setSelectedField } = useField();
   const { user } = useUser();
-  const isAdmin = user?.is_admin;
+  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Lấy từ localStorage
+
   // ✅ Khôi phục selectedField từ localStorage nếu mất context
   useEffect(() => {
     if (!selectedField) {
@@ -38,6 +38,7 @@ const FieldInfo: React.FC = () => {
       </div>
     );
   }
+
   if (isAdmin) {
     return (
       <div className="self-stretch w-full max-md:mt-8">
@@ -59,19 +60,7 @@ const FieldInfo: React.FC = () => {
           <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
             <AssignmentTurnedInIcon className="w-5 h-5 text-yellow-500" />
             <span
-              className={`inline-block w-16 h-3 rounded ${
-                selectedField.state.name === "Hoạt động"
-                  ? "bg-green-500"
-                  : selectedField.state.name === "Bảo trì"
-                    ? "bg-amber-400"
-                    : selectedField.state.name === "Ngưng sử dụng"
-                      ? "bg-red-600"
-                      : selectedField.state.name === "Đang đặt lịch"
-                        ? "bg-blue-400"
-                        : selectedField.state.name === "Tạm ngưng"
-                          ? "bg-gray-400"
-                          : "bg-gray-500"
-              }`}
+              className={`inline-block w-16 h-3 rounded ${getStateColor(selectedField.state.name)}`}
             ></span>
           </div>
 
@@ -88,12 +77,10 @@ const FieldInfo: React.FC = () => {
           <div className="flex flex-col gap-1 mt-2">
             <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
               <span className="font-bold text-slate-800">
-                Mô tả {selectedField.description} VND
+                Mô tả {selectedField.description}
               </span>
-          
             </div>
           </div>
-          
         </div>
         <div className="flex gap-4 mt-4">
           <Button
@@ -119,41 +106,34 @@ const FieldInfo: React.FC = () => {
         className={`self-stretch w-full max-md:mt-8 ${showComments ? "blur-sm" : ""}`}
       >
         <div className="flex flex-col py-2 px-4 w-full bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
-          <div className="flex flex-col w-full">
-            {/* Tên sân */}
-            <div className="flex gap-1 text-lg text-slate-800 font-medium">
-              {selectedField.name}
+          <div className="flex flex-col w-full h-36">
+            <div className="flex gap-1 text-lg text-slate-800">
+              <div className="font-medium">{selectedField.name}</div>
             </div>
 
-            {/* Số điện thoại */}
             <div className="flex items-center gap-1 mt-2 text-base text-gray-600">
               <PhoneIcon className="w-5 h-5 text-gray-600" />
-              <span>0933290303</span>
+              <span>{"0933290303"}</span>
             </div>
 
-            {/* Địa chỉ */}
             <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
               <LocationOnIcon className="w-5 h-5 text-yellow-500" />
               <span>{selectedField.address}</span>
             </div>
 
-            {/* Giá sân và Kiểu sân */}
-            <div className="flex flex-col gap-1 mt-10 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-1 mt-2">
+              <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
                 <span className="font-bold text-slate-800">
-                  Giá sân: {selectedField.price.toLocaleString()} VND
+                  Giá sân: {selectedField.price} VND
                 </span>
                 <span className="font-bold text-slate-800">
                   Kiểu sân: {selectedField.category?.name}
                 </span>
               </div>
             </div>
-
-           
           </div>
         </div>
 
-        {/* Các nút */}
         <div className="flex gap-2 justify-between mt-2">
           <Button
             onClick={() =>
@@ -178,7 +158,6 @@ const FieldInfo: React.FC = () => {
         </div>
       </div>
 
-      {/* Overlay bình luận */}
       <CommentOverlay
         isOpen={showComments}
         onClose={() => setShowComments(false)}
@@ -186,6 +165,24 @@ const FieldInfo: React.FC = () => {
       />
     </>
   );
+};
+
+// Hàm helper để lấy màu trạng thái
+const getStateColor = (stateName: string) => {
+  switch (stateName) {
+    case "Hoạt động":
+      return "bg-green-500";
+    case "Bảo trì":
+      return "bg-amber-400";
+    case "Ngưng sử dụng":
+      return "bg-red-600";
+    case "Đang đặt lịch":
+      return "bg-blue-400";
+    case "Tạm ngưng":
+      return "bg-gray-400";
+    default:
+      return "bg-gray-500";
+  }
 };
 
 export default FieldInfo;

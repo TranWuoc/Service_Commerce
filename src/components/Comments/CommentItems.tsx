@@ -14,7 +14,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   content,
   fieldId,
   id,
-  createdAt,
+  updatedAt,
   user,
   image_url,
   onCommentUpdated,
@@ -194,8 +194,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                 className="object-contain shrink-0 aspect-[1.05] w-[21px]"
               />
               <time className="text-gray-600">
-                {createdAt
-                  ? new Date(createdAt).toLocaleDateString()
+                {updatedAt
+                  ? new Date(updatedAt).toLocaleDateString()
                   : "Invalid Date"}
               </time>
             </div>
