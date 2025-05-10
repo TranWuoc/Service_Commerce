@@ -17,7 +17,7 @@ import AdminDashboard from "../views/AdminDashboard";
 import Statistics from "../views/AdminStatistic";
 import FieldList from "../views/AdminFiledList";
 import ManageFields from "../views/AdminManagerFileds";
-import { useUser } from "../Context/UserContext";
+import { useUser } from "../hooks/useUser";
 import {Form} from "../views/FieldForm";
 export const AppRouter: React.FC = () => {
   const isAdmin = localStorage.getItem("isAdmin") === "true"; // Kiểm tra vai trò người dùng

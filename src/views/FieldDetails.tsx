@@ -9,13 +9,16 @@ function FieldDetails() {
   const { selectedField } = useField(); // Lấy field từ context
 
   const fieldImages = selectedField?.images?.length
-    ? selectedField.images.map(image => 'http://localhost:8000/' + image.image_url)
+    ? selectedField.images.map((img) => ({
+      id: img.id,
+      image_url: `http://localhost:8000/${img.image_url}`,
+    }))
     : [
-        "https://randomwordgenerator.com/img/picture-generator/52e0d744435ba914f1dc8460962e33791c3ad6e04e507749712e79d29244c3_640.jpg",
-        "https://randomwordgenerator.com/img/picture-generator/52e0d744435ba914f1dc8460962e33791c3ad6e04e507749712e79d29244c3_640.jpg",
-        "/docs/images/carousel/carousel-3.svg",
-        "/docs/images/carousel/carousel-4.svg",
-        "/docs/images/carousel/carousel-5.svg",
+          "https://images.unsplash.com/photo-1609788694280-5c66f9b2b805?auto=format&fit=crop&w=1170&q=80",
+  "https://images.unsplash.com/photo-1564518098550-cc3b6b8e8c62?auto=format&fit=crop&w=1170&q=80",
+  "https://images.unsplash.com/photo-1600369672747-059a59f5f63e?auto=format&fit=crop&w=1170&q=80",
+  "https://images.unsplash.com/photo-1625245002381-25046a74b15b?auto=format&fit=crop&w=1170&q=80",
+  "https://images.unsplash.com/photo-1583267743261-04b9f1a98ff5?auto=format&fit=crop&w=1170&q=80"
       ];
       
   if (!selectedField) {

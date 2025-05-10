@@ -7,7 +7,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Button from "../Shared_components/Button";
 import { CommentOverlay } from "../Comments/CommentsOverLay";
 import { useField } from "../../hooks/useField";
-import { useUser } from "../../Context/UserContext";
+import { useUser } from "../../hooks/useUser";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 const FieldInfo: React.FC = () => {
   const navigate = useNavigate();
@@ -93,15 +93,7 @@ const FieldInfo: React.FC = () => {
           
             </div>
           </div>
-          {/* <div className="relative mt-4 w-full pb-[50%] rounded-lg overflow-hidden">
-            {selectedField.images && selectedField.images.length > 0 && (
-              <img
-                src={`http://localhost:8000/${selectedField.images[0].img_url}`} // Truy cập img_url
-                alt={selectedField.name}
-                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
-              />
-            )}
-          </div> */}
+          
         </div>
         <div className="flex gap-4 mt-4">
           <Button
@@ -157,15 +149,7 @@ const FieldInfo: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative mt-2 w-3/5 pb-[15%] rounded-lg overflow-hidden">
-              {selectedField.images && selectedField.images.length > 0 && (
-                <img
-                  src={selectedField.images[0]}
-                  alt={selectedField.name}
-                  className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
-                />
-              )}
-            </div>
+           
           </div>
         </div>
 
