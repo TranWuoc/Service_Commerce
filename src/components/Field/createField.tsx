@@ -16,7 +16,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
     address: "",
     price: 0,
     category: { id: "", name: "" },
-    state: { id: "state-001", name: "Hoạt động" },
+    state: { id: "state-001", name: "Active" },
     images: [],
     description: "",
     latitude: 0,
@@ -205,7 +205,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
       toast({
         title: "Success",
         description: "Đã thêm sân thành công",
-        variant: "sucess",
+        variant: "success2",
       });
       setTimeout(() => {
         window.location.href = "/admin/manage";
