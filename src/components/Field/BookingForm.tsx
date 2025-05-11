@@ -135,9 +135,10 @@ export const BookingForm = () => {
     try {
       setIsSubmitting(true);
       const res = await axiosInstance.post("/bookings", data);
-      
-      const { payUrl, token } = res.data.data;
-      sessionStorage.setItem("authToken", token);
+
+      const payUrl = res.data.data?.receipt?.payment_url;
+
+      console.log("payUrl", payUrl);
       toast({
         title: "Đặt sân thành công!",
         description: "Đang chuyển đến trang thanh toán...",

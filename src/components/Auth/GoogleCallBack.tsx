@@ -10,7 +10,7 @@ export const GoogleCallback = () => {
 
   useEffect(() => {
     const code = searchParams.get("code");
-
+    console.log("code", code);
     if (!code) {
       setError("Không tìm thấy mã xác thực (code)");
       return;
