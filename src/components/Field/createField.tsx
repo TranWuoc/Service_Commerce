@@ -5,7 +5,8 @@ import { toast } from "../../hooks/use-toast";
 import axiosInstance from "../../api/axiosInstance";
 import { Field } from "../../types/Field";
 import Button from "../Shared_components/Button";
-
+import { fetchCategories } from "../../api/fieldApi";
+import { handleImageChange } from "../../utils/imageUtils";
 interface FieldFormProps {
   onSubmit: (data: Omit<Field, "id">) => void; // Hàm xử lý khi submit
 }
@@ -23,48 +24,27 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
     longitude: 0,
   });
 
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
-    [],
-  );
-  const [loading, setLoading] = useState<boolean>(true);
-  const [fieldData, setFieldData] = useState<File[] | null>(null);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [images, setImages] = useState<File[]>([]);
-  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]); // Danh sách ID của các ảnh đã bị xóa
+  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]); 
   const [previews, setPreviews] = useState<string[]>([]);
+
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadData = async () => {
       try {
-        const response = await axiosInstance.get(
-          "http://localhost:8000/api/fields",
-        );
-        const fields = response.data.data;
-        const allCategories = fields.map((field: any) => ({
-          id: field.category.id,
-          name: field.category.name,
-        }));
-
-        const uniqueCategories = Array.from(
-          new Set(
-            allCategories.map((c: { id: string; name: string }) => c.name),
-          ),
-        ).map((name) =>
-          allCategories.find(
-            (c: { id: string; name: string }) => c.name === name,
-          ),
-        );
-
-        setCategories(uniqueCategories);
-        setLoading(false);
+        const categories = await fetchCategories();
+        setCategories(categories);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách kiểu sân:", error);
-        setLoading(false);
+        console.error("Error loading data:", error);
       }
     };
-    fetchCategories();
+    loadData();
   }, []);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -72,30 +52,9 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
       [name]: name === "price" ? parseFloat(value) : value,
     }));
   };
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Image selected:", e.target.files);
-    const files = Array.from(e.target.files || []);
-    if (images.length + files.length > 3) {
-      toast({
-        title: "Error",
-        description: "Bạn chỉ có thể thêm tối đa 3 ảnh.",
-        variant: "destructive",
-      });
-      console.log("Số lượng ảnh vượt quá giới hạn: ", images.length + files.length);
-      return;
-    }
-    const selected = files.slice(0, 3 - images.length); // Max 3 images
 
-    setImages((prev) => [...prev, ...selected]);
-
-    selected.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result)
-          setPreviews((prev) => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+  const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleImageChange(e, images, setImages, setPreviews);
   };
 
   const handleLocationSelect = (data: {
@@ -111,9 +70,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     // Kiểm tra các trường bắt buộc
     if (!formData.name.trim()) {
       toast({
@@ -223,10 +180,12 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="p-6 mx-auto bg-white rounded-lg max-w-[800px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] h-auto flex flex-col mt-0 gap-1"
-    >
+    <div className="relative flex mx-auto max-w-[1000px] h-auto flex-col  rounded-xl bg-white bg-clip-border text-gray-700 shadow-md mb-3 pb-3 pl-2 pr-2">
+      <div className="relative mx-4 -mt-6 mb-4 grid h-28 place-items-center overflow-hidden rounded-xl bg-gradient-to-tr from-cyan-600 to-cyan-400 bg-clip-border text-white shadow-lg shadow-cyan-500/40">
+        <h3 className="block font-sans text-3xl font-semibold leading-snug tracking-normal text-white antialiased">
+          Thêm mới sân
+        </h3>
+      </div>
       <InputField
         label="Tên sân"
         type="text"
@@ -286,6 +245,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
         required
         name="state"
         disabled={true}
+        onChange={handleInputChange}
         style={{ marginBottom: "1.5rem" }}
       />
       <InputField
@@ -298,14 +258,14 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
         style={{ marginBottom: "1.5rem", height: "100px" }}
         onChange={handleInputChange}
       />
-      <div className="mb-4">
+      <div className="mb-4 flex flex-col pl-[190px] ">
         <label
           htmlFor="images"
-          className="block text-sm font-medium text-gray-700"
+          className="self-start mb-2 text-xl text-black max-sm:text-xl"
         >
           Hình ảnh
         </label>
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-4 flex flex-wrap gap-2  ">
           {previews.map((preview, index) => (
             <div key={index} className="relative">
               <img
@@ -330,17 +290,21 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
           type="file"
           name="image"
           multiple
-          onChange={handleImageChange}
+          onChange={onImageChange}
           className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
       </div>
-      <Button
-        text="Thêm mới sân"
-        type="primary"
-        onClick={handleSubmit}
-        customStyle={{ marginTop: "1rem", width: "100%" }}
-      />
-    </form>
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}
+      >
+        <Button
+          text="Thêm mới sân"
+          type="primary"
+          onClick={handleSubmit}
+          customStyle={{ width: "30%" }}
+        />
+      </div>
+    </div>
   );
 };
 

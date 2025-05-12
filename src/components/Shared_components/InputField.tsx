@@ -8,7 +8,7 @@ interface InputFieldProps {
   disabled?: boolean;
   style?: React.CSSProperties;
   customClass?: string; 
-  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   options?: { value: string; label: string }[]; // Thêm thuộc tính options
 }
 

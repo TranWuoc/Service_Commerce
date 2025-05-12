@@ -91,20 +91,19 @@ const AdminDashboard: React.FC = () => {
           />
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex flex-col justify-between items-center bg-white h-1/2 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-2">Doanh thu</h2>
-          <p className="text-gray-600 mb-4">Xem trạng thái và thông tin chi tiết của các sân bóng.</p>
           {totalRevenue !== null ? (
             <p className="text-gray-800 font-bold">Tổng doanh thu: {totalRevenue.toLocaleString()} VND</p>
           ) : (
             <p>Đang tải doanh thu...</p>
           )}
-          <button
-            className="py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          <Button
+            text="Xem chi tiết"
+            type="primary"
             onClick={() => navigate("/admin/manage")}
-          >
-            Xem chi tiết
-          </button>
+            customStyle={{ marginTop: "10px" }}
+          />
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
