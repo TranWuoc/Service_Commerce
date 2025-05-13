@@ -38,7 +38,7 @@ const FieldPictureGallery: React.FC<FieldPictureGalleryProps> = ({ images }) => 
   return (
     <div
       id="default-carousel"
-      className="relative w-full h-[80vh]" // Đặt chiều cao toàn bộ slider
+      className="relative w-full h-[75vh]" // Đặt chiều cao toàn bộ slider
       data-carousel="slide"
     >
       {/* Carousel wrapper */}

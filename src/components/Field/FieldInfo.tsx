@@ -13,9 +13,9 @@ const FieldInfo: React.FC = () => {
   const [showComments, setShowComments] = React.useState(false);
   const { selectedField, setSelectedField } = useField();
   const { user } = useUser();
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Lấy từ localStorage
+  const isAdmin = localStorage.getItem("isAdmin") === "true"; 
 
-  // ✅ Khôi phục selectedField từ localStorage nếu mất context
+
   useEffect(() => {
     if (!selectedField) {
       const storedField = localStorage.getItem("selectedField");
@@ -103,7 +103,7 @@ const FieldInfo: React.FC = () => {
   return (
     <>
       <div
-        className={`self-stretch w-full max-md:mt-8 ${showComments ? "blur-sm" : ""}`}
+        className={`self-stretch h-75vh w-full max-md:mt-8 ${showComments ? "blur-sm" : ""}`}
       >
         <div className="flex flex-col py-2 px-4 w-full bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
           <div className="flex flex-col w-full h-36">
@@ -167,18 +167,17 @@ const FieldInfo: React.FC = () => {
   );
 };
 
-// Hàm helper để lấy màu trạng thái
+
 const getStateColor = (stateName: string) => {
   switch (stateName) {
-    case "Hoạt động":
+    case "Active":
       return "bg-green-500";
-    case "Bảo trì":
+    case "Maintenance":
       return "bg-amber-400";
-    case "Ngưng sử dụng":
+    case "Suspended":
       return "bg-red-600";
-    case "Đang đặt lịch":
-      return "bg-blue-400";
-    case "Tạm ngưng":
+
+    case "Deactivated":
       return "bg-gray-400";
     default:
       return "bg-gray-500";

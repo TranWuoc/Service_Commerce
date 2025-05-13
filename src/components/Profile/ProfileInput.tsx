@@ -65,7 +65,7 @@ export const ProfileInput: React.FC = () => {
       }
 
       await axiosInstance.post(
-        `/user/update/${userData.user_id}`,
+        `/user/update/${userData.id}`,
         form,
         {
           headers: {
@@ -83,7 +83,11 @@ export const ProfileInput: React.FC = () => {
         description: "Thông tin đã được cập nhật.",
       });
     } catch (error) {
-      console.error("Lỗi khi cập nhật thông tin:", error);
+      toast.toast({
+        variant: "destructive",
+        title: "Lỗi!",
+        description: error.response?.data?.message || "Đã xảy ra lỗi trong quá trình cập nhật.",
+      });
     }
   };
 

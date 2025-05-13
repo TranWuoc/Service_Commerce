@@ -6,6 +6,7 @@ import echo from "../../lib/echo";
 import axiosInstance from "../../api/axiosInstance";
 import { Comment } from "../../types/comment";
 import { useToast } from "../../hooks/use-toast";
+import SimpleBar from 'simplebar-react';
 interface CommentOverlayProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,9 +36,9 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
         `/comment/findByFieldId/${fieldInfo.id}?page=${page}`,
         {
           params: {
-            // Truyền số trang
+          
             page,
-            per_page: 5  // Truyền số bình luận mỗi trang, bạn có thể thay đổi giá trị này nếu muốn
+            per_page: 5  
           }
         }
       );
@@ -110,7 +111,8 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 overflow-auto">
-      <div className="relative w-[60%] max-h-[90%] rounded-[20px] overflow-y-auto bg-opacity p-0">
+      
+      <div className="relative w-[60%] max-h-[90%] rounded-[20px]  bg-opacity p-0">
         <CommentHeader  onClose={onClose} fieldInfo={fieldInfo} />
         
         <div className="flex flex-col gap-4  bg-white">

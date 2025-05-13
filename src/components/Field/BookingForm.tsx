@@ -70,11 +70,17 @@ export const BookingForm = () => {
     if (selectedDate >= new Date(getMinDate())) {
       setFormData({ ...formData, date: e.target.value });
     }
+    else {
+      toast({
+        title: "Lỗi",
+        description: "Ngày đặt sân phải từ 5 ngày sau ngày hiện tại.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getSuggestions = (value: string) => {
     const input = value.trim().toLowerCase();
-    // Tìm kiếm chỉ theo tên sân
     return fields.filter((field) => field.name.toLowerCase().includes(input));
   };
 

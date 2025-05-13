@@ -4,7 +4,7 @@ import axios from "axios";
 import { Field } from "../../types/Field";
 import { InputField } from "../Shared_components/InputField";
 import { toast, useToast } from "../../hooks/use-toast";
-import { Toast } from "../../components/ui/toast";
+
 import axiosInstance from "../../api/axiosInstance";
 import Button from "../Shared_components/Button";
 const UpdateField: React.FC = () => {
@@ -264,9 +264,9 @@ const UpdateField: React.FC = () => {
           variant: "sucess",
         });
   
-        // Chuyển hướng người dùng sau khi xóa thành công
+ 
         setTimeout(() => {
-          window.location.href = "/admin/manage"; // Điều hướng về danh sách sân
+          window.location.href = "/admin/manage"; 
         }, 3000);
       })
       .catch((error) => {
