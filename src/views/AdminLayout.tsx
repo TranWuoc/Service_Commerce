@@ -33,11 +33,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const getPageTitle = () => {
     switch (location.pathname) {
       case "/admin":
-        return "Trang chính Admin";
+        return "Dashboard";
       case "/admin/manage":
         return "Quản lý thông sân";
+      case "/admin/manageUser":
+        return "Quản lý người dùng";
       case "/admin/Profile":
         return "Hồ sơ Admin";
+      case "/admin/statistic":
+        return "Thống kê ";
       // default:
       //   return "Trang quản lý Admin";
     }
@@ -68,7 +72,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div className="flex items-end justify-end py-4 px-6">
             <AvatarMenu />
           </div>
-        <div className="mt-6">
+        <div className="mt-6 ">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">{getPageTitle()}</h1>
           {children}
         </div>

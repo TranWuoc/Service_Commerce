@@ -91,9 +91,10 @@ const FieldInfo: React.FC = () => {
             variant="primary"
           />
           <Button
-            onClick={() => navigate("/admin/statistic")}
-            text="Xem thống kê"
-            variant="secondary"
+            onClick={() => setShowComments(true)}
+            text="Bình luận"
+            variant="tertiary"
+            className="flex-1 py-2 bg-amber-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-amber-600 transition-colors"
           />
         </div>
       </div>
