@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { CommentInput } from "../Comments/CommentInput";
 import { CommentHeader } from "./CommentHeader";
 import { CommentItem } from "./CommentItems";
 import echo from "../../lib/echo";
-import axiosInstance from "../../api/axiosInstance";
 import { Comment } from "../../types/comment";
 import { useToast } from "../../hooks/use-toast";
+import { fetchCommentsByField } from "../../actions/commentActions";
+
 interface CommentOverlayProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,7 +20,7 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
   fieldInfo,
 }) => {
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const [pagination, setPagination] = useState({
@@ -26,66 +28,57 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
     totalPages: 1,
   });
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const navigate = useNavigate();
+  const paginationRef = useRef(pagination);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const fetchComments = useCallback(async (page = 1) => {
-    try {
-      setLoading(true);
-      const res = await axiosInstance.get(
-        `/comment/findByFieldId/${fieldInfo.id}?page=${page}`,
-        {
-          params: {
-            // Truyền số trang
-            page,
-            per_page: 5  // Truyền số bình luận mỗi trang, bạn có thể thay đổi giá trị này nếu muốn
+  const fetchComments = useCallback(
+    async (page: number = 1) => {
+      try {
+        setLoading(true);
+        const { data, meta } = await fetchCommentsByField(fieldInfo.id, {
+          page,
+          perPage: 5,
+        });
+        setComments(data);
+        setPagination({
+          currentPage: meta.current_page,
+          totalPages: meta.last_page,
+        });
+        paginationRef.current = {
+          currentPage: meta.current_page,
+          totalPages: meta.last_page,
+        };
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+        setError("Failed to load comments. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fieldInfo.id]
+  );
+
+  const handleDeletedComment = useCallback(
+    (deletedCommentId: string) => {
+      setComments((prev) => {
+        const updatedComments = prev.filter((c) => c.id !== deletedCommentId);
+
+        if (updatedComments.length === 0) {
+          if (paginationRef.current.currentPage === 1) {
+            navigate(-1);
+          } else if (
+            paginationRef.current.currentPage === paginationRef.current.totalPages
+          ) {
+            fetchComments(paginationRef.current.currentPage - 1);
           }
         }
-      );
 
-      setComments(res.data.data);
-      setPagination({
-        currentPage: res.data.meta.current_page,
-        totalPages: res.data.meta.last_page
+        return updatedComments;
       });
-    } catch (err) {
-      console.error("Failed to load comments:", err);
-      setError("Failed to load comments. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [fieldInfo.id]);
-
-    const handleNewComment = useCallback((e: any) => {
-      const newComment = e.content;
-      if (!newComment || newComment.fieldId !== fieldInfo.id) return;
-
-      setComments(prev => {
-        const exists = prev.some(c => c.id === newComment.id);
-        return exists ? prev : [newComment, ...prev];
-      });
-    }, [fieldInfo.id]);
-
-    const handleUpdatedComment = useCallback((e: any) => {
-      const updatedComment = e.content;
-   
-      if (!updatedComment || updatedComment.fieldId !== fieldInfo.id) return;
-      // Cập nhật bình luận trong danh sách
-      setComments(prev =>
-        prev.map(c => 
-          c.id === updatedComment.id 
-            ? { ...c, content: updatedComment.content, image_url: updatedComment.image_url } // Cập nhật ảnh
-            : c
-        )
-      );
-    }, [fieldInfo.id]);
-
-  const handleDeletedComment = useCallback((e: any) => {
-   
-    const deletedCommentId = e.content;
-    if (!deletedCommentId) return;
-
-    setComments(prev => prev.filter(c => c.id !== deletedCommentId));
-  }, []);
+    },
+    [navigate, fetchComments]
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -93,70 +86,97 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
     fetchComments(1);
 
     const channel = echo.channel(`comments`);
-
-    channel.listen('.CommentCreated', handleNewComment);
-    channel.listen('.CommentUpdated', handleUpdatedComment);
-    channel.listen('.CommentDeleted', handleDeletedComment);
+  channel.listen(".CommentCreated", (e: any) => {
+    // Nếu là phản hồi (có parent_id)
+    if (e.content.parent_id) {
+      setComments(prev => prev.map(comment => {
+        // Tìm comment cha và thêm phản hồi vào
+        if (comment.id === e.content.parent_id) {
+          return {
+            ...comment,
+            child: [...(comment.child || []), e.content]
+          };
+        }
+        return comment;
+      }));
+    } 
+    // Nếu là comment mới (không có parent_id)
+    else {
+      setComments(prev => {
+        if (paginationRef.current.currentPage === 1 && prev.length >= 5) {
+          fetchComments(1);
+          return prev;
+        } else {
+          return [e.content, ...prev];
+        }
+      });
+    }
+  });
+    channel.listen(".CommentUpdated", (e: any) => {
+      setComments((prev) =>
+        prev.map((c) => (c.id === e.content.id ? { ...c, ...e.content } : c))
+      );
+    });
+    channel.listen(".CommentDeleted", (e: any) => handleDeletedComment(e.content));
 
     return () => {
-      channel.stopListening('.CommentCreated', handleNewComment);
-      channel.stopListening('.CommentUpdated', handleUpdatedComment);
-      channel.stopListening('.CommentDeleted', handleDeletedComment);
-      echo.leaveChannel('comments');
+      channel.stopListening(".CommentCreated");
+      channel.stopListening(".CommentUpdated");
+      channel.stopListening(".CommentDeleted");
+      echo.leaveChannel("comments");
     };
-  }, [isOpen, fieldInfo.id, fetchComments, handleNewComment, handleUpdatedComment, handleDeletedComment]);
+  }, [isOpen, fetchComments, handleDeletedComment]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 overflow-auto">
-      <div className="relative w-[60%] max-h-[90%] rounded-[20px] overflow-y-auto bg-opacity p-0">
-        <CommentHeader  onClose={onClose} fieldInfo={fieldInfo} />
-        
-        <div className="flex flex-col gap-4  bg-white">
-          {comments.map((comment) => (
-            <CommentItem
-              key={`${comment.id}-${comment.created_at}`}
-              id={comment.id}
-              content={comment.content}
-              fieldIId={comment.fieldId}
-              createdAt={comment.createdAt}
-              image_url={comment.image_url}
-              user={comment.user}
-              user_id={comment.user?.id}  
-              onCommentDeleted={(id) => setComments(prev => prev.filter(c => c.id !== id))}
-            />
-          ))}
+      <div className="relative w-[60%] max-h-[90%] rounded-[20px] bg-opacity p-0">
+        <CommentHeader onClose={onClose} fieldInfo={fieldInfo} />
 
-          <div className="flex justify-center gap-4 py-2 bg-white">
-            {pagination.currentPage > 1 && (
-              <button
-                onClick={() => fetchComments(pagination.currentPage - 1)}
-                className="py-2 px-4 bg-blue-500 text-white rounded"
-              >
-                Prev
-              </button>
-            )}
-
-            <span className="flex items-center gap-2 text-sm text-gray-600">
-              <span>{pagination.currentPage}</span> / <span>{pagination.totalPages}</span>
-            </span>
-
-            {pagination.currentPage < pagination.totalPages && (
-              <button
-                onClick={() => fetchComments(pagination.currentPage + 1)}
-                className="py-2 px-4 bg-blue-500 text-white rounded"
-              >
-                Next
-              </button>
-            )}
-          </div>
+        <div className="flex flex-col gap-4 bg-white">
+         {comments.map((comment) => (
+  <CommentItem
+    key={`${comment.id}-${comment.created_at}`}
+    id={comment.id}
+    content={comment.content}
+    fieldId={comment.fieldId}
+    createdAt={comment.createdAt}
+    image_url={comment.image_url}
+    user={comment.user}
+    user_id={comment.user?.id}
+    childComments={comment.child} // Make sure this matches your API response structure
+    onCommentDeleted={() => fetchComments(paginationRef.current.currentPage)}
+  />
+))}
         </div>
-        <div className="flex justify-center  py-2 bg-white">
-        <CommentInput 
-          fieldId={fieldInfo.id} 
-          userId={user?.id } 
-        />
+
+        <div className="flex justify-center gap-4 py-2 bg-white">
+          {pagination.currentPage > 1 && (
+            <button
+              onClick={() => fetchComments(pagination.currentPage - 1)}
+              className="py-2 px-4 bg-blue-500 text-white rounded"
+            >
+              Prev
+            </button>
+          )}
+
+          <span className="flex items-center gap-2 text-sm text-gray-600">
+            <span>{pagination.currentPage}</span> / <span>{pagination.totalPages}</span>
+          </span>
+
+          {pagination.currentPage < pagination.totalPages && (
+            <button
+              onClick={() => fetchComments(pagination.currentPage + 1)}
+              className="py-2 px-4 bg-blue-500 text-white rounded"
+            >
+              Next
+            </button>
+          )}
+        </div>
+
+        <div className="flex justify-center py-2 bg-white">
+          <CommentInput fieldId={fieldInfo.id} userId={user?.id} />
         </div>
       </div>
     </div>

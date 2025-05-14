@@ -3,6 +3,11 @@ import { useParams } from "react-router-dom";
 import { Field } from "../../types/Field";
 import { InputField } from "../Shared_components/InputField";
 import { toast, useToast } from "../../hooks/use-toast";
+<<<<<<< HEAD:src/components/Field/updateField.tsx
+=======
+
+import axiosInstance from "../../api/axiosInstance";
+>>>>>>> master:src/components/Admin/updateField.tsx
 import Button from "../Shared_components/Button";
 import {
   fetchFieldById,
@@ -175,10 +180,15 @@ const UpdateField: React.FC = () => {
           description: "Sân đã được xóa thành công.",
           variant: "success",
         });
+<<<<<<< HEAD:src/components/Field/updateField.tsx
 
         // Chuyển hướng người dùng sau khi xóa thành công
+=======
+  
+ 
+>>>>>>> master:src/components/Admin/updateField.tsx
         setTimeout(() => {
-          window.location.href = "/admin/manage"; // Điều hướng về danh sách sân
+          window.location.href = "/admin/manage"; 
         }, 3000);
       } catch (error: any) {
         console.error("Error deleting field:", error.response?.data || error);

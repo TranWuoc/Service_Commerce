@@ -5,8 +5,11 @@ const SidebarCustomer = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Dùng useLocation để lấy đường dẫn hiện tại
 
-  // Hàm kiểm tra xem đường dẫn hiện tại có trùng với đường dẫn của item hay không
-  const isActive = (path: string) => location.pathname === path;
+ 
+const isActive = (path1, path2) => {
+  const currentPath = window.location.pathname;
+  return currentPath === path1 || currentPath === path2;
+};
 
   return (
     <div className=" flex w-64 h-screen bg-gray-50 text-gray-600 flex flex-col p-4">
@@ -22,7 +25,7 @@ const SidebarCustomer = () => {
             className={`flex items-center py-3 cursor-pointer ${isActive("/dashboard/history") ? "text-orange-500" : "hover:text-orange-500 active:text-orange-500"} mb-4`}
             onClick={() => navigate("/dashboard/history")}
           >
-            <CalendarMonth className="mr-2" /> Sân bóng đã đặt
+            <CalendarMonth className="mr-2" /> Lịch sử đặt sân
           </li>
           <li 
             className={`flex items-center py-3 cursor-pointer ${isActive("/dashboard/booking") ? "text-orange-500" : "hover:text-orange-500 active:text-orange-500"} mb-4`}
@@ -31,7 +34,7 @@ const SidebarCustomer = () => {
             <SportsSoccer className="mr-2" /> Đặt sân
           </li>
           <li 
-            className={`flex items-center py-3 cursor-pointer ${isActive("/dashboard") ? "text-orange-500" : "hover:text-orange-500 active:text-orange-500"} mb-4`}
+            className={`flex items-center py-3 cursor-pointer ${isActive("/dashboard","/dashboard/FieldInfo") ? "text-orange-500" : "hover:text-orange-500 active:text-orange-500"} mb-4`}
             onClick={() => navigate("/dashboard")}
           >
             <Stadium className="mr-2" /> Sân bóng

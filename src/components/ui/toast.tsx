@@ -29,12 +29,12 @@ const toastVariants = cva(
       variant: {
         default: "border bg-background text-foreground",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
+          "border-red-500 bg-red-500 text-red-foreground dark:border-red-600 dark:bg-red-900/10 dark:text-red-100",
         success:
           "border-green-500 bg-green-50 text-green-900 dark:border-green-600 dark:bg-green-900/10 dark:text-green-100",
-        // Nếu bạn muốn thêm một kiểu success khác, hãy gộp lại ở đây
+       
         success2:
-          "border-green-500 bg-green-500 text-green-foreground", // hoặc sửa lại tên khác
+          "border-green-500 bg-green-500 text-green-foreground", 
       },
     },
     defaultVariants: {

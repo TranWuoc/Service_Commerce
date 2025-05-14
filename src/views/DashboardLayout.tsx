@@ -17,7 +17,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const { user, setUser } = useUser(); 
   
   useEffect(() => {
-    // Lấy user từ localStorage khi component được mount
+    
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
@@ -27,17 +27,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         console.error("Failed to parse user from localStorage:", error);
       }
     }
-    setIsLoading(false); // Dừng trạng thái loading
+    setIsLoading(false); 
   }, [setUser]);
 
   useEffect(() => {
     setIsLoading(true);
-    // Giả lập thời gian tải dữ liệu khi trang được load
+   
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 3000); // Hiển thị Skeleton trong 3 giây
 
-    return () => clearTimeout(timer); // Dọn dẹp timer khi component bị unmount
+    return () => clearTimeout(timer); 
   }, []);
 
   const handleStartLoading = () => {
@@ -119,7 +119,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               </div>
             </div>
           {/* Main content */}
-          <div className="flex flex-col w-full max-md:max-w-full">
+          <div className="flex flex-col w-full ">
             <div className="relative flex-1 pl-5 mt-10">
               {React.isValidElement(children)
                   ? React.cloneElement(children, {

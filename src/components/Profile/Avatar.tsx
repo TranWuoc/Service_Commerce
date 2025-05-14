@@ -60,7 +60,7 @@ export const AvatarMenu = () => {
 
       console.log("userData:", userData);
       if (userData.id === 'admin_000') {
-        console.log("Navigating to /admin/Profile");
+      
         navigate("/admin/Profile", { state: userData }); // Điều hướng đến trang admin
       } else {
         console.log("Navigating to /dashboard/Profile");
@@ -84,8 +84,14 @@ export const AvatarMenu = () => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      console.warn("No auth token found. Cannot logout.");
-      return;
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user"); 
+      localStorage.removeItem("isAdmin"); // Remove isAdmin from localStorage
+      localStorage.removeItem("user_id"); // Remove isLoggedIn from localStorage
+      // Remove user data from localStorage
+      setUser(null); // Reset user data in context
+      navigate("/login"); // Navigate to login page
     }
 
     try {
@@ -98,7 +104,10 @@ export const AvatarMenu = () => {
       // After successful logout, remove tokens and user data from localStorage and context
       localStorage.removeItem("authToken");
       localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user"); // Remove user data from localStorage
+      localStorage.removeItem("user"); 
+      localStorage.removeItem("isAdmin"); // Remove isAdmin from localStorage
+      localStorage.removeItem("user_id"); // Remove isLoggedIn from localStorage
+      // Remove user data from localStorage
       setUser(null); // Reset user data in context
       navigate("/login"); // Navigate to login page
     } catch (error) {
@@ -110,7 +119,7 @@ export const AvatarMenu = () => {
 
   return (
     <div className="flex items-center space-x-2">
-      <Avatar alt={user?.name || "User"} src="profile-image.jpg" sx={{ width: 40, height: 40 }} />
+      <Avatar alt={user?.name || "User"} src={'http://localhost:8000/' + user?.avatar || "profile-image.jpg"} sx={{ width: 40, height: 40 }} />
       <span className="font-medium text-gray-800">
         {loading ? "Loading..." : user?.name || "No Name"}
       </span>
