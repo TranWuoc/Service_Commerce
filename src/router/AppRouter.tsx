@@ -21,6 +21,8 @@ import { Form } from "../views/FieldForm";
 import { ProtectedRoute } from "./ProtectedRouter"; 
 import UpdateField from "../components/Field/updateField";
 import AdminManageUser from "../components/Admin/AdminManageUser";
+import RevenueField from "../components/Admin/RevenueField";
+import TopUsers from "../components/Admin/TopUsers";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
@@ -89,6 +91,24 @@ export const AppRouter: React.FC = () => {
         element={
           <ProtectedRoute adminOnly>
             <AdminLayout><AdminStatistics /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/statistic/revenue"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><RevenueField /></AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/statistic/top-user"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout><TopUsers /></AdminLayout>
           </ProtectedRoute>
         }
       />
