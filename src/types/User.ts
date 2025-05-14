@@ -7,4 +7,5 @@ export interface User {
     address: string;
     status: string;
     is_admin: number;
+    avatar: string;
   }

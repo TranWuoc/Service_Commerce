@@ -105,7 +105,7 @@ const FieldInfo: React.FC = () => {
       <div
         className={`self-stretch h-75vh w-full max-md:mt-8 ${showComments ? "blur-sm" : ""}`}
       >
-        <div className="flex flex-col py-2 px-4 w-full bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
+        <div className="flex flex-col py-2 px-4 w-full h-[35vh] bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
           <div className="flex flex-col w-full h-36">
             <div className="flex gap-1 text-lg text-slate-800">
               <div className="font-medium">{selectedField.name}</div>
@@ -120,7 +120,11 @@ const FieldInfo: React.FC = () => {
               <LocationOnIcon className="w-5 h-5 text-yellow-500" />
               <span>{selectedField.address}</span>
             </div>
-
+            <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
+              <span className="font-bold text-slate-800">
+                Mô tả {selectedField.description}
+              </span>
+            </div>
             <div className="flex flex-col gap-1 mt-2">
               <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
                 <span className="font-bold text-slate-800">

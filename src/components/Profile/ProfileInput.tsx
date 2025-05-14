@@ -1,88 +1,91 @@
+// src/components/Profile/ProfileInput.tsx
 import * as React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ProfileHeader } from "./ProfileHeader";
 import { InputField } from "../Shared_components/InputField";
 import Button from "../Shared_components/Button";
-import axiosInstance from "../../api/axiosInstance";
 import { useToast } from "../../hooks/use-toast";
+import { useUser } from "../../hooks/useUser";
+import { updateUserProfile, saveUserToLocal } from "../../actions/profileActions";
+
 export const ProfileInput: React.FC = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const  toast  = useToast();
-  const userData = JSON.parse(localStorage.getItem("user") || "{}");
-  
+  const toast = useToast();
+  const { user: contextUser, setUser } = useUser();
+
+  const userData = React.useMemo(() => {
+    return contextUser || JSON.parse(localStorage.getItem("user")) || {};
+  }, [contextUser]);
 
   React.useEffect(() => {
-    if (!userData) {
-      console.warn("No user data found in localStorage. Redirecting...");
+    if (!userData?.id) {
+      console.warn("No user data found. Redirecting...");
       navigate("/dashboard", { replace: true });
     }
   }, [userData, navigate]);
 
-  if (!userData) {
-    return <div>Loading...</div>;
-  }
-
-  const [formData, setFormData] = React.useState(userData);
   const [isEditing, setIsEditing] = React.useState(false);
   const [tempFormData, setTempFormData] = React.useState(userData);
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
 
-  const handleInputChange =
-    (field: keyof typeof userData) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setTempFormData((prev) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
-    };
+  const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTempFormData(prev => ({ ...prev, [field]: e.target.value }));
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setAvatarFile(e.target.files[0]);
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
     }
   };
 
-  const handleEditClick = () => {
-    setIsEditing(true);
+  const handleCancelClick = () => {
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+    }
+    setIsEditing(false);
+    setTempFormData(userData);
+    setAvatarFile(null);
   };
 
-  const handleCancelClick = () => {
+  const buildFormData = () => {
+    const form = new FormData();
+    form.append("name", tempFormData.name);
+    form.append("email", tempFormData.email);
+    form.append("phone", tempFormData.phone);
+    form.append("address", tempFormData.address || "");
+    if (avatarFile) form.append("avatar", avatarFile);
+    return form;
+  };
+
+  const applyUpdatedUser = (updatedUser: any) => {
+    setUser(updatedUser);
+    setTempFormData(updatedUser);
+    saveUserToLocal(updatedUser);
     setIsEditing(false);
-    setTempFormData(formData);
     setAvatarFile(null);
   };
 
   const handleUpdateClick = async () => {
     try {
-      const form = new FormData();
-      form.append("name", tempFormData.name);
-      form.append("email", tempFormData.email);
-      form.append("phone", tempFormData.phone);
-      form.append("address", tempFormData.address || "");
-      if (avatarFile) {
-        form.append("avatar", avatarFile);
+      const updatedUser = await updateUserProfile(userData.id, buildFormData());
+
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+        setAvatarPreview(null);
       }
 
-      await axiosInstance.post(
-        `/user/update/${userData.id}`,
-        form,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      applyUpdatedUser(updatedUser);
 
-      setFormData(tempFormData);
-      setIsEditing(false);
-      setAvatarFile(null);
       toast.toast({
         variant: "success",
         title: "Thành công!",
         description: "Thông tin đã được cập nhật.",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast.toast({
         variant: "destructive",
         title: "Lỗi!",
@@ -91,22 +94,37 @@ export const ProfileInput: React.FC = () => {
     }
   };
 
+  React.useEffect(() => {
+    return () => {
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
+  const getImageUrl = () => {
+    if (avatarPreview) return avatarPreview;
+    return userData.avatar ? `http://localhost:8000/${userData.avatar}` : "profile-image.jpg";
+  };
+
   return (
     <section className="rounded-2xl border border-solid border-slate-100 bg-white p-6">
       <ProfileHeader
-        name={formData.name}
+        name={tempFormData.name}
         memberSince="January 2024"
-        imageUrl={
-          avatarFile
-            ? URL.createObjectURL(avatarFile)
-            : formData.avatar || "profile-image.jpg"
-        }
+        imageUrl={getImageUrl()}
         onImageChange={() => {}}
       />
+
       {isEditing && (
         <div className="my-4">
           <label className="block font-medium mb-1">Thay ảnh đại diện</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
         </div>
       )}
 
@@ -144,7 +162,7 @@ export const ProfileInput: React.FC = () => {
       <div className="flex justify-end gap-4 mt-4">
         {!isEditing ? (
           <Button
-            onClick={handleEditClick}
+            onClick={() => setIsEditing(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white"
             text="Sửa thông tin"
           />

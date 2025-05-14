@@ -5,21 +5,10 @@ import Button from "../Shared_components/Button";
 import { useLocation } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { useToast } from "../../hooks/use-toast";
-import axiosInstance from "../../api/axiosInstance";
+
 import Autosuggest from "react-autosuggest";
-
-interface Field {
-  id: number;
-  name: string;
-}
-
-interface TimeSlot {
-  value: string;
-  label: string;
-  startHour: number;
-  endHour: number;
-}
-
+import { fetchFields, createBooking, prepareBookingData, getMinBookingDate  } from "../../actions/bookingActions";
+import { TimeSlot, Field, BookingFormData  } from "../../types/Booking";
 export const BookingForm = () => {
   const timeSlots: TimeSlot[] = [
     { value: "6-8", label: "06:00 - 08:00", startHour: 6, endHour: 8 },
@@ -39,7 +28,7 @@ export const BookingForm = () => {
   const [fields, setFields] = useState<Field[]>([]);
   const [suggestions, setSuggestions] = useState<Field[]>([]);
   const [inputValue, setInputValue] = useState(location.state?.fieldName || "");
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BookingFormData>({
     name: location.state?.fieldName || "",
     fieldId: location.state?.fieldId || "",
     date: "",
@@ -48,29 +37,28 @@ export const BookingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchFields = async () => {
+    const loadFields = async () => {
       try {
-        const res = await axiosInstance.get("/fields");
-        setFields(res.data.data);
+        const data = await fetchFields();
+        setFields(data);
       } catch (error) {
-        console.error("Lỗi khi lấy danh sách sân:", error);
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải danh sách sân bóng",
+          variant: "destructive",
+        });
       }
     };
-    fetchFields();
+    loadFields();
   }, []);
-
-  const getMinDate = () => {
-    const today = new Date();
-    today.setDate(today.getDate() + 5);
-    return today.toISOString().split("T")[0];
-  };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = new Date(e.target.value);
-    if (selectedDate >= new Date(getMinDate())) {
+    const minDate = new Date(getMinBookingDate());
+    
+    if (selectedDate >= minDate) {
       setFormData({ ...formData, date: e.target.value });
-    }
-    else {
+    } else {
       toast({
         title: "Lỗi",
         description: "Ngày đặt sân phải từ 5 ngày sau ngày hiện tại.",
@@ -78,17 +66,7 @@ export const BookingForm = () => {
       });
     }
   };
-
-  const getSuggestions = (value: string) => {
-    const input = value.trim().toLowerCase();
-    return fields.filter((field) => field.name.toLowerCase().includes(input));
-  };
-
-  const onSuggestionsFetchRequested = ({ value }: { value: string }) => {
-     setSuggestions(getSuggestions(value).slice(0, 3));
-  };
-
-  const onSuggestionsClearRequested = () => setSuggestions([]);
+const onSuggestionsClearRequested = () => setSuggestions([]);
 
   const onSuggestionSelected = (
     event: any,
@@ -101,35 +79,25 @@ export const BookingForm = () => {
     });
     setInputValue(suggestion.name);
   };
+  const getSuggestions = (value: string) => {
+    const input = value.trim().toLowerCase();
+    return fields.filter((field) => field.name.toLowerCase().includes(input));
+  };
 
-  const createBookingData = () => {
-    const slot = timeSlots.find((s) => s.value === formData.timeSlot);
-    if (!slot || !formData.date || !formData.fieldId) return null;
-
-    const base = new Date(formData.date);
-    const start = new Date(base);
-    const end = new Date(base);
-    start.setHours(slot.startHour, 0, 0, 0);
-    end.setHours(slot.endHour, 0, 0, 0);
-
-    const fmt = (d: Date) =>
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-        d.getDate()
-      ).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(
-        d.getMinutes()
-      ).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
-
-    return {
-      field_id: formData.fieldId,
-      date_start: fmt(start),
-      date_end: fmt(end),
-    };
+  const onSuggestionsFetchRequested = ({ value }: { value: string }) => {
+    setSuggestions(getSuggestions(value).slice(0, 3));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = createBookingData();
-    if (!data) {
+    const bookingData = prepareBookingData(
+      formData.fieldId,
+      formData.date,
+      formData.timeSlot,
+      timeSlots
+    );
+    
+    if (!bookingData) {
       toast({
         title: "Lỗi",
         description: "Vui lòng điền đầy đủ thông tin đặt sân.",
@@ -140,18 +108,15 @@ export const BookingForm = () => {
 
     try {
       setIsSubmitting(true);
-      const res = await axiosInstance.post("/bookings", data);
+      const res = await createBooking(bookingData);
+      const payUrl = res.data?.receipt?.payment_url;
 
-      const payUrl = res.data.data?.receipt?.payment_url;
-
-      console.log("payUrl", payUrl);
       toast({
         title: "Đặt sân thành công!",
         description: "Đang chuyển đến trang thanh toán...",
       });
       window.location.href = payUrl;
     } catch (error: any) {
-      console.error("Error submitting booking:", error);
       toast({
         title: "Đặt sân thất bại",
         description: error.response?.data?.message || "Có lỗi xảy ra!",
@@ -161,8 +126,7 @@ export const BookingForm = () => {
       setIsSubmitting(false);
     }
   };
-
-  const handleCancel = () => {
+   const handleCancel = () => {
     setFormData({ name: "", fieldId: "", date: "", timeSlot: "" });
     setInputValue("");
   };
@@ -209,7 +173,7 @@ export const BookingForm = () => {
                   name="date"
                   style={{ margin: 0, maxWidth: "none" }}
                   onChange={handleDateChange}
-                  min={getMinDate()}
+                  min={getMinBookingDate()}
                   onKeyDown={(e) => e.preventDefault()}
                   className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[35px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer"
                 ></InputField>

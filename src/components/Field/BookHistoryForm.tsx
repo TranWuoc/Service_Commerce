@@ -11,18 +11,27 @@ const BookHistoryForm: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
   const fetchBookings = async () => {
     try {
       const res = await axiosInstance.get("/bookings/user");
-      const bookings = res.data.data.map((booking: any) => ({
-        id: booking.id,
-        name: booking.field.name,
-        rawDate: booking.date_start,
-        date: formatDate(booking.date_start),
-        price: booking.field.price,
-        status: "Đã thuê",
-        review: "Chưa có đánh giá",
-      }));
+      const bookings = res.data.data.map((booking: any) => {
+        const isPaid = booking.receipt?.status === "paid";
+
+        return {
+          id: booking.id,
+          name: booking.field.name,
+          rawDate: booking.date_start,
+          date: formatDate(booking.date_start),
+          price: booking.field.price,
+          status: isPaid ? "Đã thuê" : "Chưa thanh toán",
+          receiptUrl: isPaid ? null : booking.receipt?.payment_url,
+          review: "Chưa có đánh giá",
+        };
+      });
       setAllRows(bookings);
       setFilteredRows(bookings);
     } catch (err) {
@@ -39,10 +48,6 @@ const BookHistoryForm: React.FC = () => {
     });
   };
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
   const handleCancel = (id: string) => {
     setSelectedId(id);
     setShowConfirm(true);
@@ -54,6 +59,7 @@ const BookHistoryForm: React.FC = () => {
       await axiosInstance.delete(`/bookings/${selectedId}`);
       const updated = allRows.filter((r) => r.id !== selectedId);
       setAllRows(updated);
+      setFilteredRows(updated);
     } catch (err) {
       console.error("Lỗi khi hủy đặt sân:", err);
     } finally {
@@ -62,21 +68,22 @@ const BookHistoryForm: React.FC = () => {
     }
   };
 
-
-
-  return (
-    <div className="p-5 space-y-4">
-      <SearchBar
-  searchQuery={search}
-  onInputChange={setSearch}
-  onSearch={() => {
+  const handleSearch = () => {
     const keyword = search.trim().toLowerCase();
     const result = allRows.filter((r) =>
       r.name.toLowerCase().includes(keyword)
     );
     setFilteredRows(result);
-  }}
-/>
+  };
+
+  return (
+    <div className="p-5 space-y-4">
+      <SearchBar
+        searchQuery={search}
+        onInputChange={setSearch}
+        onSearch={handleSearch}
+      />
+
       <FieldsTable rows={filteredRows} onCancel={handleCancel} />
 
       <ConfirmModal

@@ -1,8 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+
+import React, { useState, useEffect } from "react";
 import { FaMapMarkerAlt, FaFilter } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 import { FieldList } from "../Field/FieldList";
-import axiosInstance from "../../api/axiosInstance";
+import {
+  fetchAllFields,
+  fetchFields,
+  getLocation,
+} from "../../actions/fieldActions";
 
 export function FieldsSummary({
   onStartLoading,
@@ -26,106 +31,49 @@ export function FieldsSummary({
     { id: "cat-uuid-003", name: "Sân 11" },
   ];
 
-  const fetchAllFields = useCallback(async () => {
+  const loadAllFields = async () => {
+    setIsLoading(true);
+    const data = await fetchAllFields();
+    setFields(data);
+    setIsLoading(false);
+  };
+
+  const applyFilters = async () => {
+    if (!userLocation) setIsLocationFetched(false);
+
+    const categoryId = selectedTypes.length > 0 ? selectedTypes[0] : null;
+
     try {
-      setIsLoading(true);
-      setFields([]);
-      const response = await axiosInstance.get("/fields");
-      const filteredFields = response.data.data.filter(
-        (field: any) => field.state?.id === "state-001"
-      );
-      setFields(filteredFields);
-    } catch (error) {
-      console.error("Lỗi khi gửi request:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const fetchFields = useCallback(
-    async (lat: string | null, lng: string | null, categoryId: string | null) => {
-      try {
-        setIsLoading(true);
-        setFields([]);
-
-        const params = new URLSearchParams();
-        if (categoryId) params.append("category_id", categoryId);
-        if (lat && lng) {
-          params.append("latitude", lat);
-          params.append("longitude", lng);
-        }
-        params.append("page", "1");
-
-        const response = await axiosInstance.post(`/fields/filter?${params.toString()}`);
-        const filteredFields = response.data.data.filter(
-          (field: any) => field.state?.id === "state-001"
-        );
-        setFields(filteredFields);
-      } catch (error) {
-        console.error("Lỗi khi lọc sân:", error);
-      } finally {
-        setIsLoading(false);
+      if (!userLocation) {
+        const loc = await getLocation();
+        setUserLocation(loc);
+        setIsLocationFetched(true);
+        const data = await fetchFields(loc.lat, loc.lng, categoryId);
+        setFields(data);
+      } else {
+        const data = await fetchFields(userLocation.lat, userLocation.lng, categoryId);
+        setFields(data);
       }
-    },
-    []
-  );
-
-  const getLocation = useCallback(() => {
-    return new Promise<{ lat: string; lng: string }>((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject("Trình duyệt không hỗ trợ Geolocation.");
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude.toString();
-          const lng = pos.coords.longitude.toString();
-          resolve({ lat, lng });
-        },
-        (err) => reject(err),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    });
-  }, []);
-
-const applyFilters = async () => {
-  // Nếu không có thay đổi vị trí, reset trạng thái vị trí
-  if (!userLocation) {
-    setIsLocationFetched(false); // Reset trạng thái vị trí
-  }
-
-  const categoryId = selectedTypes.length > 0 ? selectedTypes[0] : null;
-
-  try {
-    if (!userLocation) {
-      const loc = await getLocation();
-      setUserLocation(loc);
-      setIsLocationFetched(true);
-      await fetchFields(loc.lat, loc.lng, categoryId);
-    } else {
-      await fetchFields(userLocation.lat, userLocation.lng, categoryId);
+    } catch (err) {
+      console.error("Không thể lấy vị trí:", err);
     }
-  } catch (err) {
-    console.error("Không thể lấy vị trí:", err);
-  }
 
-  setShowFilters(false);
-};
-
+    setShowFilters(false);
+  };
 
   const handleToggleLocation = async () => {
     if (isLocationFetched) {
       setIsLocationFetched(false);
       setUserLocation(null);
-      await fetchAllFields();
+      await loadAllFields();
     } else {
       try {
         const loc = await getLocation();
         setUserLocation(loc);
         setIsLocationFetched(true);
         const categoryId = selectedTypes.length > 0 ? selectedTypes[0] : null;
-        await fetchFields(loc.lat, loc.lng, categoryId);
+        const data = await fetchFields(loc.lat, loc.lng, categoryId);
+        setFields(data);
       } catch (err) {
         console.error("Không thể lấy vị trí:", err);
       }
@@ -143,12 +91,12 @@ const applyFilters = async () => {
     setIsLocationFetched(false);
     setUserLocation(null);
     setShowFilters(false);
-    await fetchAllFields();
+    await loadAllFields();
   };
 
   useEffect(() => {
-    fetchAllFields();
-  }, [fetchAllFields]);
+    loadAllFields();
+  }, []);
 
   return (
     <div className="w-full">
@@ -200,10 +148,7 @@ const applyFilters = async () => {
                   <div className="space-y-2 min-h-[100px]">
                     {fieldTypes.length > 0 ? (
                       fieldTypes.map((type) => (
-                        <label
-                          key={type.id}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
+                        <label key={type.id} className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={selectedTypes.includes(type.id)}
@@ -214,9 +159,7 @@ const applyFilters = async () => {
                         </label>
                       ))
                     ) : (
-                      <div className="text-gray-500 text-center py-4">
-                        Không có loại sân nào
-                      </div>
+                      <div className="text-gray-500 text-center py-4">Không có loại sân nào</div>
                     )}
                   </div>
 

@@ -9,7 +9,7 @@ interface FieldCardProps {
   usage: number;
   price: number;
   imageUrl: string;
-  style?: React.CSSProperties; // Định nghĩa kiểu style
+  style?: React.CSSProperties;
 }
 
 export function FieldCard({

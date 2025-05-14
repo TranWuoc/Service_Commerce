@@ -1,5 +1,5 @@
 "use client";
-import FieldForm from "../components/Field/createField";
+import FieldForm from "../components/Admin/createField";
 
 export const Form = () => {
   return (
