@@ -2,15 +2,17 @@ import React from "react";
 import AdminSidebar from "../components/Admin/AdminSidebar"; // Sidebar của admin
 import { AvatarMenu } from "../components/Profile/Avatar"; // Avatar của admin
 import { useEffect, useState } from "react";
-import ChatListener from "../listener/ChatListener";
+import channel from "../listener/ChatListener";
+import { useToast } from "../hooks/use-toast";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+  const toastWithEvent = useToast();
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-
+  let setuped = false;
   // Theo dõi kích thước màn hình và ẩn sidebar khi nhỏ hơn 768px
   useEffect(() => {
     const handleResize = () => {
@@ -20,6 +22,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         setIsSidebarVisible(true);
       }
     };
+    if (!setuped) {
+      channel.bind("MessageCreated", (data: any) => {
+        if (!data) return;
+        if (!window.location.pathname.startsWith("/admin/chat")) 
+          toastWithEvent.toast({
+            title: "Tin nhắn mới",
+            description: "Bạn có một tin nhắn mới từ khách hàng.",
+            onClick: () => {window.location.href = "/admin/chat"}
+          });
+      });
+      setuped = true;
+    }
 
     // Lắng nghe sự kiện resize
     window.addEventListener("resize", handleResize);
@@ -71,11 +85,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div className="flex items-end justify-end py-4 px-6">
             <AvatarMenu />
           </div>
-        <div className={getPageTitle() ? 'mt-6' : ''}>
-          {getPageTitle() && (<h1 className="text-4xl font-bold text-gray-800 mb-4">{getPageTitle()}</h1>)}
-          {children}
-        </div>
-        <ChatListener />
+          <div className={getPageTitle() ? 'mt-6' : ''}>
+            {getPageTitle() && (<h1 className="text-4xl font-bold text-gray-800 mb-4">{getPageTitle()}</h1>)}
+            {children}
+          </div>
         </div>
 
         {/* Main content */}
