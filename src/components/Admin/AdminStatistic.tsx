@@ -106,7 +106,7 @@ const AdminStatistics: React.FC = () => {
             <Button
               text="Xem chi tiết"
               type="primary"
-              onClick={() => navigate("/admin/manage")}
+              onClick={() => navigate("/admin/statistic/revenue")}
               customStyle={{ marginTop: "10px" }}
             />
           </div>

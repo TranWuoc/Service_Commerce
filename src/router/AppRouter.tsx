@@ -19,7 +19,7 @@ import AdminManageFields from "../components/Admin/AdminManageFields";
 import FieldList from "../views/AdminFiledList";
 import { Form } from "../views/FieldForm";
 import { ProtectedRoute } from "./ProtectedRouter"; 
-import UpdateField from "../components/Field/updateField";
+import UpdateField from "../components/Admin/updateField";
 import AdminManageUser from "../components/Admin/AdminManageUser";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);

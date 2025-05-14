@@ -1,4 +1,4 @@
-// src/actions/fieldActions.ts
+
 import axiosInstance from "../api/axiosInstance";
 
 export const fetchAllFields = async (): Promise<any[]> => {
