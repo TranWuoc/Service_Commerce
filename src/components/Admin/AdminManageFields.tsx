@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useField } from "../hooks/useField";
+import { useField } from "../../hooks/useField";
 import axios from "axios";
-import { Field } from "../types/Field";
-import { Input } from "../components/ui/input";
+import { Field } from "../../types/Field";
+import { Input } from "../ui/input";
 import { useNavigate } from "react-router-dom";
-import Button from "../components/Shared_components/Button";
-const ManageFields: React.FC = () => {
+import Button from "../Shared_components/Button";
+const AdminManageFields: React.FC = () => {
   const { fields, setFields } = useField(); // Lấy dữ liệu từ FieldContext
   const [searchTerm, setSearchTerm] = useState(""); // State để lưu giá trị tìm kiếm
   const [filteredFields, setFilteredFields] = useState<Field[]>([]); // State để lưu danh sách sân đã lọc
@@ -134,4 +134,4 @@ const ManageFields: React.FC = () => {
   );
 };
 
-export default ManageFields;
+export default AdminManageFields;
