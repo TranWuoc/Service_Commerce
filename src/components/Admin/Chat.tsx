@@ -1,80 +1,120 @@
-import { useEffect, useState, useRef } from "react";
-import AdminChatView from "../../views/AdminChat";
+import { useEffect, useState } from "react";
 import AdminChat from "../../views/AdminChat";
 import { useMessage } from "../../hooks/useMessage";
+import channel from "../../listener/ChatListener";
+import { useChatStore } from "../../stores/ChatStore";
 import { userId } from "../../lib/utils";
-import { chatObserver } from "../../lib/chatObserver";
+import { VNESoSanh, VNEToString } from "../../lib/dayj";
+import { Thread } from "../../types/Thread";
 
 const Chat = () => {
-  let newMessageSubed = false;
   const user_id = userId();
-  const [changedThread, setChangedThread] = useState(false);
-  const [pageThread, setPageThread] = useState(1);
-  const [sizeThread, setSizeThread] = useState(10);
-  const [parameters, setParameters] = useState([]);
-  const [threads, setThreads] = useState([]);
-  const [currentThread, setCurrentThread] = useState(undefined);
-  const { getThreads, getThread, sendMessageAPI } = useMessage();
-  const scrollToBottomFunctionRef = useRef(null);
+  const sizeThread = 10;
+
+  const { getThreads, getThread, sendMessageAPI, readThread } = useMessage();
+  
+  const typing = useChatStore((state) => state.typing);
+  const setTyping = useChatStore((state) => state.setTyping);
+  const threads = useChatStore((state) => state.threads);
+  const setThreads = useChatStore((state) => state.setThreads);
+  const currentThread = useChatStore((state) => state.currentThread);
+  const setCurrentThread = useChatStore((state) => state.setCurrentThread);
+  const pageThread = useChatStore((state) => state.pageThread);
+  const setPageThread = useChatStore((state) => state.setPageThread);
+  const parameters = useChatStore((state) => state.parameters);
+  const setParameters = useChatStore((state) => state.setParameters);
+  const handlerNewMessage = useChatStore((state) => state.handlerNewMessage);
+  const handlerReadedMessages = useChatStore(
+    (state) => state.handlerReadedMessages,
+  );
+  const changedThread = useChatStore((state) => state.changedThread);
+  const setChangedThread = useChatStore((state) => state.setChangedThread);
+
+  const [imagesUpload, setImagesUpload] = useState<{ link: string; file: File }[]>([]);
+
   useEffect(() => {
     if (currentThread) {
-      if (!currentThread.messages) 
-        getMessage();
+      if (!currentThread.messages) getMessages();
       else if (!changedThread) setChangedThread(true);
+      if (currentThread.last_sender_id !== user_id && !currentThread.readed)
+        readMessages(currentThread.id);
     }
-    if (!threads || threads.length === 0) loadThread();
   }, [currentThread]);
+
   useEffect(() => {
-    if (!newMessageSubed) {
-      newMessageSubed = true;
-      chatObserver.subscribe((newMessage) => {  
-        handlerNewMessage(newMessage)
-      })
-    }
-  }, [])
-  const handlerNewMessage = (message) => {
-    const threadIndex = threads.findIndex(item => item.id === message.thread_id);
-    //Neu thread chưa tồn tại, load lại thread
-    if (threadIndex === -1) {
-      loadThread();
-      return;
-    }
-    const thread = threads[threadIndex];
-    thread.last_send = message.time_send;
-    thread.last_sender_id = messages.sender_id;
-    thread.latest_message = message;
-    if (currentThread && currentThread.id === thread.id) {
-      //goi api doc message
-    } else
-      thread.readed = false
-    //Kiem tra neu messages cua thread đã được load
-    const paraIndex = parameters.findIndex(item => item.id === thread.id);
-    if (paraIndex === -1) return;
-    thread.messages = [message, ...thread.messages]
-    const newThreads = [...threads]
-    newThreads.splice(threadIndex, 1)
-    setThreads([thread, ...newThreads]);
-  }
-  const loadThread = () => {
-    getThreads(pageThread, sizeThread).then((data) => {
-        setThreads(data.data);
+    nextThreads();
+    const handleIncomingMessage = (data: any) => {
+      if (!data) return;
+      handlerNewMessage(data.content, loadThreads);
+    };
+
+    const handleReadedMessages = (data: any) => {
+      if (!data) return;
+      handlerReadedMessages(data.content, user_id);
+    };
+
+    channel.bind("MessageCreated", handleIncomingMessage);
+
+    channel.bind("MessageReaded", handleReadedMessages);
+
+    return () => {
+      channel.unbind("MessageCreated", handleIncomingMessage); // Cleanup
+      channel.unbind("MessageReaded", handleReadedMessages); // Cleanup
+    };
+  }, []);
+
+  const readMessages = (thread_id: string) => {
+    readThread(thread_id).then(() => {
+      const threadIndex = threads.findIndex((item: Thread) => item.id === thread_id);
+      if (threadIndex === -1) return;
+
+      const oldThread = threads[threadIndex];
+      handlerReadedMessages(oldThread, user_id)
     });
-  }
-  const scrollToBottomBoxChat = (fn) => {
-    scrollToBottomFunctionRef.current = fn;
   };
-  const hasNext = (parameter, thread) => {
-    const totalPages = Math.ceil(thread.messages_count / parameter.size) + (thread.messages_count % parameter.size == 0 ? 0 : 1);
-    return parameter.page < totalPages;
-  }
-  const getMessage = () => {
+
+
+  const loadThreads = async () => {
+    setParameters([]);
+
+    const allThreads: Thread[] = [];
+
+    for (let i = 1; i <= pageThread; i++) {
+      const data = await getThreads(i, sizeThread);
+      if (data) allThreads.push(...data);
+    }
+
+    setThreads(allThreads);
+
+    // Nếu currentThread không tồn tại trong danh sách mới → reset
+    if (
+      currentThread &&
+      allThreads.findIndex((item) => item.id === currentThread.id) === -1
+    ) {
+      setCurrentThread(undefined);
+    }
+  };
+  const nextThreads = () => {
+    getThreads(pageThread + 1, sizeThread).then((newThreads) => {
+      if (!newThreads || newThreads.length === 0) return;
+
+      setThreads([...threads, ...newThreads]);
+      setPageThread(pageThread + 1);
+    });
+  };
+  const hasNext = (parameter: {id: string, page: number, size: number}, thread: Thread) => {
+    const totalPages =
+      Math.ceil(thread.messages_count / parameter.size) +
+      (thread.messages_count % parameter.size == 0 ? 0 : 1);
+    return parameter.page <= totalPages;
+  };
+  const getMessages = async () => {
     if (!currentThread) return;
 
-    let parameterIndex = parameters.findIndex(
-      (item) => item.id === currentThread.id,
+    const parameterIndex = parameters.findIndex(
+      (item: {id: string}) => item.id === currentThread.id,
     );
 
-    console.log(parameters)
     let parameter;
 
     if (parameterIndex === -1) {
@@ -88,62 +128,56 @@ const Chat = () => {
 
     if (!hasNext(parameter, currentThread)) return;
 
-    getThread(currentThread.id, parameter.page, parameter.size)
-      .then((data) => {
-        const messages = data.data.messages;
-        const threadIndex = threads.findIndex(item => item.id === currentThread.id);
-        const thread = threads[threadIndex];
-        if (thread.messages)
-          thread.messages = [...thread.messages, ...messages];
-        else 
-          thread.messages = messages;
-        threads[threadIndex] = thread;
+    const data = await getThread(
+      currentThread.id,
+      parameter.page,
+      parameter.size,
+    );
 
-        setParameters([...parameters.filter(item => item.id != currentThread.id), parameter]);
+    const threadRes = data;
+    if (!threadRes) return;
+    const threadIndex = threads.findIndex(
+      (item: Thread) => item.id === currentThread.id,
+    );
+    const threadOld = threads[threadIndex];
 
-        setThreads(threads);
+    if (threadOld.messages)
+      threadRes.messages = [...threadOld.messages, ...threadRes.messages];
+    threads[threadIndex] = threadRes;
 
-        setCurrentThread(thread);
+    setParameters([
+      ...parameters.filter((item: {id: string}) => item.id != currentThread.id),
+      parameter,
+    ]);
 
-        console.log(thread)
+    setThreads([...threads]);
 
-        if (!changedThread) setChangedThread(true);
-
-        console.log(parameters)
-      })
-      .catch((error) => {
-        console.error("Error loading messages:", error);
-      });
+    setCurrentThread(threadRes);
   };
-  const sendMessage = (content, setInputValue) => {
+  const sendMessage = (content: string, setInputValue: (value: string) => void) => {
     if (!currentThread) return;
-    sendMessageAPI(content, currentThread.id)
-      .then(data => {
-        const newMessage = data.data;
-        const updatedThreads = [...threads];
-        const threadIndex = updatedThreads.findIndex(item => item.id === currentThread.id)
-        const thread = updatedThreads[threadIndex]
-        if (thread.messages)
-          thread.messages = [newMessage, ...thread.messages]
-        else 
-          thread.messages = [newMessage]
-        setThreads(updatedThreads);
-        setCurrentThread(thread)
-        setInputValue('')
-        setChangedThread(true)
-      })
-  }
+    sendMessageAPI(content, imagesUpload, currentThread.id).then((data) => {
+      setImagesUpload([]);
+      const newMessage = data;
+      if (!newMessage) return;
+      handlerNewMessage(newMessage, loadThreads);
+      setInputValue("");
+    });
+  };
   return (
     <>
       <AdminChat
         threads={threads}
         currentThread={currentThread}
         setCurrentThread={setCurrentThread}
-        loadMessage={getMessage}
-        scrollToBottomBoxChat={scrollToBottomBoxChat}
         changedThread={changedThread}
         setChangedThread={setChangedThread}
         sendMessage={sendMessage}
+        imagesUpload={imagesUpload}
+        setImagesUpload={setImagesUpload}
+        nextThreads={nextThreads}
+        getMessages={getMessages}
+        typing={typing}
       />
     </>
   );
