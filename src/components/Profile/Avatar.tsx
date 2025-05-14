@@ -84,8 +84,14 @@ export const AvatarMenu = () => {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      console.warn("No auth token found. Cannot logout.");
-      return;
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user"); 
+      localStorage.removeItem("isAdmin"); // Remove isAdmin from localStorage
+      localStorage.removeItem("user_id"); // Remove isLoggedIn from localStorage
+      // Remove user data from localStorage
+      setUser(null); // Reset user data in context
+      navigate("/login"); // Navigate to login page
     }
 
     try {

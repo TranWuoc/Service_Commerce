@@ -114,15 +114,15 @@ const ManageFields: React.FC = () => {
                 {" "}
                 <span
                   className={`inline-block w-16 h-3 rounded ${
-                    field.state.name === "Hoạt động"
+                    field.state.name === "Active"
                       ? "bg-green-500"
-                      : field.state.name === "Bảo trì"
+                      : field.state.name === "Maintenance"
                         ? "bg-amber-400"
-                        : field.state.name === "Ngưng sử dụng"
+                        : field.state.name === "Suspended"
                           ? "bg-red-600"
                           : field.state.name === "Đang đặt lịch"
                             ? "bg-blue-400"
-                            : field.state.name === "Tạm ngưng"
+                            : field.state.name === "Deactivated"
                               ? "bg-gray-400"
                               : "bg-gray-500"
                   }`}

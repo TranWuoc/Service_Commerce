@@ -86,8 +86,23 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
     fetchComments(1);
 
     const channel = echo.channel(`comments`);
-    channel.listen(".CommentCreated", (e: any) => {
-      setComments((prev) => {
+  channel.listen(".CommentCreated", (e: any) => {
+    // Nếu là phản hồi (có parent_id)
+    if (e.content.parent_id) {
+      setComments(prev => prev.map(comment => {
+        // Tìm comment cha và thêm phản hồi vào
+        if (comment.id === e.content.parent_id) {
+          return {
+            ...comment,
+            child: [...(comment.child || []), e.content]
+          };
+        }
+        return comment;
+      }));
+    } 
+    // Nếu là comment mới (không có parent_id)
+    else {
+      setComments(prev => {
         if (paginationRef.current.currentPage === 1 && prev.length >= 5) {
           fetchComments(1);
           return prev;
@@ -95,7 +110,8 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
           return [e.content, ...prev];
         }
       });
-    });
+    }
+  });
     channel.listen(".CommentUpdated", (e: any) => {
       setComments((prev) =>
         prev.map((c) => (c.id === e.content.id ? { ...c, ...e.content } : c))
@@ -119,19 +135,20 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({
         <CommentHeader onClose={onClose} fieldInfo={fieldInfo} />
 
         <div className="flex flex-col gap-4 bg-white">
-          {comments.map((comment) => (
-            <CommentItem
-              key={`${comment.id}-${comment.created_at}`}
-              id={comment.id}
-              content={comment.content}
-              fieldId={comment.fieldId}
-              createdAt={comment.createdAt}
-              image_url={comment.image_url}
-              user={comment.user}
-              user_id={comment.user?.id}
-              onCommentDeleted={() => fetchComments(paginationRef.current.currentPage)}
-            />
-          ))}
+         {comments.map((comment) => (
+  <CommentItem
+    key={`${comment.id}-${comment.created_at}`}
+    id={comment.id}
+    content={comment.content}
+    fieldId={comment.fieldId}
+    createdAt={comment.createdAt}
+    image_url={comment.image_url}
+    user={comment.user}
+    user_id={comment.user?.id}
+    childComments={comment.child} // Make sure this matches your API response structure
+    onCommentDeleted={() => fetchComments(paginationRef.current.currentPage)}
+  />
+))}
         </div>
 
         <div className="flex justify-center gap-4 py-2 bg-white">

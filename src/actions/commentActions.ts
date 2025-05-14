@@ -1,4 +1,4 @@
-// src/actions/commentActions.ts
+
 import axiosInstance from "../api/axiosInstance";
 import { useToast } from "../hooks/use-toast";
 
@@ -31,7 +31,8 @@ export const sendComment = async (
   fieldId: number | string,
   comment: string,
   images: File[],
-  toast: ReturnType<typeof useToast>
+  toast: ReturnType<typeof useToast>,
+  parentId?: string // Thêm tham số parentId để hỗ trợ bình luận và phản hồi
 ) => {
   if (images.length === 0) {
     toast.toast({
@@ -47,12 +48,17 @@ export const sendComment = async (
   formData.append("field_id", String(fieldId));
   formData.append("content", comment);
   formData.append("status", "active");
+ console.log("Parent ID in sendComment:", parentId); 
+  // Nếu có parentId thì thêm parent_comment_id vào formData
+  if (parentId) {
+    formData.append("parent_id", parentId);
+  }
 
   // Thêm ảnh vào formData
   images.forEach((img) => {
     formData.append("image", img);
   });
-
+console.log("Form Data:", formData);
   try {
     const response = await axiosInstance.post("/comment/create", formData, {
       headers: {
@@ -62,8 +68,10 @@ export const sendComment = async (
 
     toast.toast({
       variant: "success",
-      title: "Bình luận thành công",
-      description: "Bình luận của bạn đã được gửi thành công!",
+      title: parentId ? "Phản hồi thành công" : "Bình luận thành công",
+      description: parentId
+        ? "Phản hồi của bạn đã được gửi thành công!"
+        : "Bình luận của bạn đã được gửi thành công!",
     });
 
     return response.data;
@@ -76,6 +84,7 @@ export const sendComment = async (
     throw error;
   }
 };
+
 export async function updateComment(
   id: string,
   content: string,

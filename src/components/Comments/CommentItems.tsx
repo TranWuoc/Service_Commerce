@@ -3,10 +3,13 @@ import { useState, useCallback } from "react";
 import { Comment } from "../../types/comment";
 import { updateComment, deleteComment } from "../../actions/commentActions";
 import { useToast } from "../../hooks/use-toast";
+import { CommentInput } from "./CommentInput";
 
 interface CommentItemProps extends Comment {
   onCommentUpdated?: (updatedComment: Comment) => void;
   onCommentDeleted?: (commentId: string) => void;
+  childComments?: Comment[];
+  isChild?: boolean; // New prop to identify child comments
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
@@ -20,6 +23,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   image_url,
   onCommentUpdated,
   onCommentDeleted,
+  childComments = [],
+  isChild = false, // Default to false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
@@ -27,23 +32,31 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [showOldImage, setShowOldImage] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
-
+  const [isReplying, setIsReplying] = useState(false);
+  const isAdmin =localStorage.getItem("isAdmin") === "true";
   const toast = useToast();
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
   const handleEdit = useCallback(async () => {
     try {
-      await updateComment(id, editedContent, newImage, showOldImage, image_url, (updatedComment) => {
-        if (onCommentUpdated) {
-          onCommentUpdated(updatedComment);
+      await updateComment(
+        id,
+        editedContent,
+        newImage,
+        showOldImage,
+        image_url,
+        (updatedComment) => {
+          if (onCommentUpdated) {
+            onCommentUpdated(updatedComment);
+          }
+          resetEditState();
+          toast.toast({
+            variant: "success",
+            title: "Thành công!",
+            description: "Bình luận đã được cập nhật.",
+          });
         }
-        resetEditState();
-        toast.toast({
-          variant: "success",
-          title: "Thành công!",
-          description: "Bình luận đã được cập nhật.",
-        });
-      });
+      );
     } catch (error) {
       toast.toast({
         variant: "destructive",
@@ -54,23 +67,27 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   }, [id, editedContent, newImage, showOldImage, image_url, onCommentUpdated, toast]);
 
   const handleDelete = useCallback(() => {
-    deleteComment(id, () => {
-      if (onCommentDeleted) {
-        onCommentDeleted(id);
+    deleteComment(
+      id,
+      () => {
+        if (onCommentDeleted) {
+          onCommentDeleted(id);
+        }
+        toast.toast({
+          variant: "success",
+          title: "Thành công!",
+          description: "Bình luận đã được xóa.",
+        });
+        setShowConfirm(false);
+      },
+      (errorMessage) => {
+        toast.toast({
+          variant: "destructive",
+          title: "Lỗi",
+          description: errorMessage,
+        });
       }
-      toast.toast({
-        variant: "success",
-        title: "Thành công!",
-        description: "Bình luận đã được xóa.",
-      });
-      setShowConfirm(false);
-    }, (errorMessage) => {
-      toast.toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: errorMessage,
-      });
-    });
+    );
   }, [id, onCommentDeleted, toast]);
 
   const resetEditState = () => {
@@ -83,7 +100,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
   return (
     <article className="flex flex-col items-start w-full mb-4">
-      <div className="flex flex-col items-start px-12 pt-4 pb-2 mt-10 ml-14 w-full font-semibold bg-zinc-300 max-w-[780px] rounded-[50px] max-md:px-5 max-md:max-w-full">
+      <div
+        className={`flex flex-col items-start px-12 pt-4 pb-2 mt-10 ${
+          isChild ? "ml-10" : "ml-14"
+        } w-full font-semibold bg-zinc-300 max-w-[780px] rounded-[50px] max-md:px-5 max-md:max-w-full`}
+      >
         {isEditing ? (
           <>
             <textarea
@@ -145,7 +166,16 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           </>
         ) : (
           <>
-            <h4 className="text-lg font-semibold mb-2">{user?.name || "Người dùng"}</h4>
+            <div className="flex items-center gap-3 mb-2">
+              {user?.avatar && (
+                <img
+                  src={"http://localhost:8000/" + user?.avatar}
+                  alt="Avatar"
+                  className="w-8 h-8 object-cover rounded-full"
+                />
+              )}
+              <h4 className="text-lg font-semibold">{user?.name || "Người dùng"}</h4>
+            </div>
             <p className="text-base text-black mb-2">{content}</p>
             {image_url && (
               <div className="w-full mb-2">
@@ -172,22 +202,37 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         )}
       </div>
 
-      {String(currentUser?.id) === String(user_id) && (
-        <div className="flex gap-3 mt-5 ml-14 justify-end w-[85%]">
-          <button
-            onClick={() => setIsEditing(true)}
-            className="text-sm text-blue-500 hover:underline"
-          >
-            Sửa
-          </button>
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="text-sm text-red-500 hover:underline"
-          >
-            Xóa
-          </button>
-        </div>
-      )}
+{(String(currentUser?.id) === String(user_id) || isAdmin) && (
+  <div className="flex gap-3 mt-5 ml-14 justify-end w-[85%]">
+    
+    {/* Nếu là chủ sở hữu thì được sửa */}
+    {String(currentUser?.id) === String(user_id) && (
+      <span className="text-sm text-blue-500 cursor-pointer hover:underline" onClick={() => setIsEditing(true)}>
+        Sửa
+      </span>
+    )}
+
+    {/* Nếu là chủ sở hữu hoặc admin thì được xóa */}
+    <span
+      className="text-sm text-red-500 cursor-pointer hover:underline"
+      onClick={() => setShowConfirm(true)}
+    >
+      Xóa
+    </span>
+
+    {/* Nếu không phải bình luận con thì được phản hồi */}
+    {!isChild && (
+      <span
+        className="text-sm text-green-500 cursor-pointer hover:underline"
+        onClick={() => setIsReplying(!isReplying)}
+      >
+        Phản hồi
+      </span>
+    )}
+  </div>
+)}
+
+    
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
@@ -209,6 +254,38 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {isReplying && (
+        <div className="ml-14 mt-2 w-[85%]">
+          <CommentInput 
+            fieldId={fieldId} 
+            userId={currentUser?.id} 
+            parentId={id} 
+            compact={true} // Add this prop to make it smaller
+          />
+        </div>
+      )}
+
+      {childComments && childComments.length > 0 && (
+        <div className="ml-10 mt-4 border-l-2 border-gray-300 pl-4">
+          {childComments.map((child) => (
+            <CommentItem
+              key={child.id}
+              id={child.id}
+              content={child.content}
+              fieldId={child.fieldId}
+              createdAt={child.createdAt}
+              updatedAt={child.updatedAt}
+              image_url={child.image_url}
+              user={child.user}
+              user_id={child.user?.id}
+              childComments={child.child || []}
+              onCommentDeleted={onCommentDeleted}
+              isChild={true} // Mark as child comment
+            />
+          ))}
         </div>
       )}
     </article>
