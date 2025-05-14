@@ -111,7 +111,9 @@ const AdminSidebar = () => {
 
           <li
             className={`flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500 ${
-              location.pathname === "/admin/statistic" ? "text-orange-500" : ""
+              location.pathname === "/admin/statistic" || 
+              location.pathname ==="/admin/statistic/revenue" 
+              ? "text-orange-500" : ""
             }`}
             onClick={() => navigate("/admin/statistic")}
           >

@@ -20,6 +20,12 @@ export interface Field {
     latitude?: number;
     longitude?: number;
   }
+
+export interface RevenueByFieldItem {
+  field_id: string;
+  field: Field;
+  total_revenue: number;
+}
   
   export interface FieldApiResponse {
     data: Field;

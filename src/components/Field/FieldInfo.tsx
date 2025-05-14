@@ -88,14 +88,12 @@ const FieldInfo: React.FC = () => {
               navigate(`/admin/manage/updateField/${selectedField.id}`)
             }
             text="Chỉnh sửa sân"
-            variant="primary"
+            type="primary"
           />
-         
           <Button
             onClick={() => setShowComments(true)}
             text="Bình luận"
-            variant="tertiary"
-            className="flex-1 py-2 bg-amber-500 rounded-[34px] shadow-[0px_0px_41px_rgba(0,0,0,0.25)] text-white font-bold text-sm hover:bg-amber-600 transition-colors"
+            type="tertiary"
           />
           <CommentOverlay
         isOpen={showComments}

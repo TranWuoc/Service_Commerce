@@ -1,6 +1,7 @@
+import React, { HTMLInputTypeAttribute } from "react";
 interface InputFieldProps {
   label: string;
-  type: string | number;
+  type:  HTMLInputTypeAttribute;
   placeholder: string;
   value: string;
   name?: string;

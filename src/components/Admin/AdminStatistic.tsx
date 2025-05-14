@@ -16,7 +16,7 @@ import { generateDoughnutData } from "../../utils/chartDoughnutStatus";
 import DoughnutChart from "../../components/Shared_components/DoughnutChart";
 import Button from "../../components/Shared_components/Button";
 import { Field } from "../../types/Field";
-import { fetchRevenueByField } from "../../api/revenueApi";
+import { fetchRevenueByField, fetchUntilDate, fetchStatisticsActiveUsers } from "../../api/revenueApi";
 ChartJS.register(
   ArcElement,
   CategoryScale,
@@ -38,6 +38,7 @@ const AdminStatistics: React.FC = () => {
     const loadRevenue = async () => {
       try {
         const revenueData = await fetchRevenueByField();
+        console.log("Doanh thu theo sân:", revenueData);
         const total = revenueData.reduce(
           (sum: number, item: any) => sum + item.total_revenue,
           0,
@@ -47,7 +48,6 @@ const AdminStatistics: React.FC = () => {
         console.error("Error loading revenue:", error);
       }
     };
-
     loadRevenue();
   }, []);
 
@@ -112,16 +112,16 @@ const AdminStatistics: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Thống kê</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Top người dùng</h2>
             <p className="text-gray-600 mb-4">
               Xem báo cáo và thống kê chi tiết.
             </p>
-            <button
-              className="py-2 px-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
-              onClick={() => navigate("/admin/manage")}
-            >
-              Xem chi tiết
-            </button>
+            <Button
+              text="Xem chi tiết"
+              type="primary"
+              onClick={() => navigate("/admin/statistic/top-user")}
+              customStyle={{ marginTop: "10px" }}
+            />
           </div>
         </div>
 
