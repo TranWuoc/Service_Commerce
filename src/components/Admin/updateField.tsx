@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Field } from "../../types/Field";
 import { InputField } from "../Shared_components/InputField";
 import { toast, useToast } from "../../hooks/use-toast";
-
+import LocationInput from "../Shared_components/SearchLocation";
 import axiosInstance from "../../api/axiosInstance";
 import Button from "../Shared_components/Button";
 import {
@@ -218,7 +218,7 @@ const UpdateField: React.FC = () => {
             required
             style={{ marginBottom: "1.5rem" }}
           />
-          <InputField
+          {/* <InputField
             label="Địa điểm sân"
             type="text"
             name="address"
@@ -227,7 +227,22 @@ const UpdateField: React.FC = () => {
             onChange={handleInputChange}
             required
             style={{ marginBottom: "1.5rem" }}
-          />
+          /> */}
+          <LocationInput 
+  onLocationSelect={(data) => {
+    setFieldData(prev => prev ? {
+      ...prev,
+      address: data.address,
+      latitude: data.lat,
+      longitude: data.lon
+    } : null);
+  }}
+  initialAddress={fieldData.address}
+  initialCoords={{
+    lat: fieldData.latitude || 0,
+    lon: fieldData.longitude || 0
+  }}
+/>
           <InputField
             label="Giá sân"
             type="text"

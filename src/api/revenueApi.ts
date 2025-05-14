@@ -33,7 +33,8 @@ export const fetchUntilDate = async () => {
   }
 };
 
- export const fetchStatisticsActiveUsers = async () => {
+
+export const fetchStatisticsActiveUsers = async () => {
   try {
     const response = await axiosInstance.get("http://127.0.1:8000/api/statistics/top-users");
     return response.data.data; // Trả về dữ liệu doanh thu
