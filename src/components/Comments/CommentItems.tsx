@@ -1,7 +1,7 @@
 import * as React from "react";
-import { useState } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import { useState, useCallback } from "react";
 import { Comment } from "../../types/comment";
+import { updateComment, deleteComment } from "../../actions/commentActions";
 import { useToast } from "../../hooks/use-toast";
 
 interface CommentItemProps extends Comment {
@@ -15,7 +15,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   fieldId,
   id,
   updatedAt,
-  createdAt, 
+  createdAt,
   user,
   image_url,
   onCommentUpdated,
@@ -23,84 +23,62 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [newImage, setNewImage] = useState<File | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [showOldImage, setShowOldImage] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const toast = useToast();
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const handleEdit = async () => {
+  const handleEdit = useCallback(async () => {
     try {
-      const formData = new FormData();
-      formData.append("content", editedContent);
-      if (newImage) {
-        formData.append("image", newImage);
-      }
-      if (!showOldImage) {
-        formData.append("image_status", "1");
-      } else {
-        formData.append("image_status", "0");
-      }
-      console.log("FormData:", formData.get("content"));
-      console.log("FormDataimage:", formData.get("image"));
-
-      const response = await axiosInstance.post(
-        `/comment/update/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
+      await updateComment(id, editedContent, newImage, showOldImage, image_url, (updatedComment) => {
+        if (onCommentUpdated) {
+          onCommentUpdated(updatedComment);
         }
-      );
-
-      toast.toast({
-        variant: "success",
-        title: "Thành công!",
-        description: "Bình luận đã được cập nhật.",
+        resetEditState();
+        toast.toast({
+          variant: "success",
+          title: "Thành công!",
+          description: "Bình luận đã được cập nhật.",
+        });
       });
-
-      const updatedComment = response.data.data;
-      if (onCommentUpdated) {
-        onCommentUpdated(updatedComment);
-      }
-
-      setIsEditing(false);
-      setNewImage(null);
-      setPreviewImageUrl(null);
-      setShowOldImage(true);
-    } catch (err: any) {
-      const backendMessage = err.response?.data?.message;
+    } catch (error) {
       toast.toast({
         variant: "destructive",
         title: "Lỗi",
-        description: backendMessage,
+        description: "Đã xảy ra lỗi khi cập nhật bình luận.",
       });
     }
-  };
+  }, [id, editedContent, newImage, showOldImage, image_url, onCommentUpdated, toast]);
 
-  const handleDelete = async () => {
-    try {
-      const response = await axiosInstance.delete(`/comment/${id}`);
+  const handleDelete = useCallback(() => {
+    deleteComment(id, () => {
+      if (onCommentDeleted) {
+        onCommentDeleted(id);
+      }
       toast.toast({
         variant: "success",
         title: "Thành công!",
         description: "Bình luận đã được xóa.",
       });
-      if (response.data.message === "Thành công!") {
-        if (onCommentDeleted) {
-          onCommentDeleted(id);
-        }
-        setShowConfirm(false);
-      }
-    } catch (err: any) {
-      const backendMessage = err.response?.data?.message;
+      setShowConfirm(false);
+    }, (errorMessage) => {
       toast.toast({
         variant: "destructive",
         title: "Lỗi",
-        description: backendMessage,
+        description: errorMessage,
       });
-    }
+    });
+  }, [id, onCommentDeleted, toast]);
+
+  const resetEditState = () => {
+    setIsEditing(false);
+    setEditedContent(content);
+    setNewImage(null);
+    setPreviewImageUrl(null);
+    setShowOldImage(true);
   };
 
   return (
@@ -113,8 +91,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
             />
-
-            {/* Image section */}
             <div className="flex items-center gap-4 mt-2">
               {showOldImage && image_url && (
                 <div className="relative">
@@ -131,7 +107,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                   </button>
                 </div>
               )}
-
               <div className="relative">
                 {previewImageUrl && (
                   <img
@@ -153,7 +128,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                 />
               </div>
             </div>
-
             <div className="flex gap-2 mt-2">
               <button
                 onClick={handleEdit}
@@ -162,13 +136,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                 Lưu
               </button>
               <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditedContent(content);
-                  setNewImage(null);
-                  setPreviewImageUrl(null);
-                  setShowOldImage(true);
-                }}
+                onClick={resetEditState}
                 className="px-3 py-1 text-sm text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
               >
                 Hủy
@@ -196,8 +164,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               />
               <time className="text-gray-600">
                 {updatedAt || createdAt
-    ? new Date(updatedAt || createdAt).toLocaleDateString()
-    : "Invalid Date"}
+                  ? new Date(updatedAt || createdAt).toLocaleDateString()
+                  : "Invalid Date"}
               </time>
             </div>
           </>

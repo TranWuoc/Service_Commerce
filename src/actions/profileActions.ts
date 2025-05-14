@@ -1,4 +1,4 @@
-// src/actions/profileActions.ts
+
 import axiosInstance from "../api/axiosInstance";
 import { User } from "../types/User"; 
 
@@ -10,7 +10,7 @@ export const updateUserProfile = async (
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-  // Trả về đúng cấu trúc "data" từ response của bạn
+
   return response.data.data;
 };
 

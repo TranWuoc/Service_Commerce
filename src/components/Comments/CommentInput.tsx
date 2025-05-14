@@ -1,8 +1,9 @@
+// src/components/CommentInput.tsx
 import React, { useState } from "react";
-import axiosInstance from "../../api/axiosInstance";
 import { useParams } from "react-router-dom";
 import Button from "../Shared_components/Button";
-import { useToast } from "../../hooks/use-toast"; // Thêm useToast
+import { useToast } from "../../hooks/use-toast";
+import { sendComment } from "../../actions/commentActions"; 
 
 interface CommentInputProps {
   fieldId: number;
@@ -40,51 +41,14 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId }) =
   };
 
   const handleSendComment = async () => {
-    // Kiểm tra nếu không có nội dung bình luận và ảnh
-    if ( images.length === 0) {
-      toast.toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: "Vui lòng  thêm ảnh.",
-      });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("user_id", userId.toString());
-    formData.append("field_id", String(fieldId || urlFieldId));
-    formData.append("content", comment);
-    formData.append("status", "active");
-
-    // Thêm ảnh vào formData
-    images.forEach((img) => {
-      formData.append("image", img);
-    });
-    
     try {
-      // Gửi request API
-      const response = await axiosInstance.post("/comment/create", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await sendComment(userId, fieldId || urlFieldId, comment, images, toast);
 
       setComment("");
       setImages([]);
       setPreviews([]);
-
-      toast.toast({
-        variant: "success",
-        title: "Bình luận thành công",
-        description: "Bình luận của bạn đã được gửi thành công!",
-      });
     } catch (error) {
-      console.error("Lỗi khi gửi:", error.response || error);
-      toast.toast({
-        variant: "destructive",
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi, vui lòng thử lại.",
-      });
+      console.error("Lỗi khi gửi bình luận", error);
     }
   };
 

@@ -41,7 +41,7 @@ function FieldDetails() {
   }
 
   return (
-    <div className="overflow-hidden bg-neutral-100 py-6 px-4">
+    <div className="overflow-hidden h-[80vh] bg-neutral-100 py-6 px-4">
       <div className="flex flex-col w-full max-w-[1000px] mx-auto">
         <div className="flex w-full gap-8 max-md:flex-col max-md:gap-4 items-center">
           <div className="flex-shrink-0 w-[30%] max-md:w-full max-md:mb-4">
