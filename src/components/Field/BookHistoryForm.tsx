@@ -29,7 +29,7 @@ const BookHistoryForm: React.FC = () => {
           price: booking.field.price,
           status: isPaid ? "Đã thanh toán" : "Chưa thanh toán",
           receiptUrl: isPaid ? null : booking.receipt?.payment_url,
-          review: "Chưa có đánh giá",
+        
         };
       });
       setAllRows(bookings);

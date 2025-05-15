@@ -20,20 +20,20 @@ export const TableRow: React.FC<TableRowProps> = ({
       <div>{name}</div>
       <div>{date}</div>
       <div>{Number(price).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</div>
-      <div className="truncate">{review || "Chưa có đánh giá"}</div>
+     
       <div
         className={`font-medium ${
-          status === "Đã thuê"
-            ? "text-green-600"
-            : status === "Đang chờ"
-            ? "text-yellow-600"
-            : "text-gray-500"
+        status === "Đã thanh toán"
+      ? "text-blue-600"
+      : status === "Đang chờ"
+      ? "text-yellow-600"
+      : "text-green-600"
         }`}
       >
         {status}
       </div>
       <div>
-        {status === "Đang chờ" && (
+        {status !== "Đã thanh toán" && status !== "Đã thuê" && (
           <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
             Hủy
           </button>
