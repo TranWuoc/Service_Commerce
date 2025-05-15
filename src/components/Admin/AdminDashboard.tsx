@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchFields } from "../../api/fieldApi"; // Giữ nguyên hàm fetchFields ban đầu
+import { fetchFields } from "../../api/fieldApi";
 import Button from "../../components/Shared_components/Button";
 import { Field } from "../../types/Field";
+import { fetchUser } from "../../api/userApi"; 
 interface FieldStatus {
   total: number;
   active: number;
@@ -11,13 +12,16 @@ interface FieldStatus {
   suspended: number;
 }
 
+interface UserStats {
+  totalUsers: number;
+}
 
 const AdminDashboard: React.FC = () => {
   const [status, setStatus] = useState<FieldStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -33,6 +37,12 @@ const AdminDashboard: React.FC = () => {
         };
         
         setStatus(status);
+
+         const users = await fetchUser();
+        setUserStats({
+          totalUsers: users?.length || 0
+        });
+
       } catch (err) {
         setError("Không thể tải dữ liệu thống kê");
         console.error(err);
@@ -140,29 +150,32 @@ const AdminDashboard: React.FC = () => {
             Bao gồm sân bị vô hiệu hóa và tạm ngừng
           </p>
         </div>
-      
-        <div className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded">
-          <div className="w-24 h-24 bg-amber-500 rounded-full absolute -right-5 -top-7">
+         {/* Thẻ tổng số người dùng  */}
+        <div 
+          className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
+          onClick={() => navigate("/admin/manageUser")} 
+        >
+          <div className="w-24 h-24 bg-purple-500 rounded-full absolute -right-4 -top-10">
             <img
-              src="/user-001.svg" // Đường dẫn trực tiếp
-              alt="Football Field Icon"
+              src="/user-001.svg" 
+              alt="User Icon"
               className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
-              style={{ filter: "brightness(0) invert(1)" }} // Đổi màu icon sang trắng
+              style={{ filter: "brightness(0) invert(1)" }} 
             />
           </div>
-          <h1 className="font-bold text-xl">Tổng số người dùng </h1>
+          <h1 className="font-bold text-xl">Tổng số người dùng</h1>
+          <p className="text-2xl font-bold text-purple-600">{userStats?.totalUsers || 0}</p>
           <p className="text-sm text-zinc-500 leading-6">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse fuga
-            adipisicing elit
+            Tất cả người dùng trong hệ thống
           </p>
         </div>
         <div className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded">
           <div className="w-24 h-24 bg-amber-500 rounded-full absolute -right-5 -top-7">
             <img
-              src="/statistic-001.svg" // Đường dẫn trực tiếp
+              src="/statistic-001.svg"
               alt="Football Field Icon"
               className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
-              style={{ filter: "brightness(0) invert(1)" }} // Đổi màu icon sang trắng
+              style={{ filter: "brightness(0) invert(1)" }} 
             />
           </div>
           <h1 className="font-bold text-xl">Tổng doanh thu </h1>

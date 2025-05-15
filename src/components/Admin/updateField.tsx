@@ -218,16 +218,6 @@ const UpdateField: React.FC = () => {
             required
             style={{ marginBottom: "1.5rem" }}
           />
-          {/* <InputField
-            label="Địa điểm sân"
-            type="text"
-            name="address"
-            placeholder="Địa điểm sân"
-            value={fieldData.address}
-            onChange={handleInputChange}
-            required
-            style={{ marginBottom: "1.5rem" }}
-          /> */}
           <LocationInput 
   onLocationSelect={(data) => {
     setFieldData(prev => prev ? {
