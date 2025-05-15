@@ -27,9 +27,9 @@ const BookHistoryForm: React.FC = () => {
           rawDate: booking.date_start,
           date: formatDate(booking.date_start),
           price: booking.field.price,
-          status: isPaid ? "Đã thuê" : "Chưa thanh toán",
+          status: isPaid ? "Đã thanh toán" : "Chưa thanh toán",
           receiptUrl: isPaid ? null : booking.receipt?.payment_url,
-          review: "Chưa có đánh giá",
+        
         };
       });
       setAllRows(bookings);

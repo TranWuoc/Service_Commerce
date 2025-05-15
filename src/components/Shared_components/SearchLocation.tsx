@@ -1,40 +1,56 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { InputField } from "./InputField";
 
 interface SearchLocationProps {
   onLocationSelect: (data: { lat: number; lon: number; address: string }) => void;
+  initialAddress?: string;
+  initialCoords?: { lat: number; lon: number };
 }
 
-const SearchLocation: React.FC<SearchLocationProps> = ({ onLocationSelect }) => {
-  const [query, setQuery] = useState<string>("");
+const SearchLocation: React.FC<SearchLocationProps> = ({ 
+  onLocationSelect, 
+  initialAddress = "", 
+  initialCoords 
+}) => {
+  const [query, setQuery] = useState<string>(initialAddress);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const hasInitialized = useRef(false);
+
+  // Khởi tạo giá trị ban đầu
+  useEffect(() => {
+    if (initialAddress && !hasInitialized.current && initialCoords) {
+      hasInitialized.current = true;
+      onLocationSelect({
+        lat: initialCoords.lat,
+        lon: initialCoords.lon,
+        address: initialAddress
+      });
+    }
+  }, [initialAddress, initialCoords, onLocationSelect]);
 
   useEffect(() => {
+    if (query === initialAddress) return;
+    
     const fetchSuggestions = async () => {
       if (query.length < 3) {
-        setSuggestions([]); // Xóa gợi ý nếu chuỗi nhập quá ngắn
+        setSuggestions([]);
         return;
       }
 
       try {
-        const response = await axios.get("https://nominatim.openstreetmap.org/search", {
-          params: {
-            q: query,
-            format: "json",
-            addressdetails: 1,
-            limit: 5,
-          },
-        });
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=vn`
+        );
         setSuggestions(response.data);
       } catch (error) {
         console.error("Lỗi khi gọi Nominatim API:", error);
       }
     };
 
-    const debounce = setTimeout(fetchSuggestions, 500); // Debounce API call
-    return () => clearTimeout(debounce); // Cleanup debounce
-  }, [query]);
+    const debounce = setTimeout(fetchSuggestions, 500);
+    return () => clearTimeout(debounce);
+  }, [query, initialAddress]);
 
   const handleSelect = (place: any) => {
     const selectedLocation = {
@@ -42,21 +58,20 @@ const SearchLocation: React.FC<SearchLocationProps> = ({ onLocationSelect }) => 
       lon: parseFloat(place.lon),
       address: place.display_name,
     };
-    console.log("Selected location:", selectedLocation); // Log thông tin địa điểm đã chọn
-    setQuery(place.display_name); // Cập nhật giá trị ô nhập
-    setSuggestions([]); // Ẩn danh sách gợi ý
-    onLocationSelect(selectedLocation); // Gọi callback với dữ liệu đã chọn
+    setQuery(place.display_name);
+    setSuggestions([]);
+    onLocationSelect(selectedLocation);
+        console.log("Selected location:", selectedLocation); // Log thông tin địa điểm đã chọn
+
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-
-    if (value === "") {
-      console.clear(); // Xóa log khi ô nhập trống
-      setSuggestions([]); // Xóa danh sách gợi ý
-    }
     
+    if (value === "") {
+      onLocationSelect({ lat: 0, lon: 0, address: "" });
+    }
   };
 
   return (

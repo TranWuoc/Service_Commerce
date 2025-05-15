@@ -103,7 +103,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       <div
         className={`flex flex-col items-start px-12 pt-4 pb-2 mt-10 ${
           isChild ? "ml-10" : "ml-14"
-        } w-full font-semibold bg-zinc-300 max-w-[780px] rounded-[50px] max-md:px-5 max-md:max-w-full`}
+        } w-full font-semibold bg-zinc-300 max-w-[700px] rounded-[50px] max-md:px-5 max-md:max-w-full`}
       >
         {isEditing ? (
           <>
@@ -257,37 +257,37 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         </div>
       )}
 
-      {isReplying && (
-        <div className="ml-14 mt-2 w-[85%]">
-          <CommentInput 
-            fieldId={fieldId} 
-            userId={currentUser?.id} 
-            parentId={id} 
-            compact={true} // Add this prop to make it smaller
-          />
-        </div>
-      )}
+{childComments && childComments.length > 0 && (
+  <div className="ml-10 mt-4 border-l-2 border-gray-300 pl-4 flex flex-col-reverse">
+    {childComments.map((child) => (
+      <CommentItem
+        key={child.id}
+        id={child.id}
+        content={child.content}
+        fieldId={child.fieldId}
+        createdAt={child.createdAt}
+        updatedAt={child.updatedAt}
+        image_url={child.image_url}
+        user={child.user}
+        user_id={child.user?.id}
+        childComments={child.child || []}
+        onCommentDeleted={onCommentDeleted}
+        isChild={true}
+      />
+    ))}
+  </div>
+)}
 
-      {childComments && childComments.length > 0 && (
-        <div className="ml-10 mt-4 border-l-2 border-gray-300 pl-4">
-          {childComments.map((child) => (
-            <CommentItem
-              key={child.id}
-              id={child.id}
-              content={child.content}
-              fieldId={child.fieldId}
-              createdAt={child.createdAt}
-              updatedAt={child.updatedAt}
-              image_url={child.image_url}
-              user={child.user}
-              user_id={child.user?.id}
-              childComments={child.child || []}
-              onCommentDeleted={onCommentDeleted}
-              isChild={true} // Mark as child comment
-            />
-          ))}
-        </div>
-      )}
+{isReplying && (
+  <div className="ml-14 mt-2 w-[85%]">
+    <CommentInput
+      fieldId={fieldId}
+      userId={currentUser?.id}
+      parentId={id}
+      compact={true}
+    />
+  </div>
+)}
     </article>
   );
 };

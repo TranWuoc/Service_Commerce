@@ -1,206 +1,181 @@
 import React, { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
 import { useNavigate } from "react-router-dom";
 import { fetchFields } from "../../api/fieldApi";
-import { generateDoughnutData } from "../../utils/chartDoughnutStatus";
-import DoughnutChart from "../../components/Shared_components/DoughnutChart";
 import Button from "../../components/Shared_components/Button";
 import { Field } from "../../types/Field";
-import { fetchRevenueByField } from "../../api/revenueApi";
-import { VictoryLine } from "victory";
-ChartJS.register(
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+import { fetchUser } from "../../api/userApi"; 
+interface FieldStatus {
+  total: number;
+  active: number;
+  maintenance: number;
+  deactivated: number;
+  suspended: number;
+}
+
+interface UserStats {
+  totalUsers: number;
+}
 
 const AdminDashboard: React.FC = () => {
-  const [fields, setFields] = useState<Field[]>([]);
-  const [doughnutData, setDoughnutData] = useState<any>(null);
-  const [doughnutOptions, setDoughnutOptions] = useState<any>(null);
-  const [totalRevenue, setTotalRevenue] = useState<number | null>(null); // State lưu tổng doanh thu
+  const [status, setStatus] = useState<FieldStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
   useEffect(() => {
-    const loadFields = async () => {
+    const loadData = async () => {
       try {
-        const fieldList = await fetchFields();
-        setFields(fieldList);
+        const fields = await fetchFields();
+        
+        // Tính toán thống kê từ dữ liệu fields
+        const status = {
+          total: fields.length,
+          active: fields.filter(f => f.state.name === "Active").length,
+          maintenance: fields.filter(f => f.state.name === "Maintenance").length,
+          deactivated: fields.filter(f => f.state.name === "Deactivated").length,
+          suspended: fields.filter(f => f.state.name === "Suspended").length
+        };
+        
+        setStatus(status);
 
-        // Tạo dữ liệu cho biểu đồ Donut
-        const { doughnutData, doughnutOptions } =
-        generateDoughnutData(fieldList);
-        setDoughnutData(doughnutData);
-        setDoughnutOptions(doughnutOptions);
-      } catch (error) {
-        console.error("Error loading fields:", error);
+         const users = await fetchUser();
+        setUserStats({
+          totalUsers: users?.length || 0
+        });
+
+      } catch (err) {
+        setError("Không thể tải dữ liệu thống kê");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    const loadRevenue = async () => {
-      try {
-        const revenueData = await fetchRevenueByField();
-        const total = revenueData.reduce(
-          (sum: number, item: any) => sum + item.total_revenue,
-          0,
-        ); // Tính tổng doanh thu
-        setTotalRevenue(total);
-      } catch (error) {
-        console.error("Error loading revenue:", error);
-      }
-    };
-
-    loadFields();
-    loadRevenue();
+    loadData();
   }, []);
 
-  const generateRandomPoints = () => {
-    return Array.from({ length: 20 }, (_, i) => ({
-      x: i * 30 + 10,
-      y: Math.floor(Math.random() * 70) + 10,
-    }));
-  };
+  if (loading) {
+    return <div className="p-6 text-center">Đang tải dữ liệu...</div>;
+  }
 
-  const points = generateRandomPoints();
+  if (error) {
+    return <div className="p-6 text-red-500 text-center">{error}</div>;
+  }
 
-  // Tạo path dạng "Smooth Curve" dùng Quadratic Bézier
-  const generateSmoothPath = () => {
-    let path = `M ${points[0].x},${points[0].y}`;
 
-    for (let i = 1; i < points.length; i++) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      const controlX = (prev.x + curr.x) / 2;
-      path += ` Q ${controlX},${prev.y} ${curr.x},${curr.y}`;
-    }
 
-    return path;
-  };
-
-  const barOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: "Biểu đồ doanh thu theo tháng",
-      },
-    },
-  };
 
   return (
     <div className="flex flex-col bg-gray-100 p-6 gap-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="flex flex-col justify-center items-center bg-white rounded-lg shadow-md p-6 gap-3">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
-            Trạng thái sân
-          </h2>
-          {doughnutData ? (
-            <DoughnutChart data={doughnutData} options={doughnutOptions} />
-          ) : (
-            <p>Đang tải dữ liệu...</p>
-          )}
-          <Button
-            text="Xem chi tiết"
-            type="primary"
-            onClick={() => navigate("/admin/manage")}
-          />
-        </div>
-
-        <div className="flex flex-col justify-between items-center bg-white h-1/2 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Doanh thu</h2>
-          {totalRevenue !== null ? (
-            <p className="text-gray-800 font-bold">
-              Tổng doanh thu: {totalRevenue.toLocaleString()} VND
-            </p>
-          ) : (
-            <p>Đang tải doanh thu...</p>
-          )}
-          <Button
-            text="Xem chi tiết"
-            type="primary"
-            onClick={() => navigate("/admin/manage")}
-            customStyle={{ marginTop: "10px" }}
-          />
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Thống kê</h2>
-          <p className="text-gray-600 mb-4">
-            Xem báo cáo và thống kê chi tiết.
-          </p>
-          <button
-            className="py-2 px-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
-            onClick={() => navigate("/admin/manage")}
-          >
-            Xem chi tiết
-          </button>
-          {/* <VictoryLine data={randomData} /> */}
-
-          <svg width="160" height="80" viewBox="0 0 160 80" className="rounded">
-            {/* Đường cong mượt */}
-            <path
-              d={generateSmoothPath()}
-              fill="none"
-              stroke="#3B82F6" // Màu Tailwind blue-500
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-        <div className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded">
-          <div className="w-24 h-24 bg-amber-500 rounded-full absolute -right-5 -top-7">
+      
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Thẻ tổng số sân */}
+        <div 
+          className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
+          onClick={() => navigate("/admin/manage")}
+        >
+          <div className="w-24 h-24 bg-blue-500 rounded-full absolute -right-5 -top-7">
             <img
-              src="/football-field-stadium-svgrepo-com copy.svg" // Đường dẫn trực tiếp
+              src="/football-field-stadium-svgrepo-com copy.svg"
               alt="Football Field Icon"
               className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
-              style={{ filter: "brightness(0) invert(1)" }} // Đổi màu icon sang trắng
+              style={{ filter: "brightness(0) invert(1)" }}
             />
           </div>
-          <h1 className="font-bold text-xl">Tổng số sân hiện có </h1>
+          <h1 className="font-bold text-xl">Tổng số sân</h1>
+          <p className="text-2xl font-bold">{status?.total || 0}</p>
           <p className="text-sm text-zinc-500 leading-6">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse fuga
-            adipisicing elit
+            Tất cả sân trong hệ thống
           </p>
         </div>
-        <div className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded">
-          <div className="w-24 h-24 bg-amber-500 rounded-full absolute -right-5 -top-7">
+
+        {/* Thẻ sân Active */}
+        <div 
+          className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
+          onClick={() => navigate("/admin/manage?status=Active")}
+        >
+          <div className="w-24 h-24 bg-green-500 rounded-full absolute -right-5 -top-7">
             <img
-              src="/user-001.svg" // Đường dẫn trực tiếp
-              alt="Football Field Icon"
+              src="/football-field-stadium-svgrepo-com copy.svg"
+              alt="Active Field Icon"
               className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
-              style={{ filter: "brightness(0) invert(1)" }} // Đổi màu icon sang trắng
+              style={{ filter: "brightness(0) invert(1)" }}
             />
           </div>
-          <h1 className="font-bold text-xl">Tổng số người dùng </h1>
+          <h1 className="font-bold text-xl">Sân hoạt động</h1>
+          <p className="text-2xl font-bold text-green-600">{status?.active || 0}</p>
           <p className="text-sm text-zinc-500 leading-6">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse fuga
-            adipisicing elit
+            Sân đang hoạt động bình thường
+          </p>
+        </div>
+
+        {/* Thẻ sân Maintenance */}
+        <div 
+          className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
+          onClick={() => navigate("/admin/manage?status=Maintenance")}
+        >
+          <div className="w-24 h-24 bg-yellow-500 rounded-full absolute -right-5 -top-7">
+            <img
+              src="/football-field-stadium-svgrepo-com copy.svg"
+              alt="Maintenance Field Icon"
+              className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </div>
+          <h1 className="font-bold text-xl">Sân bảo trì</h1>
+          <p className="text-2xl font-bold text-yellow-600">{status?.maintenance || 0}</p>
+          <p className="text-sm text-zinc-500 leading-6">
+            Sân đang trong quá trình bảo trì
+          </p>
+        </div>
+
+        {/* Thẻ sân không hoạt động */}
+        <div 
+          className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
+          onClick={() => navigate("/admin/manage?status=Inactive")}
+        >
+          <div className="w-24 h-24 bg-red-500 rounded-full absolute -right-5 -top-7">
+            <img
+              src="/football-field-stadium-svgrepo-com copy.svg"
+              alt="Inactive Field Icon"
+              className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </div>
+          <h1 className="font-bold text-xl">Sân ngừng hoạt động</h1>
+          <p className="text-2xl font-bold text-red-600">
+            {(status?.deactivated || 0) + (status?.suspended || 0)}
+          </p>
+          <p className="text-sm text-zinc-500 leading-6">
+            Bao gồm sân bị vô hiệu hóa và tạm ngừng
+          </p>
+        </div>
+         {/* Thẻ tổng số người dùng  */}
+        <div 
+          className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
+          onClick={() => navigate("/admin/manageUser")} 
+        >
+          <div className="w-24 h-24 bg-purple-500 rounded-full absolute -right-4 -top-10">
+            <img
+              src="/user-001.svg" 
+              alt="User Icon"
+              className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
+              style={{ filter: "brightness(0) invert(1)" }} 
+            />
+          </div>
+          <h1 className="font-bold text-xl">Tổng số người dùng</h1>
+          <p className="text-2xl font-bold text-purple-600">{userStats?.totalUsers || 0}</p>
+          <p className="text-sm text-zinc-500 leading-6">
+            Tất cả người dùng trong hệ thống
           </p>
         </div>
         <div className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded">
           <div className="w-24 h-24 bg-amber-500 rounded-full absolute -right-5 -top-7">
             <img
-              src="/statistic-001.svg" // Đường dẫn trực tiếp
+              src="/statistic-001.svg"
               alt="Football Field Icon"
               className="absolute top-1/2 left-1/2 w-8 h-8 -translate-x-1/2 -translate-y-1/2 mt-2"
-              style={{ filter: "brightness(0) invert(1)" }} // Đổi màu icon sang trắng
+              style={{ filter: "brightness(0) invert(1)" }} 
             />
           </div>
           <h1 className="font-bold text-xl">Tổng doanh thu </h1>
