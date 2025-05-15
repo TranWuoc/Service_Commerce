@@ -42,7 +42,7 @@ export const RegisterForm: React.FC = () => {
     <section className="flex flex-col items-center px-20 py-8 w-full max-md:px-5 max-md:py-6 max-md:w-full h-screen">
       <header className="mb-6 text-base">
         <span>Welcome to </span>
-        <span className="text-amber-500">SUPERBOW</span>
+        <span className="text-amber-500">SUPPERBOWL</span>
       </header>
       <AuthToggle activeTab={activeTab} />
 

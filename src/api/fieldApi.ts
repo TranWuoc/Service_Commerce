@@ -1,11 +1,10 @@
-import axios from "axios";
 import { Field } from "../types/Field";
 import axiosInstance from "./axiosInstance";
 
 // Lấy ra toàn bộ danh sách sân
 export const fetchFields = async (): Promise<Field[]> => {
   try {
-    const response = await axios.get("http://127.0.0.1:8000/api/fields?per_page=100");
+    const response = await axiosInstance.get("/fields?per_page=100");
     return response.data.data;
   } catch (error) {
     console.error("Error fetching fields:", error);
@@ -13,10 +12,10 @@ export const fetchFields = async (): Promise<Field[]> => {
   }
 };
 
-// Lấy ra danh sách sân theo id
+
 export const fetchFieldById = async (fieldId: string) => {
   try {
-    const response = await axiosInstance.get(`http://127.0.1:8000/api/fields/${fieldId}`);
+    const response = await axiosInstance.get(`/fields/${fieldId}`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching field by ID:", error);
@@ -26,7 +25,7 @@ export const fetchFieldById = async (fieldId: string) => {
 
 // Lấy ra danh sách kiểu sân 
 export const fetchCategories = async () => {
-    const response = await axios.get("http://localhost:8000/api/fields");
+    const response = await axiosInstance.get("/fields");
     const fields = response.data.data;
     const allCategories = fields.map((field: any) => ({
       id: field.category.id,
@@ -39,9 +38,9 @@ export const fetchCategories = async () => {
     );
   };
 
-// Lấy danh sách trạng thái sân
+
 export const fetchStates = async () => {
-    const response = await axios.get("http://localhost:8000/api/fields");
+    const response = await axiosInstance.get("/fields");
     const fields = response.data.data;
     const allStates = fields.map((field: any) => ({
       id: field.state.id,

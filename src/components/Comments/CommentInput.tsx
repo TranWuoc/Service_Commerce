@@ -48,7 +48,12 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId, par
       setImages([]);
       setPreviews([]);
     } catch (error) {
-      console.error("Lỗi khi gửi bình luận", error);
+      
+      toast.toast({
+        variant: "destructive",
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi gửi bình luận.",
+      });
     }
   };
 

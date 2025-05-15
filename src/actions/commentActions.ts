@@ -21,7 +21,7 @@ export async function fetchCommentsByField(
     });
     return response.data;
   } catch (error) {
-    console.error("Lỗi khi tải bình luận:", error);
+
     throw error;
   }
 }
