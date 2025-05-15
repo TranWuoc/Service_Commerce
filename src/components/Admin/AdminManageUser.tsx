@@ -116,10 +116,10 @@ const AdminManageUser: React.FC = () => {
 
   const UserRow = ({ user, isSelected, onSelect }: UserRowProps) => {
     // Xử lý avatar mặc định nếu null
-    const avatarUrl = user.avatar || "https://via.placeholder.com/150";
-    // Xử lý trạng thái
+    const avatarUrl = 'http://localhost:8000/' + user?.avatar || "https://via.placeholder.com/150";
+    
     const status = user.status === "1" ? "online" : "offline";
-    // Vị trí mặc định (có thể thay đổi tùy theo dữ liệu thực tế)
+    
     const position = user.is_admin === 1 ? "Admin" : "User";
 
     return (

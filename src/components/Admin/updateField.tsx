@@ -250,7 +250,7 @@ const UpdateField: React.FC = () => {
             }}
           />
           <InputField
-            label="Kiểu sân"
+            label="Kiểu sân: "
             options={categories.map((category) => ({
               value: category.id,
               label: category.name,

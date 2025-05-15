@@ -106,7 +106,7 @@ const ManageFields: React.FC = () => {
             >
               <h2 className="text-lg font-bold text-gray-800">{field.name}</h2>
               <p className="text-gray-600">Địa chỉ: {field.address}</p>
-              <p className="text-gray-600">Kiểu sân {field.category.name}</p>
+              <p className="text-gray-600">Kiểu sân:  {field.category.name}</p>
               <p className="text-gray-600">
                 Giá: {field.price.toLocaleString()} VND
               </p>

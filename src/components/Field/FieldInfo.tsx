@@ -77,7 +77,7 @@ const FieldInfo: React.FC = () => {
           <div className="flex flex-col gap-1 mt-2">
             <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
               <span className="font-bold text-slate-800">
-                Mô tả {selectedField.description}
+                Mô tả: {selectedField.description}
               </span>
             </div>
           </div>
@@ -127,7 +127,7 @@ const FieldInfo: React.FC = () => {
             </div>
             <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
               <span className="font-bold text-slate-800">
-                Mô tả {selectedField.description}
+                Mô tả: {selectedField.description}
               </span>
             </div>
             <div className="flex flex-col gap-1 mt-2">

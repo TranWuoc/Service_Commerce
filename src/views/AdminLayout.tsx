@@ -35,7 +35,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       case "/admin":
         return "Dashboard";
       case "/admin/manage":
-        return "Quản lý thông sân";
+        return "Quản lý thông tin sân";
       case "/admin/manageUser":
         return "Quản lý người dùng";
       case "/admin/Profile":

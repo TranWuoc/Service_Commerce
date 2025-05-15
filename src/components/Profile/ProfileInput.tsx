@@ -141,7 +141,7 @@ export const ProfileInput: React.FC = () => {
           type="email"
           value={tempFormData.email}
           onChange={handleInputChange("email")}
-          disabled={!isEditing}
+          disabled={true} 
         />
         <InputField
           label="Phone"
