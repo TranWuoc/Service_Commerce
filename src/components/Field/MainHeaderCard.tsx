@@ -1,34 +1,29 @@
 import Button from "../Shared_components/Button";
 import { useNavigate } from "react-router-dom";
-import { useField } from "../../hooks/useField";// Sử dụng context mới
+import { useField } from "../../hooks/useField";
 import { Field } from "../../types/Field";
 import { useUser } from "../../hooks/useUser";
+
 interface MainHeaderCardProps {
   field: Field;
-  
 }
 
 export function MainHeaderCard({ field }: MainHeaderCardProps) {
   const navigate = useNavigate();
-  const { setSelectedField} = useField();
-const safeDistance = typeof distance === "number" ? distance : null;
-const safeDuration = typeof duration === "number" ? duration : null;
+  const { setSelectedField } = useField();
+  const { user } = useUser();
 
   const getImageUrl = (field: Field) => {
-    
     if (field?.images && field.images.length > 0 && field.images[0].image_url) {
-      
       return `http://127.0.0.1:8000/${field.images[0].image_url}`;
     }
-    
     return "https://placehold.co/400x400/333/333";
   };
-  const imageUrl = field?.images?.[0] || "https://placehold.co/400x400/333/333";
-  const {user} = useUser();
 
   const handleSelectField = () => {
-    setSelectedField(field); 
-    navigate("/dashboard/FieldInfo"); 
+    setSelectedField(field); // vẫn lưu context nếu cần
+    navigate(`/dashboard/FieldInfo/${field.id}`);
+    console.log(field.id) // chuyển sang trang chi tiết với id trong URL
   };
 
   return (
@@ -44,16 +39,17 @@ const safeDuration = typeof duration === "number" ? duration : null;
       <h3 className="text-lg font-medium leading-7">{field?.name || "No Name"}</h3>
       <p className="text-sm mb-2">{field?.category?.name || "Unknown Category"}</p>
 
-      <div className="flex text-sm  mb-4 gap-2 min-h-[2.5rem]">
+      <div className="flex text-sm mb-4 gap-2 min-h-[2.5rem]">
         <div className="flex-1 line-clamp-2">{field?.address || "No Address"}</div>
       </div>
-{field.distance !== undefined && field.distance !== null && (
-  <p className="text-sm mb-1">
-    Khoảng cách: <span className="text-green-500">{field.distance.toFixed(2)} km</span>
-  </p>
-)}
 
-      <div className="flex justify-between text-sm  mb-4 mt-auto">
+      {field.distance !== undefined && field.distance !== null && (
+        <p className="text-sm mb-1">
+          Khoảng cách: <span className="text-green-500">{field.distance.toFixed(2)} km</span>
+        </p>
+      )}
+
+      <div className="flex justify-between text-sm mb-4 mt-auto">
         <div className="flex-1 text-left">
           Price: {field?.price.toLocaleString()} VND
         </div>
@@ -71,11 +67,7 @@ const safeDuration = typeof duration === "number" ? duration : null;
             }
           />
         ) : (
-        <Button
-          text="Select Field"
-          type="primary"
-          onClick={handleSelectField}
-        />
+          <Button text="Select Field" type="primary" onClick={handleSelectField} />
         )}
       </div>
     </article>

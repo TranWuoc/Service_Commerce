@@ -1,32 +1,35 @@
 import React, { HTMLInputTypeAttribute } from "react";
+
 interface InputFieldProps {
   label: string;
   type:  HTMLInputTypeAttribute;
-  placeholder: string;
+  placeholder?: string;
   value: string;
   name?: string;
   required?: boolean;
   disabled?: boolean;
   style?: React.CSSProperties;
-  customClass?: string; 
+  customClass?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  options?: { value: string; label: string }[]; // Thêm thuộc tính options
+  options?: { value: string; label: string }[];
+  // Thêm index signature để nhận các props tuỳ ý
+  [key: string]: any;
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
   label,
   type,
-  placeholder,
+  placeholder = "",
   value,
   name,
   required = false,
   disabled = false,
   style,
-  customClass = "", 
+  customClass = "",
   options,
   onChange,
+  ...rest // Lấy các props còn lại
 }) => {
-  // Render select nếu có options, nếu không sẽ render input
   const renderInput = () => {
     if (options) {
       return (
@@ -38,6 +41,7 @@ export const InputField: React.FC<InputFieldProps> = ({
           onChange={onChange}
           className={`px-8 py-0 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
           style={style}
+          {...rest} // truyền tiếp các props
         >
           <option value="" disabled>
             {placeholder || "Chọn một tùy chọn"}
@@ -50,7 +54,7 @@ export const InputField: React.FC<InputFieldProps> = ({
         </select>
       );
     }
-    
+
     return (
       <input
         type={type}
@@ -62,6 +66,7 @@ export const InputField: React.FC<InputFieldProps> = ({
         onChange={onChange}
         className={`px-8 py-0 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
         style={style}
+        {...rest} // <<< quan trọng
       />
     );
   };

@@ -131,7 +131,7 @@ export const AppRouter: React.FC = () => {
 
    
       <Route
-        path={isAdmin ? "/admin/manage/FieldInfo" : "/dashboard/FieldInfo"}
+        path={isAdmin ? "/admin/manage/FieldInfo/:id" : "/dashboard/FieldInfo/:id"}
         element={
           isAdmin ? (
             <AdminLayout>

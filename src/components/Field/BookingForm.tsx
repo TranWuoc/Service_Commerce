@@ -1,14 +1,23 @@
-import * as React from "react";
-import { useState, useEffect } from "react";
-import { InputField } from "../Shared_components/InputField";
-import Button from "../Shared_components/Button";
+import React, { useState, useEffect } from "react";
+import Autosuggest from "react-autosuggest";
 import { useLocation } from "react-router-dom";
+
+import Button from "../Shared_components/Button";
+import { InputField } from "../Shared_components/InputField";
+
+import {
+  fetchFields,
+  createBooking,
+  prepareBookingData,
+  getMinBookingDate,
+  validateBookingDate,
+} from "../../actions/bookingActions";
+
 import { useUser } from "../../hooks/useUser";
 import { useToast } from "../../hooks/use-toast";
 
-import Autosuggest from "react-autosuggest";
-import { fetchFields, createBooking, prepareBookingData, getMinBookingDate  } from "../../actions/bookingActions";
-import { TimeSlot, Field, BookingFormData  } from "../../types/Booking";
+import type { Field, TimeSlot, BookingFormData } from "../../types/Booking";
+
 export const BookingForm = () => {
   const timeSlots: TimeSlot[] = [
     { value: "6-8", label: "06:00 - 08:00", startHour: 6, endHour: 8 },
@@ -37,36 +46,40 @@ export const BookingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const loadFields = async () => {
-      try {
-        const data = await fetchFields();
-        setFields(data);
-      } catch (error) {
+    fetchFields()
+      .then(setFields)
+      .catch(() =>
         toast({
           title: "Lỗi",
           description: "Không thể tải danh sách sân bóng",
           variant: "destructive",
-        });
-      }
-    };
-    loadFields();
-  }, []);
+        })
+      );
+  }, [toast]);
 
+  // Xử lý thay đổi ngày, kiểm tra ngày hợp lệ
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = new Date(e.target.value);
-    const minDate = new Date(getMinBookingDate());
-    
-    if (selectedDate >= minDate) {
-      setFormData({ ...formData, date: e.target.value });
+    const value = e.target.value;
+    if (validateBookingDate(value)) {
+      setFormData({ ...formData, date: value });
     } else {
       toast({
         title: "Lỗi",
-        description: "Ngày đặt sân phải từ 5 ngày sau ngày hiện tại.",
+        description: "Ngày đặt sân phải từ ngày hiện tại trở đi.",
         variant: "destructive",
       });
     }
   };
-const onSuggestionsClearRequested = () => setSuggestions([]);
+
+  // Autosuggest
+  const onSuggestionsFetchRequested = ({ value }: { value: string }) => {
+    const input = value.trim().toLowerCase();
+    setSuggestions(
+      fields.filter((f) => f.name.toLowerCase().includes(input)).slice(0, 3)
+    );
+  };
+
+  const onSuggestionsClearRequested = () => setSuggestions([]);
 
   const onSuggestionSelected = (
     event: any,
@@ -79,24 +92,17 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
     });
     setInputValue(suggestion.name);
   };
-  const getSuggestions = (value: string) => {
-    const input = value.trim().toLowerCase();
-    return fields.filter((field) => field.name.toLowerCase().includes(input));
-  };
-
-  const onSuggestionsFetchRequested = ({ value }: { value: string }) => {
-    setSuggestions(getSuggestions(value).slice(0, 3));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const bookingData = prepareBookingData(
       formData.fieldId,
       formData.date,
       formData.timeSlot,
       timeSlots
     );
-    
+
     if (!bookingData) {
       toast({
         title: "Lỗi",
@@ -115,7 +121,8 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
         title: "Đặt sân thành công!",
         description: "Đang chuyển đến trang thanh toán...",
       });
-      window.location.href = payUrl;
+
+      if (payUrl) window.location.href = payUrl;
     } catch (error: any) {
       toast({
         title: "Đặt sân thất bại",
@@ -126,7 +133,8 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
       setIsSubmitting(false);
     }
   };
-   const handleCancel = () => {
+
+  const handleCancel = () => {
     setFormData({ name: "", fieldId: "", date: "", timeSlot: "" });
     setInputValue("");
   };
@@ -162,7 +170,6 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
           </div>
 
           <div className="flex flex-col items-center w-full mx-auto">
-            {/* Bảng ngày và giờ */}
             <div className="flex w-full gap-6">
               <div className="flex-1">
                 <InputField
@@ -171,12 +178,11 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
                   value={formData.date}
                   required
                   name="date"
-                  style={{ margin: 0, maxWidth: "none" }}
                   onChange={handleDateChange}
                   min={getMinBookingDate()}
                   onKeyDown={(e) => e.preventDefault()}
-                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[35px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer"
-                ></InputField>
+                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[40px] border-[2.5px] border-neutral-300 focus:outline-none focus:border-amber-500 cursor-pointer"
+                />
               </div>
 
               <div className="flex-1">
@@ -188,7 +194,8 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
                   onChange={(e) =>
                     setFormData({ ...formData, timeSlot: e.target.value })
                   }
-                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[43px] border-[2.5px] border-neutral-300  border-[2.5px] focus:outline-none focus:border-amber-500 cursor-pointer mt-1"
+                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[43px] border-[2.5px] border-neutral-300 focus:outline-none focus:border-amber-500 cursor-pointer mt-1"
+                  required
                 >
                   <option value="" disabled>
                     Chọn khung giờ
@@ -208,14 +215,14 @@ const onSuggestionsClearRequested = () => setSuggestions([]);
           <Button
             variant="tertiary"
             text={isSubmitting ? "Đang đặt sân..." : "Đặt sân"}
-            onClick={handleSubmit}
             disabled={isSubmitting}
+            onClick={handleSubmit}
           />
           <Button
             variant="tertiary"
             text="Huỷ"
-            onClick={handleCancel}
             disabled={isSubmitting}
+            onClick={handleCancel}
           />
         </div>
       </form>
