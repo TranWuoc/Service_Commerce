@@ -232,7 +232,7 @@ const AdminChat = ({
               }}
             />
             <button
-              className="bg-orange-500 text-white px-4 py-2 rounded-md ml-2"
+              className={`bg-orange-500 text-white px-4 py-2 rounded-md ml-2 ${validateInputMessage() ? 'hover:bg-orange-600' : ''}`}
               disabled={!validateInputMessage()}
               onClick={() => {
                 setChangedThread(false);
