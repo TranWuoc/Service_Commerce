@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
 let isRefreshing = false;
 let failedQueue: { resolve: Function; reject: Function }[] = [];
 
-const openRoutes = ["/", "/login", "/register", "/dashboard/vnpay-return", "/dashboard", "/dashboard/fieldinfo"];
+const openRoutes = ["/", "/login", "/register", "/dashboard/vnpay-return", "/dashboard/fieldinfo"];
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     const currentPath = window.location.pathname;
     const isOpenRoute = openRoutes.includes(currentPath);
-
+    
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
