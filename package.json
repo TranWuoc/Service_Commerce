@@ -25,12 +25,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-toast": "^1.2.7",
     "@react-native-community/netinfo": "^11.4.1",
-<<<<<<< HEAD
-    "@react-oauth/google": "^0.12.2",
-    "axios": "^1.8.4",
-=======
-    "axios": "^1.9.0",
->>>>>>> duc_dev
+
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "cmdk": "^1.1.1",
@@ -40,11 +35,7 @@
     "jwt-decode": "^4.0.0",
     "laravel-echo": "^2.0.2",
     "lucide-react": "^0.487.0",
-<<<<<<< HEAD
-    "Npm": "^3.0.0",
-=======
     "pusher": "^5.2.0",
->>>>>>> duc_dev
     "pusher-js": "^8.4.0",
     "qs": "^6.14.0",
     "react": "^19.0.0",
@@ -57,11 +48,7 @@
     "simplebar-react": "^3.3.1",
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
-<<<<<<< HEAD
     "victory": "^37.3.6"
-=======
-    "thue-san-bong": "file:"
->>>>>>> duc_dev
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

@@ -3,13 +3,14 @@ import { userId } from "../lib/utils";
 
 const user_id = userId();
 
-const pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY!, {
-  cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER!,
+const pusher = new Pusher("0beb714287d405b107bb", {
+  cluster: "ap1",
+  forceTLS: true,
   authEndpoint: "http://localhost:8000/api/broadcasting/auth",
   auth: {
     headers: {
       Accept: "application/json",
-      Authorization: `Bearer ${localStorage.getItem("authToken")}`, // ✅ Sửa lỗi ở đây
+      Authorization: `Bearer ${localStorage.getItem("authToken")}`,
     },
   },
 });

@@ -3,7 +3,7 @@ import CustomerSidebar from "../components/Customer/CustomerSidebar";
 import { FieldHeader } from "../components/Field/FieldHeader";
 import { FieldsSummary } from "../components/Field/FieldsSummary";
 import { useUser } from "../hooks/useUser";
-
+import { AvatarMenu } from "../components/Profile/Avatar";
 import IconChatBot from "../components/Bot/IconChatBot1";
 interface DashboardLayoutProps {
   children: React.ReactNode;
