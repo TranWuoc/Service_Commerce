@@ -19,13 +19,18 @@ const Inforcard: React.FC<SanCardProps> = ({
   fieldId,
 }) => {
   const navigate = useNavigate();
-
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // tháng bắt đầu từ 0
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
   const handleBooking = () => {
     navigate("/dashboard/booking", {
       state: {
         fieldId: fieldId,
         fieldName: name,
-        date: Date.now(), 
+        date: formatDate(new Date(Date.now()))
       },
       // replace: true,
       
