@@ -48,7 +48,7 @@ export const AppRouter: React.FC = () => {
       <Route path="/dashboard/history" element={<DashboardLayout><BookHistory /></DashboardLayout>} />
       <Route path="/dashboard/Profile" element={<DashboardLayout><ProfileInput /></DashboardLayout>} />
       <Route path="/dashboard/vnpay-return" element={<DashboardLayout><PaymentSuccessPage /></DashboardLayout>} />
-      <Route path="/dashboard/FieldInfo" element={<DashboardLayout><FieldDetails /></DashboardLayout>} />
+  
 
       {/* Google Callback */}
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
@@ -120,14 +120,7 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/admin/manage/FieldInfo"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout><FieldDetails /></AdminLayout>
-          </ProtectedRoute>
-        }
-      />
+   
 
    
       <Route

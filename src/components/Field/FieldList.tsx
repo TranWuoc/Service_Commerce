@@ -10,7 +10,7 @@ export function FieldList({ fields }: { fields: any[] }) {
             <MainHeaderCard key={field.id} field={field} />
           ))
         ) : (
-          <div className="text-center text-gray-500 py-4">Không có sân nào được tìm thấy.</div>
+          <div className="text-center text-gray-500 py-4">Đang loading </div>
         )}
       </div>
     </section>

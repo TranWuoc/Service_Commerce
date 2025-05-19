@@ -7,11 +7,11 @@ import { useNavigate } from "react-router-dom";
 import Button from "../Shared_components/Button";
 
 const AdminManageFields: React.FC = () => {
-  const { fields, setFields } = useField();
+const { fields, setFields, setSelectedField } = useField();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredFields, setFilteredFields] = useState<Field[]>([]);
   const navigate = useNavigate();
-  const { setSelectedField } = useField();
+
   
   // State phân trang
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +57,8 @@ const AdminManageFields: React.FC = () => {
 
   const handleFieldClick = (field: Field) => {
     setSelectedField(field);
-    navigate("/admin/manage/FieldInfo");
+    navigate(`/admin/manage/FieldInfo/${field.id}`);
+    console.log('/admin/manage/FieldInfo/${field.id}')
   };
 
   const handleAddField = () => {
