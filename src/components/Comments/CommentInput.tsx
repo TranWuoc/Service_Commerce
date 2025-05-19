@@ -52,7 +52,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId, par
       toast.toast({
         variant: "destructive",
         title: "Lỗi",
-        description: "Có lỗi xảy ra khi gửi bình luận.",
+        description: error.response?.data?.message
       });
     }
   };

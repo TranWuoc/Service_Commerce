@@ -1,4 +1,4 @@
-// GoogleLoginButton.tsx
+import React from "react";
 import Button from "./Button";
 
 const GoogleIcon = (
@@ -15,12 +15,19 @@ const GoogleIcon = (
   </svg>
 );
 
-export const GoogleLoginButton = () => {
+interface GoogleLoginButtonProps {
+  customStyle?: React.CSSProperties;
+}
+
+export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
+  customStyle,
+}) => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
     const params = new URLSearchParams({
-      client_id: "821700928894-63h51cko8dra16gpl3h2ojjnh8736820.apps.googleusercontent.com",
+      client_id:
+        "821700928894-63h51cko8dra16gpl3h2ojjnh8736820.apps.googleusercontent.com",
       redirect_uri: "http://localhost:5173/auth/google/callback",
       response_type: "code",
       scope: "openid email profile",
@@ -37,7 +44,7 @@ export const GoogleLoginButton = () => {
       type="google"
       onClick={handleLogin}
       icon={GoogleIcon}
-      
+      customStyle={customStyle}
     />
   );
 };

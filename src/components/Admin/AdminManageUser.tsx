@@ -115,8 +115,10 @@ const AdminManageUser: React.FC = () => {
 
 
   const UserRow = ({ user, isSelected, onSelect }: UserRowProps) => {
-    // Xử lý avatar mặc định nếu null
-    const avatarUrl = 'http://localhost:8000/' + user?.avatar || "https://via.placeholder.com/150";
+const avatarUrl =
+  user?.avatar && typeof user.avatar === "string" && user.avatar.includes("googleusercontent")
+    ? user.avatar
+    : `http://localhost:8000/${user?.avatar || ""}`;
     
     const status = user.status === "1" ? "online" : "offline";
     
@@ -133,8 +135,7 @@ const AdminManageUser: React.FC = () => {
             src={avatarUrl}
             alt={`${user.name} avatar`}
             onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "https://via.placeholder.com/150";
+              
             }}
           />
           <div className="ps-3">

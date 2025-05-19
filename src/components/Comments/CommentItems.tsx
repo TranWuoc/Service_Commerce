@@ -169,7 +169,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex items-center gap-3 mb-2">
               {user?.avatar && (
                 <img
-                  src={"http://localhost:8000/" + user?.avatar}
+                  src={ user?.avatar.includes("googleusercontent")
+                  ? user?.avatar :"http://localhost:8000/" + user?.avatar}
                   alt="Avatar"
                   className="w-8 h-8 object-cover rounded-full"
                 />
@@ -203,7 +204,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
       </div>
 
 {(String(currentUser?.id) === String(user_id) || isAdmin) && (
-  <div className="flex gap-3 mt-5 ml-14 justify-end w-[85%]">
+  <div className="flex gap-3 mt-5 ml-14 justify-end w-[75%]">
     
     {/* Nếu là chủ sở hữu thì được sửa */}
     {String(currentUser?.id) === String(user_id) && (
