@@ -1,31 +1,63 @@
 import React, { useEffect, useState } from "react";
 import { fetchRevenueByField } from "../../api/revenueApi";
 import { RevenueByFieldItem } from "../../types/Field";
+import { Button } from "../../components/ui/button";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "../../components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../components/ui/popover";
+import { cn } from "../../lib/utils";
 
 const RevenueField: React.FC = () => {
   const [revenueData, setRevenueData] = useState<RevenueByFieldItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchRevenueByField();
-        if (data) {
-          setRevenueData(data);
-        } else {
-          setError("Dữ liệu trả về không hợp lệ");
-        }
-      } catch (err) {
-        setError("Không thể tải dữ liệu doanh thu");
-        console.error("Lỗi khi tải dữ liệu:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    loadData();
+    setStartDate(firstDayOfMonth);
+    setEndDate(today);
   }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      loadData();
+    }
+  }, [startDate, endDate]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (!startDate || !endDate) return;
+
+      const params = {
+        start_date: startDate.toISOString().split("T")[0],
+        end_date: endDate.toISOString().split("T")[0],
+      };
+
+      const data = await fetchRevenueByField(params);
+      if (data) {
+        setRevenueData(data);
+      } else {
+        setError("Dữ liệu trả về không hợp lệ");
+      }
+    } catch (err) {
+      setError("Không thể tải dữ liệu doanh thu");
+      console.error("Lỗi khi tải dữ liệu:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Hàm định dạng tiền tệ
   const formatCurrency = (amount: number): string => {
@@ -62,15 +94,77 @@ const RevenueField: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 justify-center items-center">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">Thống kê doanh thu sân bóng</h2>
-        <p className="text-gray-600">
-          Doanh thu từ ngày 01/01/2025 đến 30/05/2025
-        </p>
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-semibold">
+            Thống kê doanh thu sân bóng theo tháng
+          </h2>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Từ ngày:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[180px] justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? (
+                      format(startDate, "dd/MM/yyyy")
+                    ) : (
+                      <span>Chọn ngày</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={startDate || undefined}
+                    onSelect={(date) => setStartDate(date ?? null)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Đến ngày:</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[180px] justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? (
+                      format(endDate, "dd/MM/yyyy")
+                    ) : (
+                      <span>Chọn ngày</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={endDate || undefined}
+                    onSelect={(date) => setEndDate(date ?? null)}
+                    initialFocus
+                    fromDate={startDate || undefined} // Ngày kết thúc không được trước ngày bắt đầu
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="overflow-x-auto shadow-md sm:rounded-lg">
+      <div className="overflow-x-auto shadow-md sm:rounded-lg ">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

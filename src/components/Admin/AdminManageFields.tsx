@@ -11,11 +11,9 @@ const { fields, setFields, setSelectedField } = useField();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredFields, setFilteredFields] = useState<Field[]>([]);
   const navigate = useNavigate();
-
-  
-  // State phân trang
+  const { setSelectedField } = useField();
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(12); // 12 thẻ mỗi trang
+  const [itemsPerPage] = useState(12);
 
   useEffect(() => {
     axios
@@ -46,7 +44,7 @@ const { fields, setFields, setSelectedField } = useField();
       );
       setFilteredFields(filtered);
     }
-    setCurrentPage(1); // Reset về trang 1 khi tìm kiếm
+    setCurrentPage(1);
   }, [searchTerm, fields]);
 
   // Tính toán dữ liệu phân trang
@@ -72,9 +70,6 @@ const { fields, setFields, setSelectedField } = useField();
     }
     return address;
   };
-
-
-  // Hàm chuyển trang
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
@@ -104,14 +99,9 @@ const { fields, setFields, setSelectedField } = useField();
             </svg>
           </span>
         </div>
-        <Button
-          text="Thêm mới sân"
-          type="primary"
-          onClick={handleAddField}
-        />
+        <Button text="Thêm mới sân" type="primary" onClick={handleAddField} />
       </div>
 
-      {/* Hiển thị dữ liệu */}
       {filteredFields.length === 0 ? (
         <p>Không có sân nào phù hợp với tìm kiếm.</p>
       ) : (
@@ -123,8 +113,12 @@ const { fields, setFields, setSelectedField } = useField();
                 className="bg-white rounded-lg shadow-md p-4 cursor-pointer hover:shadow-lg transition"
                 onClick={() => handleFieldClick(field)}
               >
-                <h2 className="text-lg font-bold text-gray-800">{field.name}</h2>
-                <p className="text-gray-600">Địa chỉ: {shortenAddress(field.address)}</p>
+                <h2 className="text-lg font-bold text-gray-800">
+                  {field.name}
+                </h2>
+                <p className="text-gray-600">
+                  Địa chỉ: {shortenAddress(field.address)}
+                </p>
                 <p className="text-gray-600">Kiểu sân: {field.category.name}</p>
                 <p className="text-gray-600">
                   Giá: {field.price.toLocaleString()} VND
@@ -151,7 +145,6 @@ const { fields, setFields, setSelectedField } = useField();
           {totalPages > 1 && (
             <div className="flex justify-center mt-8">
               <nav className="flex items-center gap-1">
-                {/* Nút Previous */}
                 <button
                   onClick={() => paginate(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
@@ -160,7 +153,6 @@ const { fields, setFields, setSelectedField } = useField();
                   &lt;
                 </button>
 
-                {/* Các trang */}
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNumber;
                   if (totalPages <= 5) {
@@ -189,7 +181,9 @@ const { fields, setFields, setSelectedField } = useField();
                 })}
 
                 <button
-                  onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    paginate(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="px-3 py-1 rounded-md border border-gray-300 bg-white text-gray-700 disabled:opacity-50"
                 >
