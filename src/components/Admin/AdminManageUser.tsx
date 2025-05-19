@@ -116,7 +116,7 @@ const AdminManageUser: React.FC = () => {
 
   const UserRow = ({ user, isSelected, onSelect }: UserRowProps) => {
     // Xử lý avatar mặc định nếu null
-    const avatarUrl = 'http://localhost:8000/' + user?.avatar || "https://via.placeholder.com/150";
+    const avatarUrl = 'http://localhost:8000/' + user?.avatar;
     
     const status = user.status === "1" ? "online" : "offline";
     
@@ -132,10 +132,13 @@ const AdminManageUser: React.FC = () => {
             className="w-10 h-10 rounded-full"
             src={avatarUrl}
             alt={`${user.name} avatar`}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "https://via.placeholder.com/150";
-            }}
+           onError={(e) => {
+                        // Fallback khi ảnh không tải được
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/default-avatar.png';
+                        target.onerror = null; // Ngăn vòng lặp vô hạn nếu fallback cũng lỗi
+                    }}
+
           />
           <div className="ps-3">
             <div className="text-base font-semibold">{user.name}</div>

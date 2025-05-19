@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Field } from "../../types/Field";
-import { InputField } from "../Shared_components/InputField";
-import { toast, useToast } from "../../hooks/use-toast";
-import LocationInput from "../Shared_components/SearchLocation";
-import axiosInstance from "../../api/axiosInstance";
-import Button from "../Shared_components/Button";
+import { Field } from "../../../types/Field";
+import { InputField } from "../../Shared_components/InputField";
+import { toast, useToast } from "../../../hooks/use-toast";
+import LocationInput from "../../Shared_components/SearchLocation";
+import axiosInstance from "../../../api/axiosInstance";
+import Button from "../../Shared_components/Button";
 import {
   fetchFieldById,
   fetchCategories,
   fetchStates,
   updateField,
   deleteField,
-} from "../../api/fieldApi";
+} from "../../../api/fieldApi";
 import {
   handleImageSelection,
   handleImageDeletion,
   handleImageChange,
   handleDeleteImage,
-} from "../../utils/imageUtils";
+} from "../../../utils/imageUtils";
 
 const UpdateField: React.FC = () => {
   const { fieldId } = useParams<{ fieldId: string }>();

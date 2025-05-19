@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { InputField } from "../Shared_components/InputField";
-import LocationInput from "../Shared_components/SearchLocation";
-import { toast } from "../../hooks/use-toast";
-import axiosInstance from "../../api/axiosInstance";
-import { Field } from "../../types/Field";
-import Button from "../Shared_components/Button";
-import { fetchCategories } from "../../api/fieldApi";
-import { handleImageChange } from "../../utils/imageUtils";
+import { InputField } from "../../Shared_components/InputField";
+import LocationInput from "../../Shared_components/SearchLocation";
+import { toast } from "../../../hooks/use-toast";
+import axiosInstance from "../../../api/axiosInstance";
+import { Field } from "../../../types/Field";
+import Button from "../../Shared_components/Button";
+import { fetchCategories } from "../../../api/fieldApi";
+import { handleImageChange } from "../../../utils/imageUtils";
 interface FieldFormProps {
   onSubmit: (data: Omit<Field, "id">) => void; // Hàm xử lý khi submit
 }

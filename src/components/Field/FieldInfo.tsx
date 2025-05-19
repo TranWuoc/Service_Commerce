@@ -13,8 +13,7 @@ const FieldInfo: React.FC = () => {
   const [showComments, setShowComments] = React.useState(false);
   const { selectedField, setSelectedField } = useField();
   const { user } = useUser();
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; 
-
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   useEffect(() => {
     if (!selectedField) {
@@ -82,7 +81,7 @@ const FieldInfo: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-4 mt-4">
+        <div className="flex flex-col gap-4 ml-16 mt-4 w-[450px]">
           <Button
             onClick={() =>
               navigate(`/admin/manage/updateField/${selectedField.id}`)
@@ -91,16 +90,23 @@ const FieldInfo: React.FC = () => {
             type="primary"
           />
           <Button
+            onClick={() =>
+              navigate(`/admin/manage/timetableField/${selectedField.id}`)
+            }
+            text="Quản lý giờ sân"
+            type="primary"
+          />
+          <Button
             onClick={() => setShowComments(true)}
             text="Bình luận"
             type="tertiary"
           />
-          <CommentOverlay
-        isOpen={showComments}
-        onClose={() => setShowComments(false)}
-        fieldInfo={selectedField}
-      />
         </div>
+          <CommentOverlay
+            isOpen={showComments}
+            onClose={() => setShowComments(false)}
+            fieldInfo={selectedField}
+          />
       </div>
     );
   }
@@ -175,7 +181,6 @@ const FieldInfo: React.FC = () => {
     </>
   );
 };
-
 
 const getStateColor = (stateName: string) => {
   switch (stateName) {
