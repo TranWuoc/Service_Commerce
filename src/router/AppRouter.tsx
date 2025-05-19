@@ -123,20 +123,25 @@ export const AppRouter: React.FC = () => {
    
 
    
-      <Route
-        path={isAdmin ? "/admin/manage/FieldInfo/:id" : "/dashboard/FieldInfo/:id"}
-        element={
-          isAdmin ? (
-            <AdminLayout>
-              <FieldDetails />
-            </AdminLayout>
-          ) : (
+        <Route
+          path="/admin/manage/FieldInfo/:id"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminLayout>
+                <FieldDetails />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/FieldInfo/:id"
+          element={
             <DashboardLayout>
               <FieldDetails />
             </DashboardLayout>
-          )
-        }
-      />
+          }
+        />
             <Route 
         path={isAdmin ? "/admin/Profile" : "/dashboard/Profile"} 
         element={

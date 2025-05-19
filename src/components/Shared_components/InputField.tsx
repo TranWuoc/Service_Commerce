@@ -72,7 +72,7 @@ export const InputField: React.FC<InputFieldProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto mb-6" style={style}>
+    <div className="flex flex-col items-center w-full max-w-[800px] mx-auto mb-6" style={style}>
       <label className="self-start mb-2 text-xl text-black max-sm:text-xl">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}

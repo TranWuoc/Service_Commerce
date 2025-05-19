@@ -309,7 +309,7 @@ if (saved !== null) {
                       price={
                         Number(fields[0].price).toLocaleString("vi-VN") + " đ"
                       }
-                      fieldId={fields.id}
+                      fieldId={fields[0].id}
                     />
                   </div>
                 ) : (
@@ -317,7 +317,7 @@ if (saved !== null) {
                     {fields.map((field: any, idx: number) => (
                       <Inforcard
                         key={idx}
-                        image={field.images?.[0]?.image_url || "/default.jpg"}
+                        image={'http://localhost:8000/' +field.images?.[0]?.image_url || "/default.jpg"}
                         name={field.name}
                         soluong={field.category?.name}
                         vitri={field.address}

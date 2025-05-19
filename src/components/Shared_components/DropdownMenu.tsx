@@ -12,7 +12,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   options,
 }) => {
   return (
-    <div className="flex flex-col items-center w-full max-w-[600px] mx-auto mb-6">
+    <div className="flex flex-col items-center w-full max-w-[800px] mx-auto mb-6">
       <label className="self-start mb-2 text-xl text-black max-sm:text-xl">
         {label}
       </label>

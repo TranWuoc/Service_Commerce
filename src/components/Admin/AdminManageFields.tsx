@@ -58,7 +58,7 @@ const { fields, setFields, setSelectedField } = useField();
   const handleFieldClick = (field: Field) => {
     setSelectedField(field);
     navigate(`/admin/manage/FieldInfo/${field.id}`);
-    console.log('/admin/manage/FieldInfo/${field.id}')
+    
   };
 
   const handleAddField = () => {

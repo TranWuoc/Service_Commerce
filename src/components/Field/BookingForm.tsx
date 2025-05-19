@@ -33,29 +33,35 @@ export const BookingForm = () => {
   const location = useLocation();
   const { user } = useUser();
   const { toast } = useToast();
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>(timeSlots);
+
   const [fields, setFields] = useState<Field[]>([]);
   const [suggestions, setSuggestions] = useState<Field[]>([]);
   const [inputValue, setInputValue] = useState(location.state?.fieldName || "");
   const [formData, setFormData] = useState<BookingFormData>({
     name: location.state?.fieldName || "",
     fieldId: location.state?.fieldId || "",
-    date: "",
+   date: location.state?.date || "", 
     timeSlot: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchFields()
-      .then(setFields)
-      .catch(() =>
-        toast({
-          title: "Lỗi",
-          description: "Không thể tải danh sách sân bóng",
-          variant: "destructive",
-        })
-      );
-  }, [toast]);
+useEffect(() => {
+  // Nếu location có truyền fieldId + fieldName từ trang trước
+  if (location.state?.fieldId && location.state?.fieldName) {
+    const fieldId = location.state.fieldId.toString();
+    const fieldName = location.state.fieldName;
+     const date = location.state.date || "";
+    // Gán trực tiếp input và formData
+    setInputValue(fieldName);
+    setFormData((prev) => ({
+      ...prev,
+      name: fieldName,
+      fieldId: fieldId,
+      date: date
+    }));
+  }
+}, [location.state]);
+
 
   const handleDateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -69,11 +75,12 @@ export const BookingForm = () => {
       return;
     }
 
-    setFormData({ ...formData, date: value });
-
-    // TODO: logic kiểm tra và lọc khung giờ có thể đặt
-  };
-
+    setFormData((prev) => {
+    const updated = { ...prev, date: value };
+    console.log("✅ Updated formData:", updated); // 👉 Debug
+    return updated;
+  });
+};
   // Autosuggest
   const onSuggestionsFetchRequested = ({ value }: { value: string }) => {
     const input = value.trim().toLowerCase();
@@ -146,15 +153,16 @@ export const BookingForm = () => {
     <div className="bg-neutral-100">
       <form
         onSubmit={handleSubmit}
-        className="p-6 mx-auto bg-white rounded-lg max-w-[800px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] h-[95vh] flex flex-col"
+        className="p-6 mx-auto bg-white rounded-lg max-w-[700px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] h-[95vh] flex flex-col"
       >
         <h2 className="mb-3 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col items-center gap-2">
           <div className="flex flex-col w-full">
             <label className="mb-2 text-xl text-black">
               Tên sân <span className="text-red-500 ml-1">*</span>
             </label>
+           
             <Autosuggest
               suggestions={suggestions}
               onSuggestionsFetchRequested={onSuggestionsFetchRequested}
@@ -167,17 +175,25 @@ export const BookingForm = () => {
               value: inputValue,
               onChange: (_, { newValue }) => {
                 setInputValue(newValue);
-                if (newValue.trim() === "") {
-                  setFormData((prev) => ({ ...prev, fieldId: "", name: "" }));
+
+                const matchedField = fields.find(
+                  (f) => f.name.toLowerCase() === newValue.trim().toLowerCase()
+                );
+
+                if (!matchedField) {
+                  setFormData((prev) => ({ ...prev, fieldId: "", name: newValue }));
+                } else {
+                  setFormData((prev) => ({ ...prev, fieldId: matchedField.id.toString(), name: matchedField.name }));
                 }
               },
               className:
                 "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
             }}
             />
+            
           </div>
 
-          <div className="flex flex-col items-center w-full mx-auto">
+          <div className="flex flex-col w-full mt-4">
             <div className="w-full">
               <InputField
                 label="Ngày đặt sân"

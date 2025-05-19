@@ -23,18 +23,20 @@ const Inforcard: React.FC<SanCardProps> = ({
   const handleBooking = () => {
     navigate("/dashboard/booking", {
       state: {
-        fieldId,
+        fieldId: fieldId,
         fieldName: name,
-        _ts: Date.now(), 
+        date: Date.now(), 
       },
       // replace: true,
+      
     });
+   
   };
   return (
     <div className="w-full bg-white rounded-lg shadow hover:shadow-md transition duration-300 p-1 ">
       <div className="w-full h-20 flex items-center justify-center overflow-hidden rounded-md bg-gray-50">
         <img
-          src={image}
+          src={'http://localhost:8000/'+image}
           alt={name}
           className="object-contain h-full"
         />
