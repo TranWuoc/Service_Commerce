@@ -119,7 +119,7 @@ export const AvatarMenu = () => {
 
   return (
     <div className="flex items-center space-x-2">
-      <Avatar alt={user?.name || "User"} src={'http://localhost:8000/' + user?.avatar || "profile-image.jpg"} sx={{ width: 40, height: 40 }} />
+      <Avatar alt={user?.name || "User"}  src={ user?.avatar.includes("googleusercontent")? user?.avatar :"http://localhost:8000/" + user?.avatar} sx={{ width: 40, height: 40 }} />
       <span className="font-medium text-gray-800">
         {loading ? "Loading..." : user?.name || "No Name"}
       </span>

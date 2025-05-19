@@ -102,10 +102,13 @@ export const ProfileInput: React.FC = () => {
     };
   }, [avatarPreview]);
 
-  const getImageUrl = () => {
-    if (avatarPreview) return avatarPreview;
-    return userData.avatar ? `http://localhost:8000/${userData.avatar}` : "profile-image.jpg";
-  };
+const getImageUrl = () => {
+  if (!userData.avatar) return ""; // hoặc trả về ảnh mặc định nếu cần
+
+  return userData.avatar.includes("googleusercontent")
+    ? userData.avatar
+    : `http://localhost:8000/${userData.avatar}`;
+};
 
   return (
     <section className="rounded-2xl border border-solid border-slate-100 bg-white p-6">
