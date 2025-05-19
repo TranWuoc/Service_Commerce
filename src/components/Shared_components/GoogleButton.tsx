@@ -37,6 +37,7 @@ export const GoogleLoginButton = () => {
       type="google"
       onClick={handleLogin}
       icon={GoogleIcon}
+      
     />
   );
 };

@@ -57,7 +57,7 @@ export const LoginForm: React.FC = () => {
 
         </div>
         <div className="mt-3 flex w-full justify-center items-center space-x-2">
-          <GoogleLoginButton customStyle={{ width: "30%", height: "60px" }} /> {/* Đảm bảo cả 2 nút cùng chiều rộng */}
+          <GoogleLoginButton customStyle={{ width: "48%", height: "60px" }} /> {/* Đảm bảo cả 2 nút cùng chiều rộng */}
         </div>
         
       </form>

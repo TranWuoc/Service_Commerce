@@ -18,16 +18,15 @@ export default function FieldTable({
   onSelect,
 }: {
   startDate: string;
-  onSelect: (slot: string) => void;
+  onSelect: (slot: { date: string; slot: string }) => void;
 }) {
   const [selected, setSelected] = useState<{ date: string; slot: string } | null>(null);
 
-  // Tính tuần bắt đầu từ thứ Hai chứa startDate
   const weekdays = useMemo(() => {
     if (!startDate) return [];
 
     const base = new Date(startDate);
-    const weekStart = startOfWeek(base, { weekStartsOn: 1 }); // Thứ Hai
+    const weekStart = startOfWeek(base, { weekStartsOn: 1 }); // Monday
 
     return Array.from({ length: 7 }, (_, i) => {
       const date = addDays(weekStart, i);
@@ -38,7 +37,7 @@ export default function FieldTable({
     });
   }, [startDate]);
 
-  const isBooked = (date: string, slot: string) => false; 
+  const isBooked = (date: string, slot: string) => false;
 
   const isSelected = (date: string, slot: string) =>
     selected?.date === date && selected.slot === slot;
@@ -48,11 +47,11 @@ export default function FieldTable({
 
     if (isSelected(date, slot)) {
       setSelected(null);
-      onSelect("");
+      onSelect({ date: "", slot: "" });
     } else {
       const newSelection = { date, slot };
       setSelected(newSelection);
-      onSelect(`${date}-${slot}`);
+      onSelect(newSelection); // ✅ Truyền object thay vì string
     }
   };
 
@@ -90,8 +89,7 @@ export default function FieldTable({
                       }
                     )}
                     onClick={() => toggleSelect(day.date, value)}
-                  >
-                  </td>
+                  />
                 );
               })}
             </tr>

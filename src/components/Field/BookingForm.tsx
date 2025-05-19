@@ -214,16 +214,16 @@ useEffect(() => {
         {formData.fieldId && formData.date && (
         <div className="flex-grow overflow-auto mt-4">
           
-          <FieldTable
-            startDate={formData.date}
-            onSelect={(slot) => {
-              const parts = slot.split("-");
-              if (parts.length < 5) return;
-
-              const timeSlot = `${parts[3]}-${parts[4]}`;
-              setFormData((prev) => ({ ...prev, timeSlot }));
-            }}
-          />
+<FieldTable
+  startDate={formData.date}
+  onSelect={({ date, slot }) => {
+    setFormData((prev) => ({
+      ...prev,
+      date,
+      timeSlot: slot,
+    }));
+  }}
+/>
         </div>
 )}
         {/* Nút bấm luôn hiện ở dưới */}
