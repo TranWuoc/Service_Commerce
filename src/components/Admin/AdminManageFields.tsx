@@ -11,7 +11,7 @@ const { fields, setFields, setSelectedField } = useField();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredFields, setFilteredFields] = useState<Field[]>([]);
   const navigate = useNavigate();
-  const { setSelectedField } = useField();
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
