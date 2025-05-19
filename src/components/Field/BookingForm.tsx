@@ -45,6 +45,17 @@ export const BookingForm = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+   useEffect(() => {
+    fetchFields()
+      .then(setFields)
+      .catch(() =>
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải danh sách sân bóng",
+          variant: "destructive",
+        })
+      );
+  }, [toast]);
 useEffect(() => {
   // Nếu location có truyền fieldId + fieldName từ trang trước
   if (location.state?.fieldId && location.state?.fieldName) {
@@ -151,97 +162,107 @@ useEffect(() => {
 
   return (
     <div className="bg-neutral-100">
-      <form
-        onSubmit={handleSubmit}
-        className="p-6 mx-auto bg-white rounded-lg max-w-[700px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] h-[95vh] flex flex-col"
-      >
-        <h2 className="mb-3 text-3xl text-center">MẪU ĐẶT SÂN</h2>
+ <form
+  onSubmit={handleSubmit}
+  className={`mx-auto bg-white rounded-lg max-w-[700px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] flex flex-col transition-all duration-300 ${
+    formData.fieldId && formData.date ? "max-h-[90vh] h-[90vh]" : "h-auto"
+  }`}
+>
+  <h2 className="p-6 pb-2 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex flex-col w-full">
-            <label className="mb-2 text-xl text-black">
-              Tên sân <span className="text-red-500 ml-1">*</span>
-            </label>
-           
-            <Autosuggest
-              suggestions={suggestions}
-              onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-              onSuggestionsClearRequested={onSuggestionsClearRequested}
-              getSuggestionValue={(s: Field) => s.name}
-              renderSuggestion={(s: Field) => <div className="p-2 bg-gray-300 text-white-500">{s.name}</div>}
-              onSuggestionSelected={onSuggestionSelected}
-              inputProps={{
-              placeholder: "Nhập tên sân...",
-              value: inputValue,
-              onChange: (_, { newValue }) => {
-                setInputValue(newValue);
+  {/* Nội dung chính - cuộn được nếu timetable xuất hiện */}
+  <div className="flex-grow overflow-auto px-6 space-y-4">
+    {/* --- Tên sân --- */}
+    <div className="flex flex-col w-full">
+      <label className="mb-2 text-xl text-black">
+        Tên sân <span className="text-red-500 ml-1">*</span>
+      </label>
+      <Autosuggest
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+        onSuggestionsClearRequested={onSuggestionsClearRequested}
+        getSuggestionValue={(s: Field) => s.name}
+        renderSuggestion={(s: Field) => (
+          <div className="p-2 bg-gray-300 text-white-500">{s.name}</div>
+        )}
+        onSuggestionSelected={onSuggestionSelected}
+        inputProps={{
+          placeholder: "Nhập tên sân...",
+          value: inputValue,
+          onChange: (_, { newValue }) => {
+            setInputValue(newValue);
+            const matchedField = fields.find(
+              (f) =>
+                f.name.toLowerCase() === newValue.trim().toLowerCase()
+            );
+            if (!matchedField) {
+              setFormData((prev) => ({
+                ...prev,
+                fieldId: "",
+                name: newValue,
+              }));
+            } else {
+              setFormData((prev) => ({
+                ...prev,
+                fieldId: matchedField.id.toString(),
+                name: matchedField.name,
+              }));
+            }
+          },
+          className:
+            "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
+        }}
+      />
+    </div>
 
-                const matchedField = fields.find(
-                  (f) => f.name.toLowerCase() === newValue.trim().toLowerCase()
-                );
+    {/* --- Ngày đặt sân --- */}
+    <div className="flex flex-col w-full mt-2">
+      <InputField
+        label="Ngày đặt sân"
+        type="date"
+        value={formData.date}
+        required
+        name="date"
+        onChange={handleDateChange}
+        min={getMinBookingDate()}
+        onKeyDown={(e) => e.preventDefault()}
+        className="px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full"
+      />
+    </div>
 
-                if (!matchedField) {
-                  setFormData((prev) => ({ ...prev, fieldId: "", name: newValue }));
-                } else {
-                  setFormData((prev) => ({ ...prev, fieldId: matchedField.id.toString(), name: matchedField.name }));
-                }
-              },
-              className:
-                "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
-            }}
-            />
-            
-          </div>
+    {/* --- Timetable --- */}
+    {formData.fieldId && formData.date && (
+      <div className="mt-2">
+        <FieldTable
+          startDate={formData.date}
+          onSelect={({ date, slot }) => {
+            setFormData((prev) => ({
+              ...prev,
+              date,
+              timeSlot: slot,
+            }));
+          }}
+        />
+      </div>
+    )}
+  </div>
 
-          <div className="flex flex-col w-full mt-4">
-            <div className="w-full">
-              <InputField
-                label="Ngày đặt sân"
-                type="date"
-                value={formData.date}
-                required
-                name="date"
-                onChange={handleDateChange}
-                min={getMinBookingDate()}
-                onKeyDown={(e) => e.preventDefault()}
-                className="px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Bọc FieldTable trong div có flex-grow và overflow-auto để scroll */}
-        {formData.fieldId && formData.date && (
-        <div className="flex-grow overflow-auto mt-4">
-          
-<FieldTable
-  startDate={formData.date}
-  onSelect={({ date, slot }) => {
-    setFormData((prev) => ({
-      ...prev,
-      date,
-      timeSlot: slot,
-    }));
-  }}
-/>
-        </div>
-)}
-        {/* Nút bấm luôn hiện ở dưới */}
-        <div className="flex gap-4 justify-center mt-4">
-          <Button
-            variant="tertiary"
-            text={isSubmitting ? "Đang đặt sân..." : "Đặt sân"}
-            disabled={isSubmitting}
-            onClick={handleSubmit}
-          />
-          <Button
-            variant="tertiary"
-            text="Huỷ"
-            disabled={isSubmitting}
-            onClick={handleCancel}
-          />
-        </div>
-      </form>
+  {/* --- Buttons luôn ở dưới --- */}
+  <div className="mt-auto px-6 pb-6 pt-4 flex gap-4 justify-center">
+    <Button
+      variant="tertiary"
+      text={isSubmitting ? "Đang đặt sân..." : "Đặt sân"}
+      disabled={isSubmitting}
+      onClick={handleSubmit}
+    />
+    <Button
+      variant="tertiary"
+      text="Huỷ"
+      disabled={isSubmitting}
+      onClick={handleCancel}
+    />
+  </div>
+</form>
     </div>
   );
 };
