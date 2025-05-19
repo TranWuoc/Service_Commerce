@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Autosuggest from "react-autosuggest";
 import { useLocation } from "react-router-dom";
-
+import { fetchBookedTimeSlots } from "../../actions/bookingActions";
 import Button from "../Shared_components/Button";
 import { InputField } from "../Shared_components/InputField";
-
+import FieldTable from "../Shared_components/Timetable";
 import {
   fetchFields,
   createBooking,
@@ -33,7 +33,7 @@ export const BookingForm = () => {
   const location = useLocation();
   const { user } = useUser();
   const { toast } = useToast();
-
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>(timeSlots);
   const [fields, setFields] = useState<Field[]>([]);
   const [suggestions, setSuggestions] = useState<Field[]>([]);
   const [inputValue, setInputValue] = useState(location.state?.fieldName || "");
@@ -57,18 +57,21 @@ export const BookingForm = () => {
       );
   }, [toast]);
 
-  // Xử lý thay đổi ngày, kiểm tra ngày hợp lệ
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDateChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (validateBookingDate(value)) {
-      setFormData({ ...formData, date: value });
-    } else {
+
+    if (!validateBookingDate(value)) {
       toast({
         title: "Lỗi",
         description: "Ngày đặt sân phải từ ngày hiện tại trở đi.",
         variant: "destructive",
       });
+      return;
     }
+
+    setFormData({ ...formData, date: value });
+
+    // TODO: logic kiểm tra và lọc khung giờ có thể đặt
   };
 
   // Autosuggest
@@ -143,7 +146,7 @@ export const BookingForm = () => {
     <div className="bg-neutral-100">
       <form
         onSubmit={handleSubmit}
-        className="p-6 mx-auto bg-white rounded-lg max-w-[800px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] h-[70vh] flex flex-col"
+        className="p-6 mx-auto bg-white rounded-lg max-w-[800px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] h-[95vh] flex flex-col"
       >
         <h2 className="mb-3 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
@@ -157,61 +160,58 @@ export const BookingForm = () => {
               onSuggestionsFetchRequested={onSuggestionsFetchRequested}
               onSuggestionsClearRequested={onSuggestionsClearRequested}
               getSuggestionValue={(s: Field) => s.name}
-              renderSuggestion={(s: Field) => <div className="p-2">{s.name}</div>}
+              renderSuggestion={(s: Field) => <div className="p-2 bg-gray-300 text-white-500">{s.name}</div>}
               onSuggestionSelected={onSuggestionSelected}
               inputProps={{
-                placeholder: "Nhập tên sân...",
-                value: inputValue,
-                onChange: (_, { newValue }) => setInputValue(newValue),
-                className:
-                  "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
-              }}
+              placeholder: "Nhập tên sân...",
+              value: inputValue,
+              onChange: (_, { newValue }) => {
+                setInputValue(newValue);
+                if (newValue.trim() === "") {
+                  setFormData((prev) => ({ ...prev, fieldId: "", name: "" }));
+                }
+              },
+              className:
+                "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full",
+            }}
             />
           </div>
 
           <div className="flex flex-col items-center w-full mx-auto">
-            <div className="flex w-full gap-6">
-              <div className="flex-1">
-                <InputField
-                  label="Ngày đặt sân"
-                  type="date"
-                  value={formData.date}
-                  required
-                  name="date"
-                  onChange={handleDateChange}
-                  min={getMinBookingDate()}
-                  onKeyDown={(e) => e.preventDefault()}
-                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[40px] border-[2.5px] border-neutral-300 focus:outline-none focus:border-amber-500 cursor-pointer"
-                />
-              </div>
-
-              <div className="flex-1">
-                <label className="self-start mb-2 text-xl text-black">
-                  Giờ đặt <span className="text-red-500 ml-1">*</span>
-                </label>
-                <select
-                  value={formData.timeSlot}
-                  onChange={(e) =>
-                    setFormData({ ...formData, timeSlot: e.target.value })
-                  }
-                  className="px-8 py-0 w-full text-2xl bg-white rounded-xl h-[43px] border-[2.5px] border-neutral-300 focus:outline-none focus:border-amber-500 cursor-pointer mt-1"
-                  required
-                >
-                  <option value="" disabled>
-                    Chọn khung giờ
-                  </option>
-                  {timeSlots.map((slot) => (
-                    <option key={slot.value} value={slot.value}>
-                      {slot.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="w-full">
+              <InputField
+                label="Ngày đặt sân"
+                type="date"
+                value={formData.date}
+                required
+                name="date"
+                onChange={handleDateChange}
+                min={getMinBookingDate()}
+                onKeyDown={(e) => e.preventDefault()}
+                className="px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-full"
+              />
             </div>
           </div>
         </div>
 
-        <div className="flex gap-4 justify-center mt-auto pt-4">
+        {/* Bọc FieldTable trong div có flex-grow và overflow-auto để scroll */}
+        {formData.fieldId && formData.date && (
+        <div className="flex-grow overflow-auto mt-4">
+          
+          <FieldTable
+            startDate={formData.date}
+            onSelect={(slot) => {
+              const parts = slot.split("-");
+              if (parts.length < 5) return;
+
+              const timeSlot = `${parts[3]}-${parts[4]}`;
+              setFormData((prev) => ({ ...prev, timeSlot }));
+            }}
+          />
+        </div>
+)}
+        {/* Nút bấm luôn hiện ở dưới */}
+        <div className="flex gap-4 justify-center mt-4">
           <Button
             variant="tertiary"
             text={isSubmitting ? "Đang đặt sân..." : "Đặt sân"}

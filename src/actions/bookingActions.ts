@@ -84,3 +84,17 @@ export const validateBookingDate = (dateStr: string): boolean => {
 
   return selectedDate >= today;
 };
+export const fetchBookedTimeSlots = async (
+  fieldId: string,
+  date: string
+): Promise<{ date_start: string; date_end: string }[]> => {
+  try {
+    const res = await axiosInstance.get(
+      `/booked-time-slots/uuid-${fieldId}?date=${date}`
+    );
+    return res.data.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy time slot đã đặt:", error);
+    return [];
+  }
+};

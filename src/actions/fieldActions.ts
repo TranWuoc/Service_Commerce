@@ -32,8 +32,8 @@ export const fetchFields = async (
       (field: any) => field.state?.id === "state-001"
     );
   } catch (error) {
-    console.error("Lỗi khi lọc sân:", error);
-    return [];
+    return fetchAllFields();
+
   }
 };
 
