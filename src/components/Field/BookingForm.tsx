@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { InputField } from "../Shared_components/InputField";
 import Button from "../Shared_components/Button";
 import { useLocation } from "react-router-dom";
@@ -36,6 +36,15 @@ export const BookingForm = () => {
     date: "",
     timeSlot: "",
   });
+useEffect(() => {
+  if (location.state?.fieldId && location.state?.fieldName) {
+    setFormData((prev) => ({
+      ...prev,
+      fieldId: location.state.fieldId,
+      name: location.state.fieldName,
+    }));
+  }
+}, [location.state]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
