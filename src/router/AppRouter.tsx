@@ -24,7 +24,7 @@ import AdminManageUser from "../components/Admin/AdminManageUser";
 import RevenueField from "../components/Admin/RevenueField";
 import TopUsers from "../components/Admin/TopUsers";
 import TimeTableField from "../components/Admin/AdminManageTimeTableField";
-
+import Chat from "../components/Admin/Chat";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
@@ -240,7 +240,16 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
+<Route
+  path="/admin/chat"
+  element={
+    <ProtectedRoute adminOnly>
+      <AdminLayout>
+        <Chat />
+      </AdminLayout>
+    </ProtectedRoute>
+  }
+/>
       {/* Redirect fallback */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
