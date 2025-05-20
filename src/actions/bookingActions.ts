@@ -84,17 +84,25 @@ export const validateBookingDate = (dateStr: string): boolean => {
 
   return selectedDate >= today;
 };
-export const fetchBookedTimeSlots = async (
-  fieldId: string,
-  date: string
-): Promise<{ date_start: string; date_end: string }[]> => {
+export const fetchWeeklyBookings = async (
+  date: string,
+  fieldId: string
+): Promise<
+  {
+    date_start: string;
+    date_end: string;
+  }[]
+> => {
   try {
-    const res = await axiosInstance.get(
-      `/booked-time-slots/uuid-${fieldId}?date=${date}`
-    );
-    return res.data.data;
+    const res = await axiosInstance.get("/bookings/weekly", {
+      params: {
+        date,
+        field_id: fieldId,
+      },
+    });
+    return res.data.bookings; // đảm bảo response structure đúng
   } catch (error) {
-    console.error("Lỗi khi lấy time slot đã đặt:", error);
-    return [];
+    console.error("Lỗi khi lấy lịch đặt theo tuần:", error);
+    throw error;
   }
 };

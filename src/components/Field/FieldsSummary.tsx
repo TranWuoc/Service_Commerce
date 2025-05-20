@@ -152,7 +152,7 @@ export function FieldsSummary({ onStartLoading, onStopLoading }: { onStartLoadin
         <h2 className="text-2xl pl-5 font-bold text-gray-800">Danh sách sân bóng</h2>
         <button
           onClick={() => setShowFilters((prev) => !prev)}
-          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+          className="p-2 mr-3 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
           title="Lọc loại sân"
         >
           <FaFilter />

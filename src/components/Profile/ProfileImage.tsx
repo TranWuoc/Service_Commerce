@@ -12,7 +12,7 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
   onImageChange,
 }) => {
   return (
-    <div className="relative h-[120px] w-[120px] overflow-hidden rounded-full">
+    <div className="px-2  relative h-[100px] w-[100px] overflow-hidden rounded-full">
       <img src={imageUrl} alt="Profile" className="size-full object-cover" />
       
     </div>

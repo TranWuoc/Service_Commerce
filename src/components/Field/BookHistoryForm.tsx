@@ -26,7 +26,7 @@ const BookHistoryForm: React.FC = () => {
           name: booking.field.name,
           rawDate: booking.date_start,
           date: formatDate(booking.date_start),
-          price: booking.field.price ,
+          price: booking.receipt.total_price ,
           status: isPaid ? "Đã thanh toán cọc" : "Chưa thanh toán cọc",
           receiptUrl: isPaid ? null : booking.receipt?.payment_url,
         
@@ -95,7 +95,7 @@ const BookHistoryForm: React.FC = () => {
           setSelectedId(null);
         }}
         onConfirm={confirmCancel}
-        confirmText="Hủy đặtđặt sân"
+        confirmText="Hủy đặt"
       />
     </div>
   );

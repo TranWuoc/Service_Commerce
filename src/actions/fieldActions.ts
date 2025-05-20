@@ -52,7 +52,7 @@ export const getLocation = (): Promise<{ lat: string; lng: string }> => {
         });
       },
       (err) => reject(err),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });
 };

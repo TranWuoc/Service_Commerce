@@ -25,27 +25,34 @@ import RevenueField from "../components/Admin/RevenueField";
 import TopUsers from "../components/Admin/TopUsers";
 import TimeTableField from "../components/Admin/AdminManageTimeTableField";
 import Chat from "../components/Admin/Chat";
+import { useAuth } from "../hooks/useAuth";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-
+const { isAuthenticated, loading } = useAuth();
   useEffect(() => {
     const storedIsAdmin = localStorage.getItem("isAdmin");
+    
     setIsAdmin(storedIsAdmin === "true");
   }, []);
 
   if (isAdmin === null) {
     return <div>Loading...</div>; // Hoặc có thể trả về loading spinner
-  }
-
-  return (
-    <Routes>
+  };
+return(
+  <Routes>
       {/* Public Routes */}
       <Route
         path="/login"
         element={
-          <AuthLayout>
-            <Login />
-          </AuthLayout>
+          !isAuthenticated ? (
+            <AuthLayout>
+              <Login />
+            </AuthLayout>
+          ) : isAdmin ? (
+            <Navigate to="/admin" replace />
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         }
       />
       <Route
@@ -256,4 +263,5 @@ export const AppRouter: React.FC = () => {
     </Routes>
   );
 };
+
 export default AppRouter;

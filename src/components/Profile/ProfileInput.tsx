@@ -111,16 +111,15 @@ const getImageUrl = () => {
 };
 
   return (
-    <section className="rounded-2xl border border-solid border-slate-100 bg-white p-6">
+    <section className="rounded-2xl border border-solid border-slate-100 bg-white p-4 max-w-[900px] mx-auto">
+
       <ProfileHeader
-        name={tempFormData.name}
-        memberSince="January 2024"
+        name={userData.name}
         imageUrl={getImageUrl()}
-        onImageChange={() => {}}
       />
 
       {isEditing && (
-        <div className="my-4">
+        <div className="my-4 px-10">
           <label className="block font-medium mb-1">Thay ảnh đại diện</label>
           <input
             type="file"
@@ -138,6 +137,7 @@ const getImageUrl = () => {
           value={tempFormData.name}
           onChange={handleInputChange("name")}
           disabled={!isEditing}
+          
         />
         <InputField
           label="Email"

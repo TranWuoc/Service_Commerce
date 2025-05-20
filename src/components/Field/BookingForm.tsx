@@ -236,6 +236,7 @@ useEffect(() => {
       <div className="mt-2">
         <FieldTable
           startDate={formData.date}
+          fieldId={formData.fieldId}
           onSelect={({ date, slot }) => {
             setFormData((prev) => ({
               ...prev,

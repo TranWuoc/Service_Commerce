@@ -6,13 +6,6 @@ interface FieldsTableProps {
 }
 
 export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
-  const isCancelable = (dateStr: string) => {
-    const startDate = new Date(dateStr);
-    const nowPlus2Days = new Date();
-    nowPlus2Days.setDate(nowPlus2Days.getDate() + 2);
-    return startDate > nowPlus2Days;
-  };
-
   const isPastDate = (dateStr: string) => {
     const bookingDate = new Date(dateStr);
     const now = new Date();
@@ -21,9 +14,10 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, string> = {
-      "Đã thanh toán cọc": "bg-green-100 text-green-600",
-      "Chưa thanh toán cọc ": "bg-yellow-100 text-yellow-700",
-      "Đã thanh toán": "bg-blue-100 text-blue-600", 
+      "Đã thanh toán cọc": "bg-blue-100 text-blue-600",
+      "Chưa thanh toán cọc": "bg-yellow-100 text-yellow-700",
+      "Đã thanh toán": "bg-blue-100 text-blue-600",
+      "Đã thuê": "bg-green-200 text-green-600",
     };
     return statusMap[status.trim()] || "bg-gray-100 text-gray-500";
   };
@@ -40,7 +34,8 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
 
       {rows.length > 0 ? (
         rows.map((row, index) => {
-          const displayStatus = isPastDate(row.rawDate) ? "Đã thanh toán cọc" : row.status?.trim();
+          const isPast = isPastDate(row.rawDate);
+          const displayStatus = isPast ? "Đã thuê" : row.status?.trim();
 
           return (
             <div
@@ -58,14 +53,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
               </div>
 
               <div>
-                {displayStatus === "Chưa thanh toán cọc" && row.receiptUrl ? (
-                  <button
-                    onClick={() => window.open(row.receiptUrl, "_blank")}
-                    className="px-2 py-1 text-sm bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-                  >
-                    Thanh toán
-                  </button>
-                ) : isCancelable(row.rawDate) && displayStatus !== "Đã thanh toán cọc" ? (
+                {!isPast ? (
                   <button
                     onClick={() => onCancel(row.id)}
                     className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
