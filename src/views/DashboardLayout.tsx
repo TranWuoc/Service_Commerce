@@ -121,8 +121,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           {/* Main content */}
           <div className="flex flex-col w-full ">
             <div className="relative flex-1 pl-5 mt-10">
-              {React.isValidElement(children)? React.cloneElement(children, {onStartLoading: handleStartLoading,onStopLoading: handleStopLoading,location,})
-          : children}
+              {React.isValidElement(children)
+  ? React.cloneElement(children, {
+      onStartLoading: handleStartLoading,
+      onStopLoading: handleStopLoading,
+      location,
+    })
+  : Array.isArray(children)
+  ? children.map((child, index) =>
+      React.isValidElement(child)
+        ? React.cloneElement(child, {
+            key: child.key || index,
+            onStartLoading: handleStartLoading,
+            onStopLoading: handleStopLoading,
+            location,
+          })
+        : child
+    )
+  : children}
+
       </div>
           </div>
         </main>

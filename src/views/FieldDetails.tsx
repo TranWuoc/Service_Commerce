@@ -64,7 +64,7 @@ const FieldDetails: React.FC = () => {
         {
           id: "4",
           image_url:
-            "https://images.pexels.com/photos/863105/pexels-photo-863105.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+            "/mu.jpg",
         },
         {
           id: "5",

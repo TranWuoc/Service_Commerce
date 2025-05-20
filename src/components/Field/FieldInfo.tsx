@@ -164,35 +164,6 @@ const FieldInfo: React.FC = () => {
                 <div className="flex gap-1 text-lg text-slate-800">
                   <div className="font-medium">{field.name}</div>
                 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 <div className="flex items-center gap-1 mt-2 text-base text-gray-600">
                   <PhoneIcon className="w-5 h-5 text-gray-600" />
                   <span>{"0933290303"}</span>

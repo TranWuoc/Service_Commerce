@@ -12,7 +12,7 @@ import {
   getMinBookingDate,
   validateBookingDate,
 } from "../../actions/bookingActions";
-
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { useToast } from "../../hooks/use-toast";
 
@@ -33,7 +33,7 @@ export const BookingForm = () => {
   const location = useLocation();
   const { user } = useUser();
   const { toast } = useToast();
-
+  const navigate = useNavigate();
   const [fields, setFields] = useState<Field[]>([]);
   const [suggestions, setSuggestions] = useState<Field[]>([]);
   const [inputValue, setInputValue] = useState(location.state?.fieldName || "");
@@ -158,6 +158,7 @@ useEffect(() => {
   const handleCancel = () => {
     setFormData({ name: "", fieldId: "", date: "", timeSlot: "" });
     setInputValue("");
+    navigate("/dashboard");
   };
 
   return (
