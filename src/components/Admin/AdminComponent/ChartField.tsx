@@ -89,16 +89,16 @@ const StatisticUntilDate: React.FC = () => {
         ],
       },
       options: {
-        indexAxis: "y", // Đặt trục ngang
+        indexAxis: "y", 
         responsive: true,
         plugins: {
           legend: {
-            display: false, // Ẩn chú thích
+            display: false, 
           },
           tooltip: {
             callbacks: {
               label: function (context) {
-                // return `${context.parsed.x} lượt đặt`;
+                return `${context.parsed.x} lượt đặt`;
               },
             },
           },

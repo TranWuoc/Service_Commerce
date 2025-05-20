@@ -129,10 +129,15 @@ const FieldInfo: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex gap-4 mt-4">
+          <div className="flex flex-col gap-4 mt-4 ml-16">
             <Button
               onClick={() => navigate(`/admin/manage/updateField/${field.id}`)}
               text="Chỉnh sửa sân"
+              type="primary"
+            />
+            <Button
+              onClick={() => navigate(`/admin/manage/FieldInfo/timetable/${field.id}`)}
+              text="Quản lý khung giờ"
               type="primary"
             />
             <Button
