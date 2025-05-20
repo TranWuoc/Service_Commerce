@@ -171,16 +171,17 @@ const getImageUrl = () => {
           />
         ) : (
           <>
-            <Button
-              onClick={handleCancelClick}
-              className="bg-gray-500 hover:bg-gray-600 text-white"
-              text="Hủy"
-            />
-            <Button
+             <Button
               onClick={handleUpdateClick}
-              className="bg-green-500 hover:bg-green-600 text-white"
+              type="primary"
               text="Cập nhật"
             />
+            <Button
+              type= "secondary"
+              onClick={handleCancelClick}
+              text="Hủy"
+            />
+         
           </>
         )}
       </div>

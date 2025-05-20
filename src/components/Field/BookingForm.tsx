@@ -88,7 +88,7 @@ useEffect(() => {
 
     setFormData((prev) => {
     const updated = { ...prev, date: value };
-    console.log("✅ Updated formData:", updated); // 👉 Debug
+   
     return updated;
   });
 };
@@ -250,13 +250,13 @@ useEffect(() => {
   {/* --- Buttons luôn ở dưới --- */}
   <div className="mt-auto px-6 pb-6 pt-4 flex gap-4 justify-center">
     <Button
-      variant="tertiary"
-      text={isSubmitting ? "Đang đặt sân..." : "Đặt sân"}
+      type="tertiary"
+      text={isSubmitting ? "Đang đặt sân..." : "Xác nhận"}
       disabled={isSubmitting}
       onClick={handleSubmit}
     />
     <Button
-      variant="tertiary"
+      type="secondary"
       text="Huỷ"
       disabled={isSubmitting}
       onClick={handleCancel}

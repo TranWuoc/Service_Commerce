@@ -67,7 +67,7 @@ export function MainHeaderCard({ field }: MainHeaderCardProps) {
             }
           />
         ) : (
-          <Button text="Select Field" type="primary" onClick={handleSelectField} />
+          <Button text="Xem chi tiết" type="primary" onClick={handleSelectField} />
         )}
       </div>
     </article>

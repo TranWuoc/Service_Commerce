@@ -21,8 +21,8 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, string> = {
-      "Đã thuê": "bg-green-100 text-green-600",
-      "Chưa thanh toán": "bg-yellow-100 text-yellow-700",
+      "Đã thanh toán cọc": "bg-green-100 text-green-600",
+      "Chưa thanh toán cọc ": "bg-yellow-100 text-yellow-700",
       "Đã thanh toán": "bg-blue-100 text-blue-600", 
     };
     return statusMap[status.trim()] || "bg-gray-100 text-gray-500";
@@ -40,7 +40,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
 
       {rows.length > 0 ? (
         rows.map((row, index) => {
-          const displayStatus = isPastDate(row.rawDate) ? "Đã thuê" : row.status?.trim();
+          const displayStatus = isPastDate(row.rawDate) ? "Đã thanh toán cọc" : row.status?.trim();
 
           return (
             <div
@@ -58,14 +58,14 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
               </div>
 
               <div>
-                {displayStatus === "Chưa thanh toán" && row.receiptUrl ? (
+                {displayStatus === "Chưa thanh toán cọc" && row.receiptUrl ? (
                   <button
                     onClick={() => window.open(row.receiptUrl, "_blank")}
                     className="px-2 py-1 text-sm bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
                   >
                     Thanh toán
                   </button>
-                ) : isCancelable(row.rawDate) && displayStatus !== "Đã thuê" ? (
+                ) : isCancelable(row.rawDate) && displayStatus !== "Đã thanh toán cọc" ? (
                   <button
                     onClick={() => onCancel(row.id)}
                     className="px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"
