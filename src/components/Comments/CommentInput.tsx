@@ -100,7 +100,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId, par
         )}
       </div>
 
-      <div className="flex justify-end mt-3">
+      <div className="flex justify-end mt-3 gap-3">
         <Button
           text="Gửi"
           type="primary"
@@ -114,6 +114,11 @@ export const CommentInput: React.FC<CommentInputProps> = ({ fieldId, userId, par
             fontSize: isReply ? "0.875rem" : "1rem",
           }}
         />
+        <Button
+  text="Hủy"
+  type="secondary"
+  onClick={oncancel || (() => setComment(""))}
+/>
       </div>
     </div>
   );
