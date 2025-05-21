@@ -34,7 +34,6 @@ const AdminStatistics: React.FC = () => {
     const loadRevenue = async () => {
       try {
         const revenueData = await fetchRevenueByField();
-        console.log("Doanh thu theo sân:", revenueData);
         const total = revenueData.reduce(
           (sum: number, item: any) => sum + item.total_revenue,
           0,

@@ -31,7 +31,6 @@ const StatisticUntilDate: React.FC = () => {
     const fetchData = async () => {
       try {
         const data = await fetchUntilDate();
-        console.log("Dữ liệu thống kê:", data);
         if (data) {
           setChartData(data);
         }

@@ -12,20 +12,26 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { Button } from "../../components/ui/button";
+import { toast } from "../../hooks/use-toast";
+import { ConfirmModal } from "../Shared_components/ConfirmModal";
 
-  interface UserRowProps {
-    user: User;
-    isSelected: boolean;
-    onSelect: (id: string) => void; 
-  }
+interface UserRowProps {
+  user: User;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+}
 
 const AdminManageUser: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]); 
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = React.useState("bottom");
+  const [confirmModal, setConfirmModal] = useState<{
+    visible: boolean;
+    user: User | null;
+  }>({ visible: false, user: null });
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -44,6 +50,36 @@ const AdminManageUser: React.FC = () => {
 
     loadUsers();
   }, []);
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No access token found");
+      }
+
+      const response = await fetch(
+        `http://localhost:8000/api/user/delete/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete user");
+      }
+
+      // Cập nhật danh sách người dùng sau khi xoá thành công
+      setUsers(users.filter((user) => user.id !== userId));
+      setSelectedUsers(selectedUsers.filter((id) => id !== userId));
+    } catch (err) {
+      setError("Failed to delete user");
+      console.error("Error deleting user:", err);
+    }
+  };
 
   const toggleUserSelection = (userId: string) => {
     // Thay đổi tham số từ number sang string
@@ -67,7 +103,6 @@ const AdminManageUser: React.FC = () => {
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
 
   const StatusIndicator = ({ status }: { status: "online" | "offline" }) => (
     <div className="flex items-center">
@@ -98,12 +133,6 @@ const AdminManageUser: React.FC = () => {
     </svg>
   );
 
-  const handleEditUser = (userId: string) => {
-    // Xử lý điều hướng đến trang chỉnh sửa user
-    console.log("Edit user:", userId);
-    // navigate(`/admin/users/edit/${userId}`);
-  };
-
   if (loading) {
     return <div className="p-6 text-center">Loading users...</div>;
   }
@@ -112,17 +141,53 @@ const AdminManageUser: React.FC = () => {
     return <div className="p-6 text-red-500 text-center">{error}</div>;
   }
 
+  const handleStatusChange = (value: string, user: User) => {
+    if (value === "inactive") {
+      setConfirmModal({ visible: true, user });
+    }
+  };
 
+  const handleConfirmDelete = async () => {
+    if (confirmModal.user) {
+      await deleteUser(confirmModal.user.id);
+      toast({
+        title: "Success",
+        description: `User ${confirmModal.user.name} has been deleted.`,
+        variant: "success2",
+      });
+    }
+    setConfirmModal({ visible: false, user: null });
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmModal({ visible: false, user: null });
+  };
 
   const UserRow = ({ user, isSelected, onSelect }: UserRowProps) => {
-const avatarUrl =
-  user?.avatar && typeof user.avatar === "string" && user.avatar.includes("googleusercontent")
-    ? user.avatar
-    : `http://localhost:8000/${user?.avatar || ""}`;
-    
+    const avatarUrl =
+      user?.avatar &&
+      typeof user.avatar === "string" &&
+      user.avatar.includes("googleusercontent")
+        ? user.avatar
+        : `http://localhost:8000/${user?.avatar || ""}`;
+
     const status = user.status === "1" ? "online" : "offline";
-    
+
     const position = user.is_admin === 1 ? "Admin" : "User";
+
+    // const handleStatusChange = (value: string) => {
+    //   if (value === "inactive") {
+    //     // Xác nhận trước khi xoá
+    //     if (window.confirm(`Are you sure you want to delete user ${user.name}?`)) {
+    //       deleteUser(user.id);
+    //       toast({
+    //         title: "Success",
+    //         description: `User ${user.name} has been deleted.`,
+    //         variant: "success2",
+    //       });
+    //     }
+    //   }
+    // };
 
     return (
       <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
@@ -134,9 +199,7 @@ const avatarUrl =
             className="w-10 h-10 rounded-full"
             src={avatarUrl}
             alt={`${user.name} avatar`}
-            onError={(e) => {
-              
-            }}
+            onError={(e) => {}}
           />
           <div className="ps-3">
             <div className="text-base font-semibold">{user.name}</div>
@@ -156,13 +219,13 @@ const avatarUrl =
               <DropdownMenuLabel>Chọn trạng thái tài khoản</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={setPosition}
+                value={status}
+                onValueChange={(value) => handleStatusChange(value, user)}
               >
-                <DropdownMenuRadioItem value="bottom">
+                <DropdownMenuRadioItem value="online">
                   Active
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="right">
+                <DropdownMenuRadioItem value="inactive">
                   Inactive
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
@@ -172,7 +235,6 @@ const avatarUrl =
       </tr>
     );
   };
-
 
   return (
     <div className="relative overflow-x-auto shadow-md rounded-lg mt-8 mr-8">
@@ -192,6 +254,20 @@ const avatarUrl =
           />
         </div>
       </div>
+
+      <ConfirmModal
+        visible={confirmModal.visible}
+        title="Xác nhận xóa người dùng"
+        message={
+          confirmModal.user
+            ? `Bạn có chắc chắn muốn xóa user ${confirmModal.user.name}?`
+            : ""
+        }
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        confirmText="Xóa"
+        cancelText="Hủy"
+      />
 
       {/* Users Table */}
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">

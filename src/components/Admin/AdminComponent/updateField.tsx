@@ -19,6 +19,7 @@ import {
   handleImageChange,
   handleDeleteImage,
 } from "../../../utils/imageUtils";
+import { ConfirmModal } from "../../Shared_components/ConfirmModal";
 
 const UpdateField: React.FC = () => {
   const { fieldId } = useParams<{ fieldId: string }>();
@@ -30,6 +31,7 @@ const UpdateField: React.FC = () => {
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -48,7 +50,10 @@ const UpdateField: React.FC = () => {
   }, [fieldId]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>  ) => {
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
 
     if (name === "category.name") {
@@ -161,228 +166,240 @@ const UpdateField: React.FC = () => {
   };
 
   const handleDeleteField = async () => {
+    setConfirmDelete(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!fieldId) {
       toast({
         title: "Error",
         description: "Không tìm thấy ID của sân.",
         variant: "destructive",
       });
+      setConfirmDelete(false);
       return;
     }
-    if (window.confirm("Bạn có chắc chắn muốn xóa sân này?")) {
-      try {
-        await deleteField(fieldId!); // Gọi API xóa sân
-        toast({
-          title: "Success",
-          description: "Sân đã được xóa thành công.",
-          variant: "success",
-        });
-
-        // Chuyển hướng người dùng sau khi xóa thành công
-        setTimeout(() => {
-          window.location.href = "/admin/manage"; 
-        }, 3000);
-      } catch (error: any) {
-        console.error("Error deleting field:", error.response?.data || error);
-        toast({
-          title: "Error",
-          description: "Lỗi khi xóa sân! Vui lòng thử lại.",
-          variant: "destructive",
-        });
-      }
+    try {
+      await deleteField(fieldId);
+      toast({
+        title: "Success",
+        description: "Sân đã được xóa thành công.",
+        variant: "success",
+      });
+      setConfirmDelete(false);
+      setTimeout(() => {
+        window.location.href = "/admin/manage";
+      }, 3000);
+    } catch (error: any) {
+      console.error("Error deleting field:", error.response?.data || error);
+      toast({
+        title: "Error",
+        description: "Lỗi khi xóa sân! Vui lòng thử lại.",
+        variant: "destructive",
+      });
+      setConfirmDelete(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDelete(false);
   };
 
   if (!fieldData) return <div>Loading...</div>;
 
   return (
-    <div
-    className="relative flex mx-auto max-w-[1000px] h-auto flex-col  rounded-xl bg-white bg-clip-border text-gray-700 shadow-md mb-3 pb-3 pl-2 pr-2"
-  >
-    <div
-      className="relative mx-4 -mt-6 mb-4 grid h-28 place-items-center overflow-hidden rounded-xl bg-gradient-to-tr from-cyan-600 to-cyan-400 bg-clip-border text-white shadow-lg shadow-cyan-500/40"
-    >
-      <h3
-        className="block font-sans text-3xl font-semibold leading-snug tracking-normal text-white antialiased"
-      >
-        Chỉnh sửa thông tin sân
-      </h3>
+    <div className="relative flex mx-auto max-w-[1000px] h-auto flex-col  rounded-xl bg-white bg-clip-border text-gray-700 shadow-md mb-3 pb-3 pl-2 pr-2">
+      <div className="relative mx-4 -mt-6 mb-4 grid h-28 place-items-center overflow-hidden rounded-xl bg-gradient-to-tr from-cyan-600 to-cyan-400 bg-clip-border text-white shadow-lg shadow-cyan-500/40">
+        <h3 className="block font-sans text-3xl font-semibold leading-snug tracking-normal text-white antialiased">
+          Chỉnh sửa thông tin sân
+        </h3>
       </div>
       <InputField
-            label="Tên sân"
-            type="text"
-            name="name"
-            placeholder="Tên sân"
-            value={fieldData.name}
-            onChange={handleInputChange}
-            required
-            style={{ marginBottom: "1.5rem" }}
-          />
-          <LocationInput 
-  onLocationSelect={(data) => {
-    setFieldData(prev => prev ? {
-      ...prev,
-      address: data.address,
-      latitude: data.lat,
-      longitude: data.lon
-    } : null);
-  }}
-  initialAddress={fieldData.address}
-  initialCoords={{
-    lat: fieldData.latitude || 0,
-    lon: fieldData.longitude || 0
-  }}
-/>
-          <InputField
-            label="Giá sân"
-            type="text"
-            placeholder="Điền giá sân ..."
-            value={fieldData.price.toLocaleString("vi-VN") + " VNĐ"}
-            required
-            name="price"
-            style={{ marginBottom: "1.5rem" }}
-            onChange={(e) => {
-              const rawValue = e.target.value.replace(/[^0-9]/g, "");
-              const numericValue = parseFloat(rawValue) || 0;
-              setFieldData((prev) =>
-                prev ? { ...prev, price: numericValue } : null,
-              );
-            }}
-          />
-          <InputField
-            label="Kiểu sân: "
-            options={categories.map((category) => ({
-              value: category.id,
-              label: category.name,
-            }))}
-            type="select"
-            placeholder="Chọn kiểu sân ..."
-            value={fieldData.category.id}
-            required
-            name="category"
-            style={{ marginBottom: "1.5rem" }}
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              const selectedCategory = categories.find(
-                (c) => c.id === selectedId,
-              );
-              if (selectedCategory) {
-                setFieldData((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        category: {
-                          id: selectedCategory.id,
-                          name: selectedCategory.name,
-                        },
-                      }
-                    : null,
-                );
-              }
-            }}
-          />
-          <InputField
-            label="Tình trạng sân"
-            options={states.map((state) => ({
-              value: state.id,
-              label: state.name,
-            }))}
-            type="text"
-            placeholder="Điền tình trạng sân ..."
-            value={fieldData.state.id}
-            required
-            name="state.name"
-            style={{ marginBottom: "1.5rem" }}
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              const selectedState = states.find((s) => s.id === selectedId);
-              if (selectedState) {
-                setFieldData((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        state: {
-                          id: selectedState.id,
-                          name: selectedState.name,
-                        },
-                      }
-                    : null,
-                );
-              }
-            }}
-          />
-          <InputField
-            label="Mô tả sân"
-            type="text"
-            placeholder="Nhập mô tả về sân ..."
-            value={fieldData.description || ""}
-            name="description"
-            style={{ marginBottom: "1.5rem", height: "100px" }}
-            onChange={handleInputChange}
-          />
-          <div className="mb-4 flex flex-col pl-[190px]">
-            <label
-              htmlFor="images"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Hình ảnh
-            </label>
-            <div className="mb-4 flex flex-wrap gap-2">
-              {/* Hiển thị ảnh cũ */}
-              {fieldData?.images
-                .filter(
-                  (image) => typeof image === "object" && "image_url" in image,
-                ) // Kiểm tra nếu ảnh là object và có `img_url`
-                .map((image: { id: string; image_url: string }, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={`http://localhost:8000/${image.image_url}`}
-                      alt="Existing"
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => onDeleteImage(image.id, index)}
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-  
-              {/* Hiển thị ảnh mới được chọn */}
-              {previews.map((preview, index) => (
-                <div key={index} className="relative">
-                  <img
-                    src={preview} // URL xem trước của ảnh mới
-                    alt="New"
-                    className="w-20 h-20 object-cover rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImages((prev) => prev.filter((_, i) => i !== index)); // Xóa file ảnh mới
-                      setPreviews((prev) => prev.filter((_, i) => i !== index)); // Xóa URL xem trước
-                    }}
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
+        label="Tên sân"
+        type="text"
+        name="name"
+        placeholder="Tên sân"
+        value={fieldData.name}
+        onChange={handleInputChange}
+        required
+        style={{ marginBottom: "1.5rem" }}
+      />
+      <LocationInput
+        onLocationSelect={(data) => {
+          setFieldData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  address: data.address,
+                  latitude: data.lat,
+                  longitude: data.lon,
+                }
+              : null,
+          );
+        }}
+        initialAddress={fieldData.address}
+        initialCoords={{
+          lat: fieldData.latitude || 0,
+          lon: fieldData.longitude || 0,
+        }}
+      />
+      <InputField
+        label="Giá sân"
+        type="text"
+        placeholder="Điền giá sân ..."
+        value={fieldData.price.toLocaleString("vi-VN") + " VNĐ"}
+        required
+        name="price"
+        style={{ marginBottom: "1.5rem" }}
+        onChange={(e) => {
+          const rawValue = e.target.value.replace(/[^0-9]/g, "");
+          const numericValue = parseFloat(rawValue) || 0;
+          setFieldData((prev) =>
+            prev ? { ...prev, price: numericValue } : null,
+          );
+        }}
+      />
+      <InputField
+        label="Kiểu sân: "
+        options={categories.map((category) => ({
+          value: category.id,
+          label: category.name,
+        }))}
+        type="select"
+        placeholder="Chọn kiểu sân ..."
+        value={fieldData.category.id}
+        required
+        name="category"
+        style={{ marginBottom: "1.5rem" }}
+        onChange={(e) => {
+          const selectedId = e.target.value;
+          const selectedCategory = categories.find((c) => c.id === selectedId);
+          if (selectedCategory) {
+            setFieldData((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    category: {
+                      id: selectedCategory.id,
+                      name: selectedCategory.name,
+                    },
+                  }
+                : null,
+            );
+          }
+        }}
+      />
+      <InputField
+        label="Tình trạng sân"
+        options={states.map((state) => ({
+          value: state.id,
+          label: state.name,
+        }))}
+        type="text"
+        placeholder="Điền tình trạng sân ..."
+        value={fieldData.state.id}
+        required
+        name="state.name"
+        style={{ marginBottom: "1.5rem" }}
+        onChange={(e) => {
+          const selectedId = e.target.value;
+          const selectedState = states.find((s) => s.id === selectedId);
+          if (selectedState) {
+            setFieldData((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    state: {
+                      id: selectedState.id,
+                      name: selectedState.name,
+                    },
+                  }
+                : null,
+            );
+          }
+        }}
+      />
+      <InputField
+        label="Mô tả sân"
+        type="text"
+        placeholder="Nhập mô tả về sân ..."
+        value={fieldData.description || ""}
+        name="description"
+        style={{ marginBottom: "1.5rem", height: "100px" }}
+        onChange={handleInputChange}
+      />
+      <div className="mb-4 flex flex-col pl-[190px]">
+        <label
+          htmlFor="images"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Hình ảnh
+        </label>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {/* Hiển thị ảnh cũ */}
+          {fieldData?.images
+            .filter(
+              (image) => typeof image === "object" && "image_url" in image,
+            ) // Kiểm tra nếu ảnh là object và có `img_url`
+            .map((image: { id: string; image_url: string }, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={`http://localhost:8000/${image.image_url}`}
+                  alt="Existing"
+                  className="w-20 h-20 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => onDeleteImage(image.id, index)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+
+          {/* Hiển thị ảnh mới được chọn */}
+          {previews.map((preview, index) => (
+            <div key={index} className="relative">
+              <img
+                src={preview} // URL xem trước của ảnh mới
+                alt="New"
+                className="w-20 h-20 object-cover rounded"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setImages((prev) => prev.filter((_, i) => i !== index)); // Xóa file ảnh mới
+                  setPreviews((prev) => prev.filter((_, i) => i !== index)); // Xóa URL xem trước
+                }}
+                className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
+              >
+                &times;
+              </button>
             </div>
-            <input
-              type="file"
-              name="image"
-              multiple
-              onChange={onImageChange}
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-          </div>
-          <div className="flex justify-center gap-4 mt-2 mb-5">
-          <Button text="Cập nhật sân" type="primary" onClick={handleSubmit} />
-          <Button text="Xóa sân" type="tertiary" onClick={handleDeleteField} />
+          ))}
         </div>
+        <input
+          type="file"
+          name="image"
+          multiple
+          onChange={onImageChange}
+          className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        />
+      </div>
+      <div className="flex justify-center gap-4 mt-2 mb-5">
+        <Button text="Cập nhật sân" type="primary" onClick={handleSubmit} />
+        <Button text="Xóa sân" type="tertiary" onClick={handleDeleteField} />
+        <ConfirmModal
+          visible={confirmDelete}
+          title="Xác nhận xóa sân"
+          message="Bạn có chắc chắn muốn xóa sân này?"
+          onCancel={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          confirmText="Xóa"
+          cancelText="Hủy"
+        />
+      </div>
     </div>
   );
 };
