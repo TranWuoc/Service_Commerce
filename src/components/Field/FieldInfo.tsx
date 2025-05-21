@@ -155,12 +155,12 @@ const FieldInfo: React.FC = () => {
       ) : (
         <>
           <div
-            className={`self-stretch h-75vh w-full max-md:mt-8 ${
+            className={`self-stretch  w-full max-md:mt-8 ${
               showComments ? "blur-sm" : ""
             }`}
           >
-            <div className="flex flex-col py-2 px-4 w-full h-[40vh] bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
-              <div className="flex flex-col w-full h-36">
+           <div className="flex flex-col py-2 px-4 w-full bg-white rounded-[30px] shadow-[0px_0px_15px_rgba(0,0,0,0.15)]">
+              <div className="flex flex-col w-full ">
                 <div className="flex gap-1 text-lg text-slate-800">
                   <div className="font-medium">{field.name}</div>
                 </div>

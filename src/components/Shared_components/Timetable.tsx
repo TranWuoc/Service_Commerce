@@ -109,11 +109,11 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
   if (!startDate || !fieldId) return null;
 
   return (
-    <div className="overflow-auto p-4 w-full">
+    <div className="overflow-auto p-4 w-full max-w-full">
       <table className="table-fixed border-collapse w-full">
         <thead>
           <tr>
-            <th className="border p-2 bg-gray-200 text-left w-[140px]">Khung giờ</th>
+            <th className="border px-5 bg-gray-200 text-left w-[140px]">Khung giờ</th>
             {weekdays.map((day) => (
               <th key={day.date} className="border bg-gray-200 p-2 text-center">
                 {day.label}
@@ -136,10 +136,10 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
                     className={classNames(
                       "border p-4 text-center cursor-pointer transition-colors",
                       {
-                        "bg-red-400 text-white cursor-not-allowed": booked,
+                        "bg-gray-300 text-gray-500 cursor-not-allowed": isPast, // Ưu tiên màu xám nếu đã qua
+                        "bg-red-400 text-white cursor-not-allowed": booked && !isPast, // Màu đỏ chỉ khi booked và chưa qua
                         "bg-green-400 text-white": selectedNow,
                         "hover:bg-amber-100": !booked && !selectedNow && !isPast,
-                        "bg-gray-300 text-gray-500 cursor-not-allowed": isPast && !booked,
                       }
                     )}
                     onClick={() => handleCellClick(day.date, value, startHour)}
