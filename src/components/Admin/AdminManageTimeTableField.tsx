@@ -86,30 +86,74 @@ const TimeTableField: React.FC = () => {
 
   // Hàm khởi tạo lịch trình
 const initializeSchedule = (startDate: Date): DaySchedule[] => {
-    const weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
-    const daysOfWeek = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-    
-    const dayNames = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
+  const weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
+  const daysOfWeek = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const dayNames = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
+  const now = new Date();
 
-    const now = new Date();
+  return daysOfWeek.map((date, index) => {
+    // Kiểm tra nếu ngày đã qua (không tính cùng ngày)
+    const isPastDate = isBefore(date, now) && !isSameDay(date, now);
 
-    return daysOfWeek.map((date, index) => {
-      const isPastDate = isBefore(date, now) && !isSameDay(date, now);
+    return {
+      day: dayNames[index],
+      date,
+      timeSlots: timeSlots.map((slot, slotIndex) => {
+        // Kiểm tra nếu khung giờ đã qua
+        const [startHourStr] = slot.split(' - ');
+        const startHour = parseInt(startHourStr.split(':')[0]);
+        const slotTime = new Date(date);
+        slotTime.setHours(startHour, 0, 0, 0);
+        
+        const isPastSlot = isPastDate || 
+                          (isSameDay(date, now) && isBefore(slotTime, now));
 
-      return {
-        day: dayNames[index],
-        date,
-        timeSlots: timeSlots.map((slot, slotIndex) => ({
+        return {
           id: `${index}-${slotIndex}`,
-          status: isPastDate ? "inactive" : "active",
+          status: isPastSlot ? "inactive" : "active",
           priceMultiplier: 1,
           customPrice: fieldPrice,
           note: "",
           isBooked: false,
-        })),
-      };
+        };
+      }),
+    };
+  });
+};
+useEffect(() => {
+  if (!startDate) return;
+
+  // Cập nhật mỗi phút để kiểm tra thời gian
+  const interval = setInterval(() => {
+    setSchedule(prevSchedule => {
+      const now = new Date();
+      return prevSchedule.map(day => {
+        const isPastDate = isBefore(day.date, now) && !isSameDay(day.date, now);
+
+        return {
+          ...day,
+          timeSlots: day.timeSlots.map(slot => {
+            const [startHourStr] = timeSlots[parseInt(slot.id.split('-')[1])].split(' - ');
+            const startHour = parseInt(startHourStr.split(':')[0]);
+            const slotTime = new Date(day.date);
+            slotTime.setHours(startHour, 0, 0, 0);
+            
+            const isPastSlot = isPastDate || 
+                             (isSameDay(day.date, now) && isBefore(slotTime, now));
+
+            // Chỉ cập nhật nếu trạng thái thay đổi
+            if (slot.status === "active" && isPastSlot) {
+              return { ...slot, status: "inactive" };
+            }
+            return slot;
+          })
+        };
+      });
     });
-  };
+  }, 60000); // Kiểm tra mỗi phút
+
+  return () => clearInterval(interval);
+}, [startDate]);
 
   // Cập nhật slot lên server
 const updateTimeSlot = async (
@@ -266,7 +310,7 @@ const updateTimeSlot = async (
 
   const getCellColor = (status: "active" | "inactive", multiplier: number, isBooked: boolean) => {
     if (isBooked) return "bg-purple-200";
-    if (status === "inactive") return "bg-gray-200";
+    if (status === "inactive") return "bg-gray-400";
 
     switch (multiplier) {
       case 1:
@@ -317,7 +361,7 @@ const updateTimeSlot = async (
               mode="single"
               selected={startDate || undefined}
               onSelect={(date) => setStartDate(date ?? null)}
-              initialFocus
+              autoFocus
               locale={vi}
             />
           </PopoverContent>
