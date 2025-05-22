@@ -24,27 +24,36 @@ import AdminManageUser from "../components/Admin/AdminManageUser";
 import RevenueField from "../components/Admin/RevenueField";
 import TopUsers from "../components/Admin/TopUsers";
 import TimeTableField from "../components/Admin/AdminManageTimeTableField";
+import Chat from "../components/Admin/Chat";
+import { useAuth } from "../hooks/useAuth";
+import RevenueFieldById from "../components/Admin/RevenueFieldById";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-
+const { isAuthenticated, loading } = useAuth();
   useEffect(() => {
     const storedIsAdmin = localStorage.getItem("isAdmin");
+    
     setIsAdmin(storedIsAdmin === "true");
   }, []);
 
   if (isAdmin === null) {
     return <div>Loading...</div>; // Hoặc có thể trả về loading spinner
-  }
-
-  return (
-    <Routes>
+  };
+return(
+  <Routes>
       {/* Public Routes */}
       <Route
         path="/login"
         element={
-          <AuthLayout>
-            <Login />
-          </AuthLayout>
+          !isAuthenticated ? (
+            <AuthLayout>
+              <Login />
+            </AuthLayout>
+          ) : isAdmin ? (
+            <Navigate to="/admin" replace />
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
         }
       />
       <Route
@@ -55,8 +64,8 @@ export const AppRouter: React.FC = () => {
           </AuthLayout>
         }
       />
-      <Route path="/landingpage" element={<LandingPage />} />
 
+      <Route path="/landingpage" element={<LandingPage />} />
       {/* Dashboard Routes */}
       <Route
         path="/dashboard"
@@ -95,14 +104,6 @@ export const AppRouter: React.FC = () => {
         element={
           <DashboardLayout>
             <PaymentSuccessPage />
-          </DashboardLayout>
-        }
-      />
-      <Route
-        path="/dashboard/FieldInfo"
-        element={
-          <DashboardLayout>
-            <FieldDetails />
           </DashboardLayout>
         }
       />
@@ -173,6 +174,16 @@ export const AppRouter: React.FC = () => {
         }
       />
 
+        <Route
+        path="/admin/statistic/revenue/:id"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout>
+              <RevenueFieldById />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin/statistic/top-user"
         element={
@@ -193,8 +204,9 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/admin/manage/FieldInfo"
+        path="/admin/manage/FieldInfo/:id"
         element={
           <ProtectedRoute adminOnly>
             <AdminLayout>
@@ -205,22 +217,7 @@ export const AppRouter: React.FC = () => {
       />
 
       <Route
-        path={isAdmin ? "/admin/manage/FieldInfo" : "/dashboard/FieldInfo"}
-        element={
-          isAdmin ? (
-            <AdminLayout>
-              <FieldDetails />
-            </AdminLayout>
-          ) : (
-            <DashboardLayout>
-              <FieldDetails />
-            </DashboardLayout>
-          )
-        }
-      />
-
-      <Route
-        path="/admin/manage/timetableField/:fieldId"
+        path="/admin/manage/FieldInfo/timetable/:id"
         element={
           <ProtectedRoute adminOnly>
             <AdminLayout>
@@ -229,7 +226,14 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
+      <Route
+        path="/dashboard/FieldInfo/:id"
+        element={
+          <DashboardLayout>
+            <FieldDetails />
+          </DashboardLayout>
+        }
+      />
       <Route
         path={isAdmin ? "/admin/Profile" : "/dashboard/Profile"}
         element={
@@ -254,11 +258,21 @@ export const AppRouter: React.FC = () => {
           </ProtectedRoute>
         }
       />
-
+<Route
+  path="/admin/chat"
+  element={
+    <ProtectedRoute adminOnly>
+      <AdminLayout>
+        <Chat />
+      </AdminLayout>
+    </ProtectedRoute>
+  }
+/>
       {/* Redirect fallback */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
     </Routes>
   );
 };
-// export default AppRouter;
+
+export default AppRouter;

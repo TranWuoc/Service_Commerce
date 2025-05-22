@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchRevenueByField } from '../../../api/revenueApi';
-import { format, eachMonthOfInterval, startOfMonth, endOfMonth } from 'date-fns';
+import { format, eachMonthOfInterval } from 'date-fns';
 
 interface ChartData {
   month: string;
@@ -16,66 +16,55 @@ const RevenueLineChart: React.FC = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
+
       try {
-        setLoading(true);
-        
-        // 1. Tạo danh sách 12 tháng trong năm
+        // 1. Gọi API 1 lần lấy dữ liệu cả năm
+        const start_date = `${selectedYear}-01-01`;
+        const end_date = `${selectedYear}-12-31`;
+        const rawData = await fetchRevenueByField({ start_date, end_date }) || [];
+
+        // 2. Tạo danh sách 12 tháng trong năm
         const months = eachMonthOfInterval({
           start: new Date(selectedYear, 0, 1),
-          end: new Date(selectedYear, 11, 31)
+          end: new Date(selectedYear, 11, 31),
         });
 
-        // 2. Lấy dữ liệu cho từng tháng
-        const allData = await Promise.all(
-          months.map(async (month) => {
-            const start = format(startOfMonth(month), 'yyyy-MM-dd');
-            const end = format(endOfMonth(month), 'yyyy-MM-dd');
-            
-            try {
-              const response = await fetchRevenueByField({ start_date: start, end_date: end });
-              return {
-                month: format(month, 'yyyy-MM'),
-                data: response || []
-              };
-            } catch (error) {
-              console.error(`Error fetching data for ${format(month, 'yyyy-MM')}:`, error);
-              return {
-                month: format(month, 'yyyy-MM'),
-                data: []
-              };
-            }
-          })
-        );
+        // 3. Khởi tạo object map: { "yyyy-MM": { fieldName: totalRevenue, ... }, ... }
+        const monthlyMap: Record<string, Record<string, number>> = {};
 
-        // 3. Chuẩn bị dữ liệu cho biểu đồ
-        const uniqueFieldNames = new Set<string>();
-        const processedData = allData.map(({ month, data }) => {
-          const monthData: ChartData = { month };
-          
-          data.forEach((item: any) => {
-            const fieldName = item.field.name;
-            uniqueFieldNames.add(fieldName);
-            monthData[fieldName] = item.total_revenue;
+        rawData.forEach((item: any) => {
+          const fieldName = item.field.name;
+          // Lấy tháng theo created_at hoặc giả sử doanh thu thuộc tháng nào đó — nếu backend không có trường tháng riêng thì cần có trường ngày
+          const date = item.created_at ? new Date(item.created_at) : new Date(); // hoặc xử lý khác tùy backend trả
+          const monthKey = format(date, 'yyyy-MM');
+
+          if (!monthlyMap[monthKey]) {
+            monthlyMap[monthKey] = {};
+          }
+          monthlyMap[monthKey][fieldName] = (monthlyMap[monthKey][fieldName] || 0) + item.total_revenue;
+        });
+
+        // 4. Lấy danh sách tất cả fieldName
+        const allFieldNames = new Set<string>();
+        rawData.forEach((item: any) => allFieldNames.add(item.field.name));
+
+        // 5. Tạo dữ liệu chart: cho đủ 12 tháng và tất cả các sân, gán 0 nếu không có doanh thu
+        const finalData = months.map(monthDate => {
+          const monthKey = format(monthDate, 'yyyy-MM');
+          const monthData: ChartData = { month: monthKey };
+
+          allFieldNames.forEach(fieldName => {
+            monthData[fieldName] = monthlyMap[monthKey]?.[fieldName] || 0;
           });
-          
+
           return monthData;
         });
 
-        // 4. Đảm bảo tất cả các tháng có cùng cấu trúc dữ liệu
-        const completeData = processedData.map(item => {
-          Array.from(uniqueFieldNames).forEach(name => {
-            if (item[name] === undefined) {
-              item[name] = 0;
-            }
-          });
-          return item;
-        });
-
-        setChartData(completeData);
-        setFieldNames(Array.from(uniqueFieldNames));
-        
+        setChartData(finalData);
+        setFieldNames(Array.from(allFieldNames));
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Lỗi tải dữ liệu:', error);
       } finally {
         setLoading(false);
       }
@@ -108,58 +97,57 @@ const RevenueLineChart: React.FC = () => {
       {chartData.length > 0 && fieldNames.length > 0 ? (
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height={400}>
-  <LineChart
-    data={chartData}
-    margin={{ top: 20, right: 30, left: 20, bottom: 60 }} // Tăng margin bottom để hiển thị nhãn trục X
-  >
-    <CartesianGrid strokeDasharray="3 3" />
-    <XAxis 
-      dataKey="month"
-      tickFormatter={(month) => `T${month.split('-')[1]}`}
-      tickCount={12}
-      interval={0}
-      tick={{ fontSize: 12, angle: -45, textAnchor: 'end' }}
-      height={60}
-    />
-    <YAxis
-      tickFormatter={(value) => new Intl.NumberFormat('vi-VN').format(value)}
-      tickCount={6}
-      domain={[0, 'auto']}
-      tick={{ fontSize: 12 }}
-      width={80}
-      label={{
-        value: 'Doanh thu (VND)',
-        angle: -90,
-        position: 'insideLeft',
-        style: { fontSize: 14 }
-      }}
-    />
-    <Tooltip
-      formatter={(value) => [
-        new Intl.NumberFormat('vi-VN', {
-          style: 'currency',
-          currency: 'VND'
-        }).format(Number(value)),
-        'Doanh thu'
-      ]}
-    />
-    <Legend />
-    {fieldNames.map((name, index) => (
-      <Line
-        key={name}
-        type="monotone"
-        dataKey={name}
-        stroke={colors[index % colors.length]}
-        strokeWidth={2}
-        activeDot={{ r: 6 }}
-      />
-    ))}
-  </LineChart>
-</ResponsiveContainer>
+            <LineChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="month"
+                tickFormatter={(month) => `T${month.split('-')[1]}`}
+                tickCount={12}
+                interval={0}
+                tick={{ fontSize: 12, angle: -45, textAnchor: 'end' }}
+                height={60}
+              />
+              <YAxis
+                tickFormatter={(value) => new Intl.NumberFormat('vi-VN').format(value)}
+                domain={[0, 'auto']}
+                tick={{ fontSize: 12 }}
+                width={80}
+                label={{
+                  value: 'Doanh thu (VND)',
+                  angle: -90,
+                  position: 'insideLeft',
+                  style: { fontSize: 14 }
+                }}
+              />
+              <Tooltip
+                formatter={(value) => [
+                  new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                  }).format(Number(value)),
+                  'Doanh thu'
+                ]}
+              />
+              <Legend />
+              {fieldNames.map((name, index) => (
+                <Line
+                  key={name}
+                  type="monotone"
+                  dataKey={name}
+                  stroke={colors[index % colors.length]}
+                  strokeWidth={2}
+                  activeDot={{ r: 6 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       ) : (
         <div className="text-center py-8 text-gray-500">
-          {chartData.length === 0 ? 'Đang xử lý dữ liệu...' : 'Không có dữ liệu doanh thu'}
+          Không có dữ liệu doanh thu
         </div>
       )}
     </div>

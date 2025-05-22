@@ -102,22 +102,24 @@ export const ProfileInput: React.FC = () => {
     };
   }, [avatarPreview]);
 
-  const getImageUrl = () => {
-    if (avatarPreview) return avatarPreview;
-    return userData.avatar ? `http://localhost:8000/${userData.avatar}` : "profile-image.jpg";
-  };
+const getImageUrl = () => {
+  if (!userData.avatar) return ""; // hoặc trả về ảnh mặc định nếu cần
+
+  return userData.avatar.includes("googleusercontent")
+    ? userData.avatar
+    : `http://localhost:8000/${userData.avatar}`;
+};
 
   return (
-    <section className="rounded-2xl border border-solid border-slate-100 bg-white p-6">
+    <section className="rounded-2xl border border-solid border-slate-100 bg-white p-4 max-w-[900px] mx-auto">
+
       <ProfileHeader
-        name={tempFormData.name}
-        memberSince="January 2024"
+        name={userData.name}
         imageUrl={getImageUrl()}
-        onImageChange={() => {}}
       />
 
       {isEditing && (
-        <div className="my-4">
+        <div className="my-4 px-10">
           <label className="block font-medium mb-1">Thay ảnh đại diện</label>
           <input
             type="file"
@@ -135,6 +137,7 @@ export const ProfileInput: React.FC = () => {
           value={tempFormData.name}
           onChange={handleInputChange("name")}
           disabled={!isEditing}
+          
         />
         <InputField
           label="Email"
@@ -168,16 +171,17 @@ export const ProfileInput: React.FC = () => {
           />
         ) : (
           <>
-            <Button
-              onClick={handleCancelClick}
-              className="bg-gray-500 hover:bg-gray-600 text-white"
-              text="Hủy"
-            />
-            <Button
+             <Button
               onClick={handleUpdateClick}
-              className="bg-green-500 hover:bg-green-600 text-white"
+              type="primary"
               text="Cập nhật"
             />
+            <Button
+              type= "secondary"
+              onClick={handleCancelClick}
+              text="Hủy"
+            />
+         
           </>
         )}
       </div>

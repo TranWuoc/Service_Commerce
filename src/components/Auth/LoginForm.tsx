@@ -23,7 +23,7 @@ export const LoginForm: React.FC = () => {
     <section className="flex flex-col items-center px-20 py-8 w-full max-md:px-5 max-md:py-6 h-screen">
       <header className="mb-4 text-base">
         <span>Welcome to </span>
-        <span className="text-amber-500">SUPERBOWL</span>
+        <span className="text-amber-500">SUPPERBOWL</span>
       </header>
 
       <AuthToggle activeTab={activeTab} />
@@ -57,7 +57,7 @@ export const LoginForm: React.FC = () => {
 
         </div>
         <div className="mt-3 flex w-full justify-center items-center space-x-2">
-          <GoogleLoginButton customStyle={{ width: "30%", height: "60px" }} /> {/* Đảm bảo cả 2 nút cùng chiều rộng */}
+          <GoogleLoginButton customStyle={{ width: "48%", height: "60px" }} /> {/* Đảm bảo cả 2 nút cùng chiều rộng */}
         </div>
         
       </form>

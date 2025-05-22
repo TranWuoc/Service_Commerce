@@ -40,6 +40,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               fontSize: "1rem",
               padding: "0",
               margin: "0",
+               outline: "none",
               backgroundColor: "transparent",
               display: "inline-block",
             }}

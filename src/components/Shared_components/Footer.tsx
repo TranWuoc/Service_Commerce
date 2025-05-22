@@ -6,7 +6,7 @@ function Footer() {
       <div className="flex flex-row justify-around items-center mb-4">
         <div className="flex flex-col  mb-4">
           <h2 className="text-2xl text-orange-400 font-bold mb-4 gap-5">
-            SuperBowl
+            SupperBowl
           </h2>
           <p className="text-lg ">
             Theo dõi chúng tôi qua các nền tảng để <br />

@@ -1,4 +1,4 @@
-// src/actions/fieldActions.ts
+
 import axiosInstance from "../api/axiosInstance";
 
 export const fetchAllFields = async (): Promise<any[]> => {
@@ -32,8 +32,8 @@ export const fetchFields = async (
       (field: any) => field.state?.id === "state-001"
     );
   } catch (error) {
-    console.error("Lỗi khi lọc sân:", error);
-    return [];
+    return fetchAllFields();
+
   }
 };
 
@@ -52,7 +52,7 @@ export const getLocation = (): Promise<{ lat: string; lng: string }> => {
         });
       },
       (err) => reject(err),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
     );
   });
 };

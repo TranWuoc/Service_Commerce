@@ -50,7 +50,7 @@ export function FieldCard({
 
   <div className="flex justify-center mt-auto">
     <Button
-      text="Select Field"
+      text="Xem chi tiết"
       type="primary"
       onClick={() =>
         navigate("/dashboard/FieldInfo", {

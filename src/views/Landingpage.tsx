@@ -7,8 +7,10 @@ import { MainHeaderCard } from "../components/Field/MainHeaderCard";
 import Button from "../components/Shared_components/Button";
 import { useNavigate } from "react-router-dom";
 import { Field } from "../types/Field";
+import { useAuth } from "../hooks/useAuth";
 const LandingPage: React.FC = () => {
   const [fields, setFields] = useState<Field[]>([]);
+  const { isAuthenticated, loading } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
   useEffect(() => {
@@ -33,6 +35,7 @@ const LandingPage: React.FC = () => {
     };
     fetchFields();
   }, []);
+
 
   return (
     <div className="flex flex-col w-full min-h-screen">
@@ -124,11 +127,12 @@ const LandingPage: React.FC = () => {
             type="primary"
             onClick={() => navigate("/register")}
           />
-          <Button
-            text="Đăng nhập"
-            type="secondary"
-            onClick={() => navigate("/login")}
-          />
+<Button
+  text="Đăng nhập"
+  type="secondary"
+  onClick={()=> navigate("/login")}
+/>
+
         </div>
       </div>
       {/* Footer */}

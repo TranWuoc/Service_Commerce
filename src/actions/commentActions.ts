@@ -21,7 +21,7 @@ export async function fetchCommentsByField(
     });
     return response.data;
   } catch (error) {
-    console.error("Lỗi khi tải bình luận:", error);
+
     throw error;
   }
 }
@@ -34,14 +34,7 @@ export const sendComment = async (
   toast: ReturnType<typeof useToast>,
   parentId?: string // Thêm tham số parentId để hỗ trợ bình luận và phản hồi
 ) => {
-  if (images.length === 0) {
-    toast.toast({
-      variant: "destructive",
-      title: "Lỗi",
-      description: "Vui lòng thêm ảnh.",
-    });
-    return;
-  }
+  
 
   const formData = new FormData();
   formData.append("user_id", userId.toString());
@@ -54,11 +47,13 @@ export const sendComment = async (
     formData.append("parent_id", parentId);
   }
 
-  // Thêm ảnh vào formData
-  images.forEach((img) => {
+if(images){
+    images.forEach((img) => {
     formData.append("image", img);
   });
-console.log("Form Data:", formData);
+}
+
+
   try {
     const response = await axiosInstance.post("/comment/create", formData, {
       headers: {
@@ -79,7 +74,7 @@ console.log("Form Data:", formData);
     toast.toast({
       variant: "destructive",
       title: "Lỗi",
-      description: error.response?.data?.message || "Đã xảy ra lỗi khi gửi bình luận.",
+      description: error.response?.data?.message,
     });
     throw error;
   }

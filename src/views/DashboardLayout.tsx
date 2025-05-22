@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import CustomerSidebar from "../components/Customer/CustomerSidebar";
-import { AvatarMenu } from "../components/Profile/Avatar";
 import { FieldHeader } from "../components/Field/FieldHeader";
 import { FieldsSummary } from "../components/Field/FieldsSummary";
 import { useUser } from "../hooks/useUser";
-
+import { AvatarMenu } from "../components/Profile/Avatar";
+import IconChatBot from "../components/Bot/IconChatBot1";
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
@@ -120,18 +120,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             </div>
           {/* Main content */}
           <div className="flex flex-col w-full ">
-            <div className="relative flex-1 pl-5 mt-10">
-              {React.isValidElement(children)
-                  ? React.cloneElement(children, {
-              onStartLoading: handleStartLoading,
-              onStopLoading: handleStopLoading,
-              location,
-            })
-          : children}
-      </div>
+           <div className="relative flex-1 pl-5 mt-10">
+  {React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, {
+        onStartLoading: handleStartLoading,
+        onStopLoading: handleStopLoading,
+        location,
+      });
+    }
+    return child;
+  })}
+</div>
+
           </div>
         </main>
-      </div>
+      </div> 
+       <IconChatBot />
     </div>
+  
   );
 };

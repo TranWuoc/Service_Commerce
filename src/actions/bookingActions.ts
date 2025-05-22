@@ -1,14 +1,13 @@
-// src/actions/bookingActions.ts
 import axiosInstance from "../api/axiosInstance";
 import { TimeSlot } from "../types/Booking";
 
-interface BookingData {
+export interface BookingData {
   field_id: string;
   date_start: string;
   date_end: string;
 }
 
-interface Field {
+export interface Field {
   id: number;
   name: string;
 }
@@ -65,9 +64,45 @@ export const prepareBookingData = (
   };
 };
 
-// Lấy ngày tối thiểu có thể đặt (5 ngày sau ngày hiện tại)
+// Lấy ngày tối thiểu có thể đặt (hôm nay, local time)
 export const getMinBookingDate = (): string => {
   const today = new Date();
-  today.setDate(today.getDate() + 5);
-  return today.toISOString().split("T")[0];
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Kiểm tra ngày có hợp lệ (>= ngày hôm nay)
+export const validateBookingDate = (dateStr: string): boolean => {
+  if (!dateStr) return false;
+  const selectedDate = new Date(dateStr);
+  const today = new Date();
+
+  selectedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  return selectedDate >= today;
+};
+export const fetchWeeklyBookings = async (
+  date: string,
+  fieldId: string
+): Promise<
+  {
+    date_start: string;
+    date_end: string;
+  }[]
+> => {
+  try {
+    const res = await axiosInstance.get("/bookings/weekly", {
+      params: {
+        date,
+        field_id: fieldId,
+      },
+    });
+    return res.data.bookings; // đảm bảo response structure đúng
+  } catch (error) {
+    console.error("Lỗi khi lấy lịch đặt theo tuần:", error);
+    throw error;
+  }
 };

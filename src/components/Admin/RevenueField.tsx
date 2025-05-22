@@ -5,12 +5,29 @@ import { Button } from "../../components/ui/button";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "../../components/ui/calendar";
+import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { cn } from "../../lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../components/ui/dialog";
+import {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+} from "../../components/ui/select";
 
 const RevenueField: React.FC = () => {
   const [revenueData, setRevenueData] = useState<RevenueByFieldItem[]>([]);
@@ -18,7 +35,24 @@ const RevenueField: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-
+  const [selectedField, setSelectedField] = useState<RevenueByFieldItem | null>(
+    null,
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogStartDate, setDialogStartDate] = useState<Date | null>(null);
+  const [dialogEndDate, setDialogEndDate] = useState<Date | null>(null);
+  const timeSlots = [
+    "6:00 - 8:00",
+    "08:00 - 10:00",
+    "10:00 - 12:00",
+    "14:00 - 16:00",
+    "16:00 - 18:00",
+    "18:00 - 20:00",
+    "20:00 - 22:00",
+    "22:00 - 24:00",
+  ];
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
+  const navigate = useNavigate();
   useEffect(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -77,6 +111,10 @@ const RevenueField: React.FC = () => {
     return address;
   };
 
+  const handleRowClick = (field: RevenueByFieldItem) => {
+    navigate(`/admin/statistic/revenue/${field.field_id}`);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -96,10 +134,10 @@ const RevenueField: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 justify-center items-center">
       <div className="flex flex-col gap-2">
+        <h2 className="text-xl text-center font-semibold">
+          Thống kê doanh thu sân bóng theo tháng
+        </h2>
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold">
-            Thống kê doanh thu sân bóng theo tháng
-          </h2>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Từ ngày:</span>
@@ -124,8 +162,11 @@ const RevenueField: React.FC = () => {
                   <Calendar
                     mode="single"
                     selected={startDate || undefined}
-                    onSelect={(date) => setStartDate(date ?? null)}
-                    initialFocus
+                    onSelect={(date) => {
+                      setStartDate(date ?? null);
+                      setEndDate(null);
+                    }}
+                    autoFocus
                   />
                 </PopoverContent>
               </Popover>
@@ -155,7 +196,7 @@ const RevenueField: React.FC = () => {
                     selected={endDate || undefined}
                     onSelect={(date) => setEndDate(date ?? null)}
                     initialFocus
-                    fromDate={startDate || undefined} // Ngày kết thúc không được trước ngày bắt đầu
+                    fromDate={startDate || undefined}
                   />
                 </PopoverContent>
               </Popover>
@@ -188,7 +229,11 @@ const RevenueField: React.FC = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {revenueData.length > 0 ? (
               revenueData.map((item, index) => (
-                <tr key={item.field_id} className="hover:bg-gray-50">
+                <tr
+                  key={item.field_id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleRowClick(item)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {index + 1}
                   </td>
@@ -236,6 +281,146 @@ const RevenueField: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          {selectedField && (
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  Chi tiết doanh thu {selectedField.field.name}{" "}
+                </DialogTitle>
+                <DialogDescription>
+                  Thông tin chi tiết về doanh thu của sân
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Từ ngày:</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[180px] justify-start text-left font-normal",
+                          !dialogStartDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dialogStartDate ? (
+                          format(dialogStartDate, "dd/MM/yyyy")
+                        ) : (
+                          <span>Chọn ngày</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 ">
+                      <Calendar
+                        mode="single"
+                        selected={dialogStartDate || undefined}
+                        onSelect={(date) => setDialogStartDate(date ?? null)}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Đến ngày:</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[180px] justify-start text-left font-normal",
+                          !dialogEndDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dialogEndDate ? (
+                          format(dialogEndDate, "dd/MM/yyyy")
+                        ) : (
+                          <span>Chọn ngày</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dialogEndDate || undefined}
+                        onSelect={(date) => setDialogEndDate(date ?? null)}
+                        hidden={
+                          dialogStartDate
+                            ? { before: dialogStartDate }
+                            : undefined
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              {dialogStartDate && dialogEndDate && (
+                <div className="flex justify-center items-center gap-2 mt-4">
+                  <span className="text-sm text-gray-600">Khung giờ:</span>
+                  <Select
+                    value={selectedTimeSlot}
+                    onValueChange={setSelectedTimeSlot}
+                  >
+                    <SelectTrigger className="w-[220px]">
+                      <SelectValue placeholder="Chọn khung giờ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Khung giờ</SelectLabel>
+                        {timeSlots.map((slot) => (
+                          <SelectItem key={slot} value={slot}>
+                            {slot}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {selectedTimeSlot && (
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <span className="text-sm font-medium">Tên sân:</span>
+                    <span className="col-span-3">
+                      {selectedField.field.name}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <span className="text-sm font-medium">Địa chỉ:</span>
+                    <span className="col-span-3">
+                      {selectedField.field.address}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <span className="text-sm font-medium">Giá thuê:</span>
+                    <span className="col-span-3">
+                      {formatCurrency(selectedField.field.price)}/giờ
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <span className="text-sm font-medium">Tổng doanh thu:</span>
+                    <span className="col-span-3 font-semibold text-green-600">
+                      {formatCurrency(selectedField.total_revenue)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <span className="text-sm font-medium">
+                      Khoảng thời gian:
+                    </span>
+                    <span className="col-span-3">
+                      {format(dialogStartDate || new Date(), "dd/MM/yyyy")} -{" "}
+                      {format(dialogEndDate || new Date(), "dd/MM/yyyy")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog> */}
     </div>
   );
 };
