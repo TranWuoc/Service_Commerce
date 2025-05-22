@@ -33,7 +33,7 @@ export const TableRow: React.FC<TableRowProps> = ({
         {status}
       </div>
       <div>
-        { status !== "Đã thuê" && (
+        { status !== "Đã thuê"  && (
           <button className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
             Hủy
           </button>

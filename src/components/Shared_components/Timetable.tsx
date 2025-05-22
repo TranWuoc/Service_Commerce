@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import classNames from "classnames";
-import { format, addDays, startOfWeek, parseISO } from "date-fns";
+import { format, addDays, startOfWeek } from "date-fns";
 import { fetchWeeklyBookings } from "../../actions/bookingActions";
 import { TimeSlot } from "../../types/Booking";
 
@@ -15,15 +15,24 @@ const timeSlots: TimeSlot[] = [
   { value: "22-24", label: "22:00 - 24:00", startHour: 22, endHour: 24 },
 ];
 
+interface SlotInfo {
+  price: number;
+  status: string;
+  booked: boolean;
+}
+
 interface Props {
   startDate: string;
   fieldId: string;
-  onSelect: (slot: { date: string; slot: string }) => void;
+  onSelect: (slot: { date: string; slot: string; price: number }) => void;
 }
 
 export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
   const [selected, setSelected] = useState<{ date: string; slot: string } | null>(null);
-  const [bookedSlots, setBookedSlots] = useState<{ [key: string]: string[] }>({});
+  const [bookedSlots, setBookedSlots] = useState<{
+    [date: string]: { [slot: string]: SlotInfo };
+  }>({});
+
   let clickTimeout: ReturnType<typeof setTimeout> | null = null;
 
   const weekdays = useMemo(() => {
@@ -46,27 +55,26 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
       if (!startDate || !fieldId) return;
 
       try {
-        const bookings = await fetchWeeklyBookings(startDate, fieldId);
-        const bookedMap: { [key: string]: string[] } = {};
+        const data = await fetchWeeklyBookings(startDate, fieldId);
+        const map: {
+          [date: string]: { [slot: string]: SlotInfo };
+        } = {};
 
-        for (const booking of bookings) {
-          const start = parseISO(booking.date_start);
-          const end = parseISO(booking.date_end);
-          const date = format(start, "yyyy-MM-dd");
-
-          const slots = timeSlots.filter(
-            (slot) =>
-              slot.startHour >= start.getHours() &&
-              slot.endHour <= end.getHours()
-          );
-
-          slots.forEach((slot) => {
-            if (!bookedMap[date]) bookedMap[date] = [];
-            bookedMap[date].push(slot.value);
+        for (const date in data.days) {
+          data.days[date].forEach((slot) => {
+            const startHour = parseInt(slot.start_time.split(":")[0]);
+            const endHour = parseInt(slot.end_time.split(":")[0]);
+            const value = `${startHour}-${endHour}`;
+            if (!map[date]) map[date] = {};
+            map[date][value] = {
+              price: slot.price,
+              status: slot.status,
+              booked: slot.booked,
+            };
           });
         }
 
-        setBookedSlots(bookedMap);
+        setBookedSlots(map);
       } catch (err) {
         console.error("Failed to fetch bookings:", err);
       }
@@ -74,9 +82,6 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
 
     fetchData();
   }, [startDate, fieldId]);
-
-  const isBooked = (date: string, slot: string) =>
-    bookedSlots[date]?.includes(slot);
 
   const isSelected = (date: string, slot: string) =>
     selected?.date === date && selected.slot === slot;
@@ -88,22 +93,26 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
     return slotTime < now;
   };
 
+  const getSlotData = (date: string, slot: string): SlotInfo | null =>
+    bookedSlots[date]?.[slot] || null;
+
   const handleCellClick = (date: string, slot: string, startHour: number) => {
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       clickTimeout = null;
-      return; // double click → ignore
+      return; // double click
     }
 
     clickTimeout = setTimeout(() => {
       clickTimeout = null;
-      if (isBooked(date, slot) || isPastSlot(date, startHour)) return;
+      const slotData = getSlotData(date, slot);
+      if (isPastSlot(date, startHour) || slotData?.booked) return;
       if (isSelected(date, slot)) return;
 
-      const newSelection = { date, slot };
+      const newSelection = { date, slot, price: slotData?.price || 0 };
       setSelected(newSelection);
       onSelect(newSelection);
-    }, 150); 
+    }, 150);
   };
 
   if (!startDate || !fieldId) return null;
@@ -126,24 +135,36 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
             <tr key={value}>
               <td className="border p-2">{label}</td>
               {weekdays.map((day) => {
-                const booked = isBooked(day.date, value);
-                const selectedNow = isSelected(day.date, value);
+                const slotData = getSlotData(day.date, value);
                 const isPast = isPastSlot(day.date, startHour);
+                const selectedNow = isSelected(day.date, value);
+                const booked = slotData?.booked;
+                const status = slotData?.status;
+                const price = slotData?.price;
+
+                let bgColor = "";
+                if (isPast) {
+                  bgColor = "bg-gray-300 text-gray-500 cursor-not-allowed";
+                } else if (booked || status !== "active") {
+                  bgColor = "bg-red-400 text-white cursor-not-allowed";
+                } 
 
                 return (
                   <td
                     key={day.date}
                     className={classNames(
-                      "border p-4 text-center cursor-pointer transition-colors",
+                      "border p-2 text-center cursor-pointer transition-colors text-sm",
+                      bgColor,
                       {
-                        "bg-gray-300 text-gray-500 cursor-not-allowed": isPast, // Ưu tiên màu xám nếu đã qua
-                        "bg-red-400 text-white cursor-not-allowed": booked && !isPast, // Màu đỏ chỉ khi booked và chưa qua
-                        "bg-green-400 text-white": selectedNow,
                         "hover:bg-amber-100": !booked && !selectedNow && !isPast,
+        "bg-green-400 text-black": selectedNow,
+        "bg-white text-black": !booked && !isPast && !selectedNow,
                       }
                     )}
                     onClick={() => handleCellClick(day.date, value, startHour)}
-                  />
+                  >
+                    {price ? `${price.toLocaleString()}₫` : "-"}
+                  </td>
                 );
               })}
             </tr>

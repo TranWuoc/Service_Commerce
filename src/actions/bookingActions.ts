@@ -12,6 +12,24 @@ export interface Field {
   name: string;
 }
 
+interface WeeklyPricingTimeSlot {
+  time_slot_id: string;
+  start_time: string;
+  end_time: string;
+  price: number;
+  status: string;
+  is_override: boolean;
+  booked: boolean;
+}
+
+interface WeeklyPricingResponse {
+  start_of_week: string;
+  end_of_week: string;
+  days: {
+    [date: string]: WeeklyPricingTimeSlot[];
+  };
+}
+
 // Lấy danh sách sân bóng
 export const fetchFields = async (): Promise<Field[]> => {
   try {
@@ -85,24 +103,18 @@ export const validateBookingDate = (dateStr: string): boolean => {
   return selectedDate >= today;
 };
 export const fetchWeeklyBookings = async (
-  date: string,
+  selectedDate: string,
   fieldId: string
-): Promise<
-  {
-    date_start: string;
-    date_end: string;
-  }[]
-> => {
+): Promise<WeeklyPricingResponse> => {
   try {
-    const res = await axiosInstance.get("/bookings/weekly", {
+    const res = await axiosInstance.get(`/weekly-pricing/${fieldId}`, {
       params: {
-        date,
-        field_id: fieldId,
+        selected_date: selectedDate,
       },
     });
-    return res.data.bookings; // đảm bảo response structure đúng
+    return res.data; // trả về toàn bộ response chứa days, start_of_week, end_of_week
   } catch (error) {
-    console.error("Lỗi khi lấy lịch đặt theo tuần:", error);
+    console.error("Lỗi khi lấy dữ liệu giá theo tuần:", error);
     throw error;
   }
 };

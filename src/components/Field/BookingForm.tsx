@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Autosuggest from "react-autosuggest";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchFields, createBooking, prepareBookingData, getMinBookingDate, validateBookingDate } from "../../actions/bookingActions";
-import { fetchBookedTimeSlots } from "../../actions/bookingActions";
 import Button from "../Shared_components/Button";
 import { InputField } from "../Shared_components/InputField";
 import FieldTable from "../Shared_components/Timetable";
@@ -37,6 +36,7 @@ export const BookingForm = () => {
     date: location.state?.date || "",
     timeSlot: "",
   });
+  const [selectedPrice, setSelectedPrice] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -59,7 +59,9 @@ export const BookingForm = () => {
         name: location.state.fieldName,
         fieldId: location.state.fieldId.toString(),
         date: location.state.date || "",
+        timeSlot: "",
       }));
+      setSelectedPrice(0);
     }
   }, [location.state]);
 
@@ -73,7 +75,8 @@ export const BookingForm = () => {
       });
       return;
     }
-    setFormData((prev) => ({ ...prev, date: value }));
+    setFormData((prev) => ({ ...prev, date: value, timeSlot: "" }));
+    setSelectedPrice(0);
   };
 
   const onSuggestionsFetchRequested = ({ value }: { value: string }) => {
@@ -88,18 +91,38 @@ export const BookingForm = () => {
       ...formData,
       name: suggestion.name,
       fieldId: suggestion.id.toString(),
+      timeSlot: "",
     });
     setInputValue(suggestion.name);
+    setSelectedPrice(0);
+  };
+
+  const handleSlotSelect = ({ date, slot, price }: { date: string; slot: string; price: number }) => {
+    setFormData((prev) => ({
+      ...prev,
+      date,
+      timeSlot: slot,
+    }));
+    setSelectedPrice(price);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.fieldId || !formData.date || !formData.timeSlot) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng điền đầy đủ thông tin đặt sân.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const bookingData = prepareBookingData(formData.fieldId, formData.date, formData.timeSlot, timeSlots);
 
     if (!bookingData) {
       toast({
         title: "Lỗi",
-        description: "Vui lòng điền đầy đủ thông tin đặt sân.",
+        description: "Dữ liệu đặt sân không hợp lệ.",
         variant: "destructive",
       });
       return;
@@ -129,6 +152,7 @@ export const BookingForm = () => {
   const handleCancel = () => {
     setFormData({ name: "", fieldId: "", date: "", timeSlot: "" });
     setInputValue("");
+    setSelectedPrice(0);
     navigate("/dashboard");
   };
 
@@ -136,7 +160,9 @@ export const BookingForm = () => {
     <div className="bg-neutral-100">
       <form
         onSubmit={handleSubmit}
-        className={`mx-auto bg-white rounded-lg max-w-[1000px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] flex flex-col transition-all duration-300 ${formData.fieldId && formData.date ? "max-h-[90vh] h-[90vh]" : "h-auto"}`}
+        className={`mx-auto bg-white rounded-lg max-w-[1000px] w-full shadow-[0px_5px_15px_rgba(0,0,0,0.12)] flex flex-col transition-all duration-300 ${
+          formData.fieldId && formData.date ? "max-h-[90vh] h-[90vh]" : "h-auto"
+        }`}
       >
         <h2 className="p-6 pb-2 text-3xl text-center">MẪU ĐẶT SÂN</h2>
 
@@ -147,52 +173,52 @@ export const BookingForm = () => {
                 Tên sân <span className="text-red-500 ml-1">*</span>
               </label>
               <div className="ml-5">
-              <Autosuggest
-                suggestions={suggestions}
-                onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-                onSuggestionsClearRequested={onSuggestionsClearRequested}
-                getSuggestionValue={(s: Field) => s.name}
-                renderSuggestion={(s: Field) => (
-                  <div className="p-2 bg-gray-300 text-white-500">{s.name}</div>
-                )}
-                onSuggestionSelected={onSuggestionSelected}
-                inputProps={{
-                  placeholder: "Nhập tên sân...",
-                  value: inputValue,
-                  onChange: (_, { newValue }) => {
-                    setInputValue(newValue);
-                    const matchedField = fields.find(
-                      (f) => f.name.toLowerCase() === newValue.trim().toLowerCase()
-                    );
-                    setFormData((prev) => ({
-                      ...prev,
-                      fieldId: matchedField ? matchedField.id.toString() : "",
-                      name: newValue,
-                    }));
-                  },
-                  className:
-                    "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-[900px]",
-                }}
-              />
+                <Autosuggest
+                  suggestions={suggestions}
+                  onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                  onSuggestionsClearRequested={onSuggestionsClearRequested}
+                  getSuggestionValue={(s: Field) => s.name}
+                  renderSuggestion={(s: Field) => <div className="p-2 bg-gray-300 text-white-500">{s.name}</div>}
+                  onSuggestionSelected={onSuggestionSelected}
+                  inputProps={{
+                    placeholder: "Nhập tên sân...",
+                    value: inputValue,
+                    onChange: (_, { newValue }) => {
+                      setInputValue(newValue);
+                      const matchedField = fields.find(
+                        (f) => f.name.toLowerCase() === newValue.trim().toLowerCase()
+                      );
+                      setFormData((prev) => ({
+                        ...prev,
+                        fieldId: matchedField ? matchedField.id.toString() : "",
+                        name: newValue,
+                        timeSlot: "",
+                      }));
+                      setSelectedPrice(0);
+                    },
+                    className:
+                      "px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-[900px]",
+                  }}
+                />
               </div>
             </div>
 
-           <div className="flex flex-col w-[940px]">
-  <label className="mb-2 px-5 text-xl text-black">
-    Ngày đặt sân <span className="text-red-500 ml-1">*</span>
-  </label>
-  <InputField
-    label=""
-    type="date"
-    value={formData.date}
-    required
-    name="date"
-    onChange={handleDateChange}
-    min={getMinBookingDate()}
-    onKeyDown={(e) => e.preventDefault()}
-    className="px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-[900px]"
-  />
-</div>
+            <div className="flex flex-col w-[940px]">
+              <label className="mb-2 px-5 text-xl text-black">
+                Ngày đặt sân <span className="text-red-500 ml-1">*</span>
+              </label>
+              <InputField
+                label=""
+                type="date"
+                value={formData.date}
+                required
+                name="date"
+                onChange={handleDateChange}
+                min={getMinBookingDate()}
+                onKeyDown={(e) => e.preventDefault()}
+                className="px-4 py-2 text-xl bg-white border border-gray-300 h-[40px] rounded-xl focus:outline-none focus:border-amber-500 w-[900px]"
+              />
+            </div>
           </div>
 
           {formData.fieldId && formData.date && (
@@ -200,14 +226,21 @@ export const BookingForm = () => {
               <FieldTable
                 startDate={formData.date}
                 fieldId={formData.fieldId}
-                onSelect={({ date, slot }) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    date,
-                    timeSlot: slot,
-                  }));
-                }}
+                onSelect={({ date, slot, price }) => handleSlotSelect({ date, slot, price })}
               />
+              {selectedPrice > 0 && (
+                <div className="px-5 py-3 mt-4 text-lg bg-yellow-50 border border-yellow-400 rounded-md w-full max-w-[940px]">
+                  Giá khung giờ:{" "}
+                  <span className="font-semibold text-amber-600">
+                    {selectedPrice.toLocaleString("vi-VN")} đ
+                  </span>
+                  <br />
+                  Giá cọc (30% trên tổng 2 tiếng):{" "}
+                  <span className="font-semibold text-amber-700">
+                    {(selectedPrice * 2 * 0.3).toLocaleString("vi-VN")} đ
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>
