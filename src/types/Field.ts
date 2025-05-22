@@ -26,6 +26,11 @@ export interface RevenueByFieldItem {
   field: Field;
   total_revenue: number;
 }
+
+export interface RevenueByFieldID {
+  total_revenue: number;
+  
+}
   
   export interface FieldApiResponse {
     data: Field;

@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/button";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "../../components/ui/calendar";
+import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -51,6 +52,7 @@ const RevenueField: React.FC = () => {
     "22:00 - 24:00",
   ];
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
+  const navigate = useNavigate();
   useEffect(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -110,10 +112,7 @@ const RevenueField: React.FC = () => {
   };
 
   const handleRowClick = (field: RevenueByFieldItem) => {
-    setSelectedField(field);
-    setIsDialogOpen(true);
-    setDialogStartDate(null);
-    setDialogEndDate(null);
+    navigate(`/admin/statistic/revenue/${field.field_id}`);
   };
 
   if (loading) {
@@ -163,8 +162,11 @@ const RevenueField: React.FC = () => {
                   <Calendar
                     mode="single"
                     selected={startDate || undefined}
-                    onSelect={(date) => setStartDate(date ?? null)}
-                    initialFocus
+                    onSelect={(date) => {
+                      setStartDate(date ?? null);
+                      setEndDate(null);
+                    }}
+                    autoFocus
                   />
                 </PopoverContent>
               </Popover>
@@ -280,7 +282,7 @@ const RevenueField: React.FC = () => {
         </div>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           {selectedField && (
             <>
@@ -312,12 +314,11 @@ const RevenueField: React.FC = () => {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 ">
                       <Calendar
                         mode="single"
                         selected={dialogStartDate || undefined}
                         onSelect={(date) => setDialogStartDate(date ?? null)}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>
@@ -346,8 +347,11 @@ const RevenueField: React.FC = () => {
                         mode="single"
                         selected={dialogEndDate || undefined}
                         onSelect={(date) => setDialogEndDate(date ?? null)}
-                        initialFocus
-                        fromDate={dialogStartDate || undefined}
+                        hidden={
+                          dialogStartDate
+                            ? { before: dialogStartDate }
+                            : undefined
+                        }
                       />
                     </PopoverContent>
                   </Popover>
@@ -416,7 +420,7 @@ const RevenueField: React.FC = () => {
             </>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 };

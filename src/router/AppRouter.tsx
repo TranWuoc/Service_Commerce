@@ -26,6 +26,7 @@ import TopUsers from "../components/Admin/TopUsers";
 import TimeTableField from "../components/Admin/AdminManageTimeTableField";
 import Chat from "../components/Admin/Chat";
 import { useAuth } from "../hooks/useAuth";
+import RevenueFieldById from "../components/Admin/RevenueFieldById";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 const { isAuthenticated, loading } = useAuth();
@@ -173,6 +174,16 @@ return(
         }
       />
 
+        <Route
+        path="/admin/statistic/revenue/:id"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout>
+              <RevenueFieldById />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin/statistic/top-user"
         element={
