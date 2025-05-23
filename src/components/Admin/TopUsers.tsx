@@ -51,13 +51,6 @@ const TopUsers: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">Top người dùng tích cực</h2>
-        <p className="text-gray-600">
-          Danh sách người dùng đặt sân nhiều nhất
-        </p>
-      </div>
-
       <div className="overflow-x-auto shadow-md sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
