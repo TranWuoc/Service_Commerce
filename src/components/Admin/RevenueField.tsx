@@ -53,30 +53,47 @@ const RevenueField: React.FC = () => {
   }, [startDate, endDate]);
 
   const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  try {
+    setLoading(true);
+    setError(null);
 
-      if (!startDate || !endDate) return;
+    if (!startDate || !endDate) return;
 
-      const params = {
-        start_date: startDate.toISOString().split("T")[0],
-        end_date: endDate.toISOString().split("T")[0],
-      };
+    // Kiểm tra nếu cùng ngày
+    const isSameDay = startDate.toDateString() === endDate.toDateString();
 
-      const data = await fetchRevenueByField(params);
-      if (data) {
-        setRevenueData(data);
-      } else {
-        setError("Dữ liệu trả về không hợp lệ");
-      }
-    } catch (err) {
-      setError("Không thể tải dữ liệu doanh thu");
-      console.error("Lỗi khi tải dữ liệu:", err);
-    } finally {
-      setLoading(false);
+    // Tạo timestamp
+    const startDateTime = new Date(startDate);
+    const endDateTime = new Date(endDate);
+
+    if (isSameDay) {
+      // Nếu cùng ngày: 00:00:00 đến 23:59:59
+      startDateTime.setHours(0, 0, 0, 0);
+      endDateTime.setHours(23, 59, 59, 999);
+    } else {
+      // Nếu khác ngày: giữ nguyên thời gian (hoặc set mặc định)
+      startDateTime.setHours(0, 0, 0, 0);
+      endDateTime.setHours(23, 59, 59, 999);
     }
-  };
+
+    const params = {
+      start_date: startDateTime.toISOString(),
+      end_date: endDateTime.toISOString(),
+    };
+
+    const data = await fetchRevenueByField(params);
+    if (data) {
+      setRevenueData(data);
+    } else {
+      setError("Dữ liệu trả về không hợp lệ");
+    }
+  } catch (err) {
+    setError("Không thể tải dữ liệu doanh thu");
+    console.error("Lỗi khi tải dữ liệu:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Hàm định dạng tiền tệ
   const formatCurrency = (amount: number): string => {
@@ -129,73 +146,64 @@ const RevenueField: React.FC = () => {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Từ ngày:</span>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[180px] justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? (
-                      format(startDate, "dd/MM/yyyy")
-                    ) : (
-                      <span>Chọn ngày</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate || undefined}
-                    onSelect={(date) => {
-                      setStartDate(date ?? null);
-                      setEndDate(null);
-                      setCurrentPage(1); // Reset về trang 1 khi thay đổi ngày
-                    }}
-                    autoFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Đến ngày:</span>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[180px] justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? (
-                      format(endDate, "dd/MM/yyyy")
-                    ) : (
-                      <span>Chọn ngày</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate || undefined}
-                    onSelect={(date) => {
-                      setEndDate(date ?? null);
-                      setCurrentPage(1); // Reset về trang 1 khi thay đổi ngày
-                    }}
-                    initialFocus
-                    fromDate={startDate || undefined}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-600">Từ ngày:</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-[180px] justify-start text-left font-normal",
+                !startDate && "text-muted-foreground",
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {startDate ? format(startDate, "dd/MM/yyyy") : <span>Chọn ngày</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={startDate || undefined}
+              onSelect={(date) => {
+                setStartDate(date ?? null);
+                setCurrentPage(1);
+              }}
+              autoFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-600">Đến ngày:</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-[180px] justify-start text-left font-normal",
+                !endDate && "text-muted-foreground",
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {endDate ? format(endDate, "dd/MM/yyyy") : <span>Chọn ngày</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={endDate || undefined}
+              onSelect={(date) => {
+                setEndDate(date ?? null);
+                setCurrentPage(1);
+              }}
+              initialFocus
+              fromDate={startDate || undefined}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
         </div>
       </div>
 
