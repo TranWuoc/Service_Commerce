@@ -25,6 +25,7 @@ const ChatBot: React.FC<Props> = ({ onClose, isVisible }) => {
   const isFetchingRef = useRef(false);
   const isFirstScroll = useRef(true);
   const fetchedPages = useRef<Set<number>>(new Set());
+  const [thread_id, setThreadId] = useState<string>(""); // ID của cuộc trò chuyện
     // Khởi tạo cuộc trò chuyện mới
   const handleNewChat = () => {
     setMessages([
@@ -46,6 +47,7 @@ if (saved !== null) {
     try {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
+      
         setMessages(parsed); // ✅ chỉ dùng nếu là mảng và có dữ liệu
         return;
       }
@@ -74,7 +76,7 @@ if (saved !== null) {
               )
             : undefined,
       }));
-
+      setThreadId(res.data.data.messages[0].thread_id); // Lưu thread_id từ phản hồi
       // Sắp xếp lại tin nhắn theo timestamp
       const sortedMessages = transformed.sort(
         (a: any, b: any) =>
@@ -90,8 +92,7 @@ if (saved !== null) {
       handleNewChat();
       }
     } catch (err) {
-      console.error("Lỗi khi tải tin nhắn:", err);
-    }
+      handleNewChat();  }
   };
   // Tải thêm tin nhắn khi cuộn
   const loadMoreMessages = async () => {
@@ -425,7 +426,9 @@ if (saved !== null) {
         if (messageToSend) {
           formData.append("content", messageToSend);
         }
-        formData.append("thread_id", "none");
+        formData.append("thread_id", thread_id);
+
+        
 
         // Tải từ URL base64 => file blob để gửi đúng dạng multipart
         selectedImages.forEach((dataUrl, idx) => {
@@ -443,12 +446,12 @@ if (saved !== null) {
           formData.append("image[]", file);
         });
 
-        await axiosInstance.post("/messages/send-message", formData, {
+        const response = await axiosInstance.post("/messages/send-message", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-
+        setThreadId(response.data.data.thread_id); // Cập nhật thread_id từ phản hồi
         const botReply: Message = {
           sender: "bot",
           content: (
