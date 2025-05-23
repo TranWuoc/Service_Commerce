@@ -258,7 +258,18 @@ if (saved !== null) {
   // Xử lý gửi tin nhắn
   const [waitingForFieldName, setWaitingForFieldName] =
     useState<boolean>(false);
+const formatTimeRange = (date_start: string, date_end: string): string => {
+  const start = new Date(date_start).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const end = new Date(date_end).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
+  return `${start} - ${end}`;
+};
   const handleSendMessage = async (customInput?: string) => {
     const messageToSend = (customInput ?? input).trim();
     // Không gửi nếu không có gì cả
@@ -371,7 +382,7 @@ if (saved !== null) {
       try {
         const response = await axiosInstance.get("/bookings/user/today");
         const bookings = response.data?.data || [];
-
+        console.log("Bookings:", bookings);
         if (bookings.length === 0) {
           setMessages((prev) => [
             ...prev,
@@ -396,6 +407,7 @@ if (saved !== null) {
                     key={idx}
                     name={item.field.name}
                     address={item.field.address}
+                    time={formatTimeRange(item.date_start,item.date_end)}
                   />
                 ))}
               </div>
