@@ -13,13 +13,6 @@ import {
 } from "../../components/ui/popover";
 import { cn } from "../../lib/utils";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../../components/ui/dialog";
-import {
   Select,
   SelectGroup,
   SelectValue,
@@ -38,21 +31,13 @@ const RevenueField: React.FC = () => {
   const [selectedField, setSelectedField] = useState<RevenueByFieldItem | null>(
     null,
   );
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [dialogStartDate, setDialogStartDate] = useState<Date | null>(null);
-  const [dialogEndDate, setDialogEndDate] = useState<Date | null>(null);
-  const timeSlots = [
-    "6:00 - 8:00",
-    "08:00 - 10:00",
-    "10:00 - 12:00",
-    "14:00 - 16:00",
-    "16:00 - 18:00",
-    "18:00 - 20:00",
-    "20:00 - 22:00",
-    "22:00 - 24:00",
-  ];
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
   const navigate = useNavigate();
+
+  // State for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   useEffect(() => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -115,6 +100,14 @@ const RevenueField: React.FC = () => {
     navigate(`/admin/statistic/revenue/${field.field_id}`);
   };
 
+  // Tính toán dữ liệu phân trang
+  const totalItems = revenueData.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const currentItems = revenueData.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage,
+  );
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -134,9 +127,6 @@ const RevenueField: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 justify-center items-center">
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl text-center font-semibold">
-          Thống kê doanh thu sân bóng theo tháng
-        </h2>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -165,6 +155,7 @@ const RevenueField: React.FC = () => {
                     onSelect={(date) => {
                       setStartDate(date ?? null);
                       setEndDate(null);
+                      setCurrentPage(1); // Reset về trang 1 khi thay đổi ngày
                     }}
                     autoFocus
                   />
@@ -194,7 +185,10 @@ const RevenueField: React.FC = () => {
                   <Calendar
                     mode="single"
                     selected={endDate || undefined}
-                    onSelect={(date) => setEndDate(date ?? null)}
+                    onSelect={(date) => {
+                      setEndDate(date ?? null);
+                      setCurrentPage(1); // Reset về trang 1 khi thay đổi ngày
+                    }}
                     initialFocus
                     fromDate={startDate || undefined}
                   />
@@ -205,7 +199,7 @@ const RevenueField: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto shadow-md sm:rounded-lg ">
+      <div className="overflow-x-auto shadow-md sm:rounded-lg w-full">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -227,15 +221,15 @@ const RevenueField: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {revenueData.length > 0 ? (
-              revenueData.map((item, index) => (
+            {currentItems.length > 0 ? (
+              currentItems.map((item, index) => (
                 <tr
                   key={item.field_id}
                   className="hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleRowClick(item)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {index + 1}
+                    {(currentPage - 1) * rowsPerPage + index + 1}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
@@ -268,159 +262,67 @@ const RevenueField: React.FC = () => {
           </tbody>
         </table>
       </div>
+      {totalItems > 0 && (
+        <div className="flex items-center justify-center w-full px-6 py-4">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Trước
+            </Button>
 
-      {revenueData.length > 0 && (
-        <div className="flex justify-end">
-          <div className="bg-blue-50 px-4 py-3 rounded-lg">
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Tổng cộng:</span>{" "}
-              {formatCurrency(
-                revenueData.reduce((sum, item) => sum + item.total_revenue, 0),
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <Button
+                    key={page}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className={
+                      page === currentPage ? "bg-blue-600 text-white" : ""
+                    }
+                  >
+                    {page}
+                  </Button>
+                ),
               )}
-            </p>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              Sau
+            </Button>
           </div>
         </div>
       )}
 
-      {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          {selectedField && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  Chi tiết doanh thu {selectedField.field.name}{" "}
-                </DialogTitle>
-                <DialogDescription>
-                  Thông tin chi tiết về doanh thu của sân
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Từ ngày:</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[180px] justify-start text-left font-normal",
-                          !dialogStartDate && "text-muted-foreground",
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dialogStartDate ? (
-                          format(dialogStartDate, "dd/MM/yyyy")
-                        ) : (
-                          <span>Chọn ngày</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 ">
-                      <Calendar
-                        mode="single"
-                        selected={dialogStartDate || undefined}
-                        onSelect={(date) => setDialogStartDate(date ?? null)}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Đến ngày:</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[180px] justify-start text-left font-normal",
-                          !dialogEndDate && "text-muted-foreground",
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dialogEndDate ? (
-                          format(dialogEndDate, "dd/MM/yyyy")
-                        ) : (
-                          <span>Chọn ngày</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={dialogEndDate || undefined}
-                        onSelect={(date) => setDialogEndDate(date ?? null)}
-                        hidden={
-                          dialogStartDate
-                            ? { before: dialogStartDate }
-                            : undefined
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-              {dialogStartDate && dialogEndDate && (
-                <div className="flex justify-center items-center gap-2 mt-4">
-                  <span className="text-sm text-gray-600">Khung giờ:</span>
-                  <Select
-                    value={selectedTimeSlot}
-                    onValueChange={setSelectedTimeSlot}
-                  >
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Chọn khung giờ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Khung giờ</SelectLabel>
-                        {timeSlots.map((slot) => (
-                          <SelectItem key={slot} value={slot}>
-                            {slot}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              {selectedTimeSlot && (
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <span className="text-sm font-medium">Tên sân:</span>
-                    <span className="col-span-3">
-                      {selectedField.field.name}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <span className="text-sm font-medium">Địa chỉ:</span>
-                    <span className="col-span-3">
-                      {selectedField.field.address}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <span className="text-sm font-medium">Giá thuê:</span>
-                    <span className="col-span-3">
-                      {formatCurrency(selectedField.field.price)}/giờ
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <span className="text-sm font-medium">Tổng doanh thu:</span>
-                    <span className="col-span-3 font-semibold text-green-600">
-                      {formatCurrency(selectedField.total_revenue)}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <span className="text-sm font-medium">
-                      Khoảng thời gian:
-                    </span>
-                    <span className="col-span-3">
-                      {format(dialogStartDate || new Date(), "dd/MM/yyyy")} -{" "}
-                      {format(dialogEndDate || new Date(), "dd/MM/yyyy")}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </DialogContent>
-      </Dialog> */}
+      {revenueData.length > 0 && (
+        <div className="flex justify-center w-full">
+          <div className="bg-slate-50 px-4 py-3 rounded-lg mb-3">
+            <p className="text-sm text-gray-600">
+              <span className="text-3xl font-semibold">Tổng cộng:</span>{" "}
+              <span className="text-3xl font-bold text-blue-500 ">
+                {formatCurrency(
+                  revenueData.reduce(
+                    (sum, item) => sum + item.total_revenue,
+                    0,
+                  ),
+                )}
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -27,20 +27,21 @@ import TimeTableField from "../components/Admin/AdminManageTimeTableField";
 import Chat from "../components/Admin/Chat";
 import { useAuth } from "../hooks/useAuth";
 import RevenueFieldById from "../components/Admin/RevenueFieldById";
+import AdminManageBooking from "../components/Admin/AdminManageBooking";
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   useEffect(() => {
     const storedIsAdmin = localStorage.getItem("isAdmin");
-    
+
     setIsAdmin(storedIsAdmin === "true");
   }, []);
 
   if (isAdmin === null) {
     return <div>Loading...</div>; // Hoặc có thể trả về loading spinner
-  };
-return(
-  <Routes>
+  }
+  return (
+    <Routes>
       {/* Public Routes */}
       <Route
         path="/login"
@@ -132,16 +133,18 @@ return(
           </ProtectedRoute>
         }
       />
+
       <Route
-        path="/admin/fileds"
+        path="/admin/manageBooking"
         element={
           <ProtectedRoute adminOnly>
             <AdminLayout>
-              <FieldList />
+              <AdminManageBooking />
             </AdminLayout>
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/manageUser"
         element={
@@ -174,7 +177,7 @@ return(
         }
       />
 
-        <Route
+      <Route
         path="/admin/statistic/revenue/:id"
         element={
           <ProtectedRoute adminOnly>
@@ -258,16 +261,16 @@ return(
           </ProtectedRoute>
         }
       />
-<Route
-  path="/admin/chat"
-  element={
-    <ProtectedRoute adminOnly>
-      <AdminLayout>
-        <Chat />
-      </AdminLayout>
-    </ProtectedRoute>
-  }
-/>
+      <Route
+        path="/admin/chat"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminLayout>
+              <Chat />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
       {/* Redirect fallback */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />

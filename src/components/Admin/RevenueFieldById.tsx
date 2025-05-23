@@ -88,6 +88,10 @@ const RevenueFieldById = () => {
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [pendingReceiptId, setPendingReceiptId] = useState<string | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
   // Lấy tất cả dữ liệu khi mới vào trang
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -119,6 +123,7 @@ const RevenueFieldById = () => {
 
     setLoading(true);
     setError(null);
+    setCurrentPage(1); // Reset to first page when applying new filters
 
     try {
       const params: any = {
@@ -153,6 +158,7 @@ const RevenueFieldById = () => {
     setEndDate(null);
     setSelectedTimeSlot("");
     setHasFilters(false);
+    setCurrentPage(1); // Reset to first page when resetting filters
 
     if (id) {
       const data = await fetchRevenueReport({
@@ -224,6 +230,15 @@ const RevenueFieldById = () => {
     setConfirmModalVisible(false);
     setPendingReceiptId(null);
   };
+
+  // Calculate pagination data
+  const totalBookings = reportData?.bookings?.length || 0;
+  const totalPages = Math.ceil(totalBookings / rowsPerPage);
+  const currentBookings =
+    reportData?.bookings?.slice(
+      (currentPage - 1) * rowsPerPage,
+      currentPage * rowsPerPage,
+    ) || [];
 
   if (loading) {
     return (
@@ -393,7 +408,7 @@ const RevenueFieldById = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {reportData.bookings.map((booking) => (
+                  {currentBookings.map((booking) => (
                     <tr key={booking.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -454,6 +469,51 @@ const RevenueFieldById = () => {
                   ))}
                 </tbody>
               </table>
+
+              {/* Pagination controls */}
+              <div className="flex items-center justify-center gap-3 px-6 py-4 border-t">
+                
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                  >
+                    Trước
+                  </Button>
+
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <Button
+                          key={page}
+                          variant={page === currentPage ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className={
+                            page === currentPage ? "bg-blue-600 text-white" : ""
+                          }
+                        >
+                          {page}
+                        </Button>
+                      ),
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages || totalPages === 0}
+                  >
+                    Sau
+                  </Button>
+                </div>
+              
             </div>
           ) : (
             <div className="p-6 text-center text-gray-500">

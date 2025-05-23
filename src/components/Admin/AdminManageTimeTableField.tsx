@@ -24,9 +24,11 @@ interface TimeSlot {
   price: number;
   note: string;
   isBooked: boolean;
+  booked: boolean;
   start_time: string;
   end_time: string;
   isManualInactive?: boolean;
+  isOverride?: boolean;
 }
 
 interface TimeSlotUpdateResponse {
@@ -93,6 +95,7 @@ const TimeTableField: React.FC = () => {
           const response = await axios.get(
             `http://localhost:8000/api/weekly-pricing/${fieldId}?selected_date=${selectedDate}`,
           );
+          console.log("Dữ liệu giá theo tuần:", response.data);
           setWeeklyData(response.data);
           processWeeklyData(response.data);
         } catch (error) {
@@ -147,14 +150,22 @@ const TimeTableField: React.FC = () => {
             (isBefore(date, now) && !isSameDay(date, now)) ||
             (isSameDay(date, now) && isBefore(slotTime, now));
 
+          const status = slot.booked
+            ? "inactive"
+            : isPastSlot
+              ? "inactive"
+              : slot.status;
+
           return {
             id: slot.time_slot_id,
-            status: isPastSlot ? "inactive" : slot.status,
+            status: status, 
             price: slot.price,
             note: "",
             isBooked: slot.booked,
+            booked: slot.booked,
             start_time: slot.start_time,
             end_time: slot.end_time,
+            isOverride: slot.is_override,
           };
         }),
       );
@@ -224,11 +235,21 @@ const TimeTableField: React.FC = () => {
       try {
         setIsLoading(true);
 
-        await updateTimeSlot(schedule[currentEdit.dayIndex].date, {
-          ...selectedSlot,
-          isManualInactive: selectedSlot.status === "inactive",
-        });
+        const dateStr = format(
+          schedule[currentEdit.dayIndex].date,
+          "yyyy-MM-dd",
+        );
+        const payload = {
+          field_id: fieldId,
+          date_start: `${dateStr}T${selectedSlot.start_time}`,
+          date_end: `${dateStr}T${selectedSlot.end_time}`,
+          custom_price: selectedSlot.price,
+          status: selectedSlot.status,
+        };
 
+        await axiosInstance.put("/field-time-slots/update-by-date", payload);
+
+        // Refresh data
         if (startDate && fieldId) {
           const selectedDate = format(startDate, "yyyy-MM-dd");
           const response = await axios.get(
@@ -247,6 +268,11 @@ const TimeTableField: React.FC = () => {
         setIsOpen(false);
       } catch (error) {
         console.error("Lỗi khi lưu thay đổi:", error);
+        toast({
+          title: "Lỗi",
+          description: "Cập nhật khung giờ thất bại",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -263,12 +289,14 @@ const TimeTableField: React.FC = () => {
 
   // Hàm lấy màu sắc cho ô
   const getCellColor = (slot: TimeSlot, basePrice: number) => {
-    if (slot.isBooked) return "bg-purple-200";
+    if (slot.booked) return "bg-purple-200"; // Ưu tiên hiển thị màu đã đặt trước
     if (slot.status === "inactive" && !slot.isManualInactive)
       return "bg-gray-400";
+
     const ratio = slot.price / basePrice;
     if (ratio >= 1.5) return "bg-red-200";
     if (ratio >= 1.2) return "bg-orange-200";
+    if (ratio > 1) return "bg-yellow-200";
     if (ratio === 1) return "bg-blue-200";
     return "bg-green-200";
   };
@@ -372,13 +400,18 @@ const TimeTableField: React.FC = () => {
                       className={`border text-center font-bold border-gray-300 p-2 ${
                         (slot.status === "inactive" &&
                           !slot.isManualInactive) ||
-                        slot.isBooked
+                          slot.booked
                           ? "cursor-not-allowed"
                           : "cursor-pointer"
                       } hover:opacity-80 ${getCellColor(slot, fieldPrice)}`}
-                      onClick={() => handleCellClick(dayIndex, slotIndex)}
+                      onClick={() => {
+                        if (!slot.booked) {
+                          // Chỉ cho phép click nếu chưa đặt
+                          handleCellClick(dayIndex, slotIndex);
+                        }
+                      }}
                       title={
-                        slot.isBooked
+                        slot.booked
                           ? "Đã đặt"
                           : slot.status === "inactive"
                             ? slot.isManualInactive
@@ -387,7 +420,7 @@ const TimeTableField: React.FC = () => {
                             : `${slot.price.toLocaleString()} VND (${(slot.price / fieldPrice).toFixed(1)}x giá gốc)`
                       }
                     >
-                      {slot.isBooked
+                      {slot.booked
                         ? "Đã đặt"
                         : slot.status === "active"
                           ? slot.price.toLocaleString()

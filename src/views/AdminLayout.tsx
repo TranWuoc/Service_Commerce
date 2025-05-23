@@ -42,6 +42,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         return "Hồ sơ Admin";
       case "/admin/statistic":
         return "Thống kê ";
+      case "/admin/manageBooking":
+        return "Quản lý đặt sân";
+      case "/admin/statistic/revenue":
+        return "Thống kê doanh thu";
+      case "/admin/statistic/top-user":
+        return "Top người dùng";   
       // default:
       //   return "Trang quản lý Admin";
     }
@@ -73,7 +79,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <AvatarMenu />
           </div>
         <div className="mt-6 ">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">{getPageTitle()}</h1>
+        <h1 className="text-4xl text-center font-serif font-bold text-gray-800 mb-4 ">{getPageTitle()}</h1>
           {children}
         </div>
         </div>
