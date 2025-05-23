@@ -23,7 +23,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className="relative mb-6">
- <div className="flex items-center px-5 py-3 rounded-2xl w-full gap-4">
+ <div className="flex items-center  py-3 rounded-2xl w-full gap-4">
   <div className="flex items-center bg-white rounded-xl gap-2 px-3 py-1 h-[50px] w-full max-w-[calc(100%-140px)]">
     <Search className="text-gray-500 flex-shrink-0" />
     <InputField
