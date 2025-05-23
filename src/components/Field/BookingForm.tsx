@@ -5,7 +5,6 @@ import { fetchFields, createBooking, prepareBookingData, getMinBookingDate, vali
 import Button from "../Shared_components/Button";
 import { InputField } from "../Shared_components/InputField";
 import FieldTable from "../Shared_components/Timetable";
-import { useUser } from "../../hooks/useUser";
 import { useToast } from "../../hooks/use-toast";
 
 import type { Field, TimeSlot, BookingFormData } from "../../types/Booking";
@@ -19,13 +18,11 @@ const timeSlots: TimeSlot[] = [
   { value: "16-18", label: "16:00 - 18:00", startHour: 16, endHour: 18 },
   { value: "18-20", label: "18:00 - 20:00", startHour: 18, endHour: 20 },
   { value: "20-22", label: "20:00 - 22:00", startHour: 20, endHour: 22 },
-  { value: "22-24", label: "22:00 - 24:00", startHour: 22, endHour: 24 },
 ];
 
 export const BookingForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useUser();
   const { toast } = useToast();
 
   const [fields, setFields] = useState<Field[]>([]);

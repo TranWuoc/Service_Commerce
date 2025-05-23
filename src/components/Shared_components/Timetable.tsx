@@ -13,7 +13,7 @@ const timeSlots: TimeSlot[] = [
   { value: "16-18", label: "16:00 - 18:00", startHour: 16, endHour: 18 },
   { value: "18-20", label: "18:00 - 20:00", startHour: 18, endHour: 20 },
   { value: "20-22", label: "20:00 - 22:00", startHour: 20, endHour: 22 },
-  { value: "22-24", label: "22:00 - 24:00", startHour: 22, endHour: 24 },
+
 ];
 
 interface SlotInfo {
@@ -45,7 +45,7 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
     return Array.from({ length: 7 }, (_, i) => {
       const date = addDays(weekStart, i);
       return {
-        label: `T${i + 2} - ${format(date, "dd/MM")}`,
+        label: `${i === 6 ? "CN" : `T${i + 2}`} - ${format(date, "dd/MM")}`,
         date: format(date, "yyyy-MM-dd"),
       };
     });
@@ -101,7 +101,7 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       clickTimeout = null;
-      return; // double click
+      return; 
     }
 
     clickTimeout = setTimeout(() => {
