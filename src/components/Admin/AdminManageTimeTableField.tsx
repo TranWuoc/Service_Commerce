@@ -5,20 +5,28 @@ import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "lucide-react";
-import { format, addDays, startOfWeek, isSameDay, isBefore, parseISO } from "date-fns";
+import {
+  format,
+  addDays,
+  startOfWeek,
+  isSameDay,
+  isBefore,
+  parseISO,
+} from "date-fns";
 import { vi } from "date-fns/locale";
 import axiosInstance from "../../api/axiosInstance";
-import { fetchWeeklyBookings } from "../../actions/admin/BookingActions";
 import axios from "axios";
+import { toast } from "../../hooks/use-toast";
+
 interface TimeSlot {
   id: string;
   status: "active" | "inactive";
-  priceMultiplier: number;
+  price: number;
   note: string;
   isBooked: boolean;
-  customPrice?: number;
-  start?: number;
-  end?: number;
+  start_time: string;
+  end_time: string;
+  isManualInactive?: boolean;
 }
 
 interface TimeSlotUpdateResponse {
@@ -30,7 +38,7 @@ interface TimeSlotUpdateResponse {
     start_time: string;
     end_time: string;
     status: "active" | "inactive";
-    custom_price: number;
+    price: number;
     updated_at: string;
   };
 }
@@ -44,16 +52,6 @@ interface DaySchedule {
 const TimeTableField: React.FC = () => {
   const { id: fieldId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const timeSlots = [
-    "6:00 - 8:00",
-    "08:00 - 10:00",
-    "10:00 - 12:00",
-    "14:00 - 16:00",
-    "16:00 - 18:00",
-    "18:00 - 20:00",
-    "20:00 - 22:00",
-    "22:00 - 24:00",
-  ];
 
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
@@ -66,9 +64,10 @@ const TimeTableField: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldPrice, setFieldPrice] = useState(0);
+  const [weeklyData, setWeeklyData] = useState<any>(null);
 
   // Lấy thông tin sân khi fieldId thay đổi
-   useEffect(() => {
+  useEffect(() => {
     const fetchFieldInfo = async () => {
       if (fieldId) {
         try {
@@ -84,193 +83,137 @@ const TimeTableField: React.FC = () => {
     fetchFieldInfo();
   }, [fieldId, navigate]);
 
-  // Hàm khởi tạo lịch trình
-const initializeSchedule = (startDate: Date): DaySchedule[] => {
-  const weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
-  const daysOfWeek = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const dayNames = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"];
-  const now = new Date();
-
-  return daysOfWeek.map((date, index) => {
-    // Kiểm tra nếu ngày đã qua (không tính cùng ngày)
-    const isPastDate = isBefore(date, now) && !isSameDay(date, now);
-
-    return {
-      day: dayNames[index],
-      date,
-      timeSlots: timeSlots.map((slot, slotIndex) => {
-        // Kiểm tra nếu khung giờ đã qua
-        const [startHourStr] = slot.split(' - ');
-        const startHour = parseInt(startHourStr.split(':')[0]);
-        const slotTime = new Date(date);
-        slotTime.setHours(startHour, 0, 0, 0);
-        
-        const isPastSlot = isPastDate || 
-                          (isSameDay(date, now) && isBefore(slotTime, now));
-
-        return {
-          id: `${index}-${slotIndex}`,
-          status: isPastSlot ? "inactive" : "active",
-          priceMultiplier: 1,
-          customPrice: fieldPrice,
-          note: "",
-          isBooked: false,
-        };
-      }),
-    };
-  });
-};
-useEffect(() => {
-  if (!startDate) return;
-
-  // Cập nhật mỗi phút để kiểm tra thời gian
-  const interval = setInterval(() => {
-    setSchedule(prevSchedule => {
-      const now = new Date();
-      return prevSchedule.map(day => {
-        const isPastDate = isBefore(day.date, now) && !isSameDay(day.date, now);
-
-        return {
-          ...day,
-          timeSlots: day.timeSlots.map(slot => {
-            const [startHourStr] = timeSlots[parseInt(slot.id.split('-')[1])].split(' - ');
-            const startHour = parseInt(startHourStr.split(':')[0]);
-            const slotTime = new Date(day.date);
-            slotTime.setHours(startHour, 0, 0, 0);
-            
-            const isPastSlot = isPastDate || 
-                             (isSameDay(day.date, now) && isBefore(slotTime, now));
-
-            // Chỉ cập nhật nếu trạng thái thay đổi
-            if (slot.status === "active" && isPastSlot) {
-              return { ...slot, status: "inactive" };
-            }
-            return slot;
-          })
-        };
-      });
-    });
-  }, 60000); // Kiểm tra mỗi phút
-
-  return () => clearInterval(interval);
-}, [startDate]);
-
-  // Cập nhật slot lên server
-const updateTimeSlot = async (
-  date: Date,
-  timeSlot: TimeSlot,
-  slotIndex: number
-): Promise<TimeSlotUpdateResponse['data']> => {
-  try {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const [start, end] = timeSlots[slotIndex].split(' - ').map(t => t.padStart(5, '0'));
-
-    // Gộp ngày và giờ thành dạng ISO: "YYYY-MM-DDTHH:mm:ss"
-    const date_start = `${dateStr}T${start}:00`;
-    const date_end = `${dateStr}T${end}:00`;
-
-    const payload = {
-      field_id: fieldId,
-      date_start,
-      date_end,
-      custom_price: typeof timeSlot.customPrice === "number"
-        ? timeSlot.customPrice
-        : fieldPrice * timeSlot.priceMultiplier,
-      status: timeSlot.status,
-      // Nếu backend cần note thì giữ lại, không thì bỏ dòng này
-      // note: timeSlot.note
-    };
-
-    console.log("Payload gửi lên server:", payload);
-
-    const res = await axiosInstance.put<TimeSlotUpdateResponse>(
-      "/field-time-slots/update-by-date",
-      payload
-    );
-
-    if (res.status === 200 && res.data.message === "Cập nhật thành công") {
-      return res.data.data;
-    }
-    throw new Error(res.data.message || "Cập nhật thất bại");
-  } catch (error) {
-    console.error("Lỗi khi cập nhật:", {
-      error: error instanceof Error ? error.message : error,
-      response: axios.isAxiosError(error) ? error.response?.data : undefined
-    });
-    throw error;
-  }
-};
-
-  // Ánh xạ booking vào schedule
-  const mapBookingsToSchedule = (schedule: DaySchedule[], bookings: any[]) => {
-    const updatedSchedule = [...schedule];
-
-    bookings.forEach(booking => {
-      const startDate = parseISO(booking.date_start);
-      const endDate = parseISO(booking.date_end);
-      
-      const dayIndex = updatedSchedule.findIndex(day => 
-        isSameDay(day.date, startDate)
-      );
-      
-      if (dayIndex !== -1) {
-        const startHour = startDate.getHours();
-        let slotIndex = -1;
-        
-        if (startHour >= 6 && startHour < 8) slotIndex = 0;
-        else if (startHour >= 8 && startHour < 10) slotIndex = 1;
-        else if (startHour >= 10 && startHour < 12) slotIndex = 2;
-        else if (startHour >= 14 && startHour < 16) slotIndex = 3;
-        else if (startHour >= 16 && startHour < 18) slotIndex = 4;
-        else if (startHour >= 18 && startHour < 20) slotIndex = 5;
-        else if (startHour >= 20 && startHour < 22) slotIndex = 6;
-        else if (startHour >= 22 && startHour < 24) slotIndex = 7;
-        
-        if (slotIndex !== -1) {
-          updatedSchedule[dayIndex].timeSlots[slotIndex] = {
-            ...updatedSchedule[dayIndex].timeSlots[slotIndex],
-            isBooked: true,
-            note: `Đã đặt: ${booking.field?.name || 'Sân bóng'}`
-          };
-        }
-      }
-    });
-
-    return updatedSchedule;
-  };
-
-  // Lấy dữ liệu booking
+  // Lấy dữ liệu weekly pricing
   useEffect(() => {
     if (startDate && fieldId) {
-      const loadData = async () => {
+      const fetchWeeklyPricing = async () => {
         setIsLoading(true);
         try {
-          const dateStr = format(startDate, 'yyyy-MM-dd');
-          const initialSchedule = initializeSchedule(startDate);
-          
-          const response = await fetchWeeklyBookings(dateStr, fieldId);
-          const updatedSchedule = mapBookingsToSchedule(initialSchedule, response.bookings);
-          
-          setSchedule(updatedSchedule);
+          const selectedDate = format(startDate, "yyyy-MM-dd");
+          const response = await axios.get(
+            `http://localhost:8000/api/weekly-pricing/${fieldId}?selected_date=${selectedDate}`,
+          );
+          setWeeklyData(response.data);
+          processWeeklyData(response.data);
         } catch (error) {
-          console.error("Lỗi khi tải dữ liệu:", error);
-          setSchedule(initializeSchedule(startDate));
+          console.error("Lỗi khi lấy dữ liệu giá theo tuần:", error);
         } finally {
           setIsLoading(false);
         }
       };
-      
-      loadData();
+      fetchWeeklyPricing();
     }
   }, [startDate, fieldId]);
 
+  const sortTimeSlots = (slots: TimeSlot[]) => {
+    return slots.sort((a, b) => {
+      const timeToMinutes = (time: string) => {
+        const [hours, minutes] = time.split(":").map(Number);
+        return hours * 60 + minutes;
+      };
+      return timeToMinutes(a.start_time) - timeToMinutes(b.start_time);
+    });
+  };
+
+  // Xử lý dữ liệu weekly pricing
+  const processWeeklyData = (data: any) => {
+    const weekStart = new Date(data.start_of_week);
+    const daysOfWeek = Array.from({ length: 7 }, (_, i) =>
+      addDays(weekStart, i),
+    );
+    const dayNames = [
+      "Thứ 2",
+      "Thứ 3",
+      "Thứ 4",
+      "Thứ 5",
+      "Thứ 6",
+      "Thứ 7",
+      "Chủ nhật",
+    ];
+    const now = new Date();
+
+    const newSchedule = daysOfWeek.map((date, index) => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      const dayData = data.days[dateStr] || [];
+
+      // Tạo timeSlots từ dữ liệu API
+      const timeSlots = sortTimeSlots(
+        dayData.map((slot: any) => {
+          const startHour = parseInt(slot.start_time.split(":")[0]);
+          const slotTime = new Date(date);
+          slotTime.setHours(startHour, 0, 0, 0);
+
+          const isPastSlot =
+            (isBefore(date, now) && !isSameDay(date, now)) ||
+            (isSameDay(date, now) && isBefore(slotTime, now));
+
+          return {
+            id: slot.time_slot_id,
+            status: isPastSlot ? "inactive" : slot.status,
+            price: slot.price,
+            note: "",
+            isBooked: slot.booked,
+            start_time: slot.start_time,
+            end_time: slot.end_time,
+          };
+        }),
+      );
+
+      return {
+        day: dayNames[index],
+        date,
+        timeSlots,
+      };
+    });
+
+    setSchedule(newSchedule);
+  };
+
+  // Cập nhật slot lên server
+  const updateTimeSlot = async (
+    date: Date,
+    timeSlot: TimeSlot,
+  ): Promise<TimeSlotUpdateResponse["data"]> => {
+    try {
+      const dateStr = format(date, "yyyy-MM-dd");
+
+      const payload = {
+        field_id: fieldId,
+        date_start: `${dateStr}T${timeSlot.start_time}`,
+        date_end: `${dateStr}T${timeSlot.end_time}`,
+        price: timeSlot.price,
+        status: timeSlot.status,
+        custom_price: timeSlot.price,
+      };
+      const res = await axiosInstance.put<TimeSlotUpdateResponse>(
+        "/field-time-slots/update-by-date",
+        payload,
+      );
+
+      if (res.status === 200 && res.data.message === "Cập nhật thành công") {
+        return res.data.data;
+      }
+      throw new Error(res.data.message || "Cập nhật thất bại");
+    } catch (error) {
+      console.error("Lỗi khi cập nhật:", {
+        error: error instanceof Error ? error.message : error,
+        response: axios.isAxiosError(error) ? error.response?.data : undefined,
+      });
+      throw error;
+    }
+  };
+
   const handleCellClick = (dayIndex: number, slotIndex: number) => {
     const slot = schedule[dayIndex].timeSlots[slotIndex];
-    
-    if (slot.status === "inactive" || slot.isBooked) {
+    const date = schedule[dayIndex].date;
+    if (
+      slot.status === "inactive" &&
+      !slot.isManualInactive &&
+      isTimePassed(date, slot.start_time)
+    ) {
       return;
     }
-    
+
     setCurrentEdit({ dayIndex, slotIndex });
     setSelectedSlot({ ...slot });
     setIsOpen(true);
@@ -280,25 +223,28 @@ const updateTimeSlot = async (
     if (currentEdit && selectedSlot) {
       try {
         setIsLoading(true);
-        
-        // Cập nhật lên server
-        const updatedSlot = await updateTimeSlot(
-          schedule[currentEdit.dayIndex].date,
-          selectedSlot,
-          currentEdit.slotIndex
-        );
 
-        // Cập nhật local state
-        const updatedSchedule = [...schedule];
-        updatedSchedule[currentEdit.dayIndex].timeSlots[currentEdit.slotIndex] = {
+        await updateTimeSlot(schedule[currentEdit.dayIndex].date, {
           ...selectedSlot,
-          customPrice: updatedSlot.custom_price,
-          status: updatedSlot.status
-        };
-        
-        setSchedule(updatedSchedule);
+          isManualInactive: selectedSlot.status === "inactive",
+        });
+
+        if (startDate && fieldId) {
+          const selectedDate = format(startDate, "yyyy-MM-dd");
+          const response = await axios.get(
+            `http://localhost:8000/api/weekly-pricing/${fieldId}?selected_date=${selectedDate}`,
+          );
+          setWeeklyData(response.data);
+          processWeeklyData(response.data);
+        }
+
+        toast({
+          title: "Thành công",
+          description: "Cập nhật khung giờ thành công",
+          variant: "success2",
+        });
+
         setIsOpen(false);
-        
       } catch (error) {
         console.error("Lỗi khi lưu thay đổi:", error);
       } finally {
@@ -307,31 +253,52 @@ const updateTimeSlot = async (
     }
   };
 
+  const isTimePassed = (date: Date, startTime: string) => {
+    const now = new Date();
+    const slotDateTime = new Date(date);
+    const [hours, minutes] = startTime.split(":").map(Number);
+    slotDateTime.setHours(hours, minutes, 0, 0);
+    return isBefore(slotDateTime, now);
+  };
 
-  const getCellColor = (status: "active" | "inactive", multiplier: number, isBooked: boolean) => {
-    if (isBooked) return "bg-purple-200";
-    if (status === "inactive") return "bg-gray-400";
+  // Hàm lấy màu sắc cho ô
+  const getCellColor = (slot: TimeSlot, basePrice: number) => {
+    if (slot.isBooked) return "bg-purple-200";
+    if (slot.status === "inactive" && !slot.isManualInactive)
+      return "bg-gray-400";
+    const ratio = slot.price / basePrice;
+    if (ratio >= 1.5) return "bg-red-200";
+    if (ratio >= 1.2) return "bg-orange-200";
+    if (ratio === 1) return "bg-blue-200";
+    return "bg-green-200";
+  };
 
-    switch (multiplier) {
-      case 1:
-        return "bg-green-200";
-      case 1.5:
-        return "bg-yellow-200";
-      case 2:
-        return "bg-orange-200";
-      case 2.5:
-        return "bg-red-200";
-      default:
-        return "bg-green-200";
-    }
+  const formatTimeRange = (start: string, end: string) => {
+    return `${start.slice(0, 5)} - ${end.slice(0, 5)}`;
+  };
+
+  const getTimeSlotHeaders = () => {
+    if (schedule.length === 0 || schedule[0].timeSlots.length === 0) return [];
+
+    const sortedSlots = [...schedule[0].timeSlots].sort((a, b) => {
+      const timeToValue = (time: string) => {
+        const [hours, minutes] = time.split(":").map(Number);
+        return hours * 60 + minutes;
+      };
+      return timeToValue(a.start_time) - timeToValue(b.start_time);
+    });
+
+    return sortedSlots.map((slot) => ({
+      start_time: slot.start_time,
+      end_time: slot.end_time,
+      id: slot.id,
+    }));
   };
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">
-          Quản lý khung giờ
-        </h1>
+        <h1 className="text-2xl font-bold">Quản lý khung giờ - {fieldName}</h1>
         <Button
           onClick={() => navigate("/admin/manage/FieldInfo/" + fieldId)}
           variant="outline"
@@ -377,13 +344,15 @@ const updateTimeSlot = async (
           <table className="min-w-full border border-gray-300">
             <thead>
               <tr>
-                <th className="border border-gray-300 p-2 bg-gray-100">Ngày/Giờ</th>
-                {timeSlots.map((time) => (
+                <th className="border border-gray-300 p-2 bg-gray-100">
+                  Ngày/Giờ
+                </th>
+                {getTimeSlotHeaders().map((slot) => (
                   <th
-                    key={time}
+                    key={slot.id}
                     className="border border-gray-300 p-2 bg-gray-100"
                   >
-                    {time}
+                    {formatTimeRange(slot.start_time, slot.end_time)}
                   </th>
                 ))}
               </tr>
@@ -397,20 +366,34 @@ const updateTimeSlot = async (
                       {format(daySchedule.date, "dd/MM")}
                     </div>
                   </td>
-                  {timeSlots.map((_, slotIndex) => {
-                    const slot = daySchedule.timeSlots[slotIndex];
-                    return (
-                      <td
-                        key={`${dayIndex}-${slotIndex}`}
-                        className={`border text-center font-bold border-gray-300 p-2 ${slot.status === "inactive" || slot.isBooked ? 'cursor-not-allowed' : 'cursor-pointer'} hover:opacity-80 ${getCellColor(slot.status, slot.priceMultiplier, slot.isBooked)}`}
-                        onClick={() => handleCellClick(dayIndex, slotIndex)}
-                        title={slot.isBooked ? slot.note : ''}
-                      >
-                        {slot.isBooked ? "Đã đặt" : 
-                         slot.status === "active" ? `x${slot.priceMultiplier}` : ""}
-                      </td>
-                    );
-                  })}
+                  {daySchedule.timeSlots.map((slot, slotIndex) => (
+                    <td
+                      key={slot.id}
+                      className={`border text-center font-bold border-gray-300 p-2 ${
+                        (slot.status === "inactive" &&
+                          !slot.isManualInactive) ||
+                        slot.isBooked
+                          ? "cursor-not-allowed"
+                          : "cursor-pointer"
+                      } hover:opacity-80 ${getCellColor(slot, fieldPrice)}`}
+                      onClick={() => handleCellClick(dayIndex, slotIndex)}
+                      title={
+                        slot.isBooked
+                          ? "Đã đặt"
+                          : slot.status === "inactive"
+                            ? slot.isManualInactive
+                              ? "Đã tắt thủ công"
+                              : "Đã quá thời gian"
+                            : `${slot.price.toLocaleString()} VND (${(slot.price / fieldPrice).toFixed(1)}x giá gốc)`
+                      }
+                    >
+                      {slot.isBooked
+                        ? "Đã đặt"
+                        : slot.status === "active"
+                          ? slot.price.toLocaleString()
+                          : "✖"}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -419,7 +402,11 @@ const updateTimeSlot = async (
       )}
 
       {/* Popup chỉnh sửa */}
-       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
+      <Dialog
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        className="relative z-50"
+      >
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="w-full max-w-md rounded bg-white p-6">
@@ -436,7 +423,7 @@ const updateTimeSlot = async (
                     checked={selectedSlot?.status === "active"}
                     onChange={() =>
                       setSelectedSlot((prev) =>
-                        prev ? { ...prev, status: "active" } : null
+                        prev ? { ...prev, status: "active" } : null,
                       )
                     }
                     className="mr-2"
@@ -449,7 +436,7 @@ const updateTimeSlot = async (
                     checked={selectedSlot?.status === "inactive"}
                     onChange={() =>
                       setSelectedSlot((prev) =>
-                        prev ? { ...prev, status: "inactive" } : null
+                        prev ? { ...prev, status: "inactive" } : null,
                       )
                     }
                     className="mr-2"
@@ -460,60 +447,20 @@ const updateTimeSlot = async (
             </div>
 
             {selectedSlot?.status === "active" && (
-              <>
-                <div className="mb-4">
-                  <label className="block mb-2 font-medium">Hệ số giá:</label>
-                  <select
-                    value={selectedSlot?.priceMultiplier}
-                    onChange={(e) =>
-                      setSelectedSlot((prev) =>
-                        prev
-                          ? { 
-                              ...prev, 
-                              priceMultiplier: Number(e.target.value),
-                              customPrice: fieldPrice * Number(e.target.value)
-                            } 
-                          : null
-                      )
-                    }
-                    className="w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="1">x1 (Giá gốc: {fieldPrice.toLocaleString()} VND)</option>
-                    <option value="1.5">x1.5 ({(fieldPrice * 1.5).toLocaleString()} VND)</option>
-                    <option value="2">x2 ({(fieldPrice * 2).toLocaleString()} VND)</option>
-                    <option value="2.5">x2.5 ({(fieldPrice * 2.5).toLocaleString()} VND)</option>
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block mb-2 font-medium">Giá tùy chỉnh (VND):</label>
-                  <input
-                    type="number"
-                    value={selectedSlot?.customPrice || fieldPrice * (selectedSlot?.priceMultiplier || 1)}
-                    onChange={(e) =>
-                      setSelectedSlot((prev) =>
-                        prev ? { ...prev, customPrice: Number(e.target.value) } : null
-                      )
-                    }
-                    className="w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-              </>
+              <div className="mb-4">
+                <label className="block mb-2 font-medium">Giá (VND):</label>
+                <input
+                  type="number"
+                  value={selectedSlot?.price || 0}
+                  onChange={(e) =>
+                    setSelectedSlot((prev) =>
+                      prev ? { ...prev, price: Number(e.target.value) } : null,
+                    )
+                  }
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
             )}
-
-            <div className="mb-4">
-              <label className="block mb-2 font-medium">Ghi chú:</label>
-              <textarea
-                value={selectedSlot?.note || ""}
-                onChange={(e) =>
-                  setSelectedSlot((prev) =>
-                    prev ? { ...prev, note: e.target.value } : null
-                  )
-                }
-                className="w-full p-2 border border-gray-300 rounded"
-                rows={3}
-              />
-            </div>
-
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsOpen(false)}
