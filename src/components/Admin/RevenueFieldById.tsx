@@ -36,7 +36,6 @@ const timeSlots = [
   { value: "16:00:00-18:00:00", label: "16:00 - 18:00" },
   { value: "18:00:00-20:00:00", label: "18:00 - 20:00" },
   { value: "20:00:00-22:00:00", label: "20:00 - 22:00" },
-  { value: "22:00:00-00:00:00", label: "22:00 - 24:00" },
 ];
 
 interface Booking {
@@ -87,8 +86,8 @@ const RevenueFieldById = () => {
   const [hasFilters, setHasFilters] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [pendingReceiptId, setPendingReceiptId] = useState<string | null>(null);
-
-  // Pagination state
+  const [hasStartDate, setHasStartDate] = useState(false);
+  const [fieldName, setFieldName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
@@ -106,7 +105,15 @@ const RevenueFieldById = () => {
           start_date: "",
           end_date: "",
         });
+        console.log("Data:", data);
         setReportData(data);
+        if (data.field?.name) {
+          setFieldName(data.field.name);
+        } else if (data.bookings && data.bookings.length > 0) {
+          setFieldName(data.bookings[0].field.name);
+        } else {
+          setFieldName("");
+        }
       } catch (err) {
         setError("Không thể tải dữ liệu doanh thu");
       } finally {
@@ -121,32 +128,72 @@ const RevenueFieldById = () => {
   const applyFilters = async () => {
     if (!id) return;
 
+    // Kiểm tra ngày kết thúc không được trước ngày bắt đầu
+    if (startDate && endDate && startDate > endDate) {
+      toast({
+        title: "Lỗi",
+        description: "Ngày kết thúc không thể trước ngày bắt đầu",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    setCurrentPage(1); // Reset to first page when applying new filters
+    setCurrentPage(1);
 
     try {
       const params: any = {
         field_id: id,
       };
 
-      if (startDate) {
-        params.start_date = format(startDate, "yyyy-MM-dd");
-      }
-      if (endDate) {
-        params.end_date = format(endDate, "yyyy-MM-dd");
-      }
-      if (selectedTimeSlot) {
+      if (
+        startDate &&
+        endDate &&
+        selectedTimeSlot &&
+        startDate.getTime() === endDate.getTime()
+      ) {
         const [startTime, endTime] = selectedTimeSlot.split("-");
+        const dateStr = format(startDate, "yyyy-MM-dd");
+        params.start_date = `${dateStr}T${startTime}`;
+        params.end_date = `${dateStr}T${endTime}`;
         params.start_time = startTime;
         params.end_time = endTime;
+      } else {
+        if (startDate) {
+          const start = new Date(startDate);
+          if (selectedTimeSlot) {
+            const [startTime] = selectedTimeSlot.split("-");
+            const [hours, minutes, seconds] = startTime.split(":").map(Number);
+            start.setHours(hours, minutes, seconds, 0);
+          } else {
+            start.setHours(0, 0, 0, 0);
+          }
+          params.start_date = start.toISOString();
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          if (selectedTimeSlot) {
+            const [, endTime] = selectedTimeSlot.split("-");
+            const [hours, minutes, seconds] = endTime.split(":").map(Number);
+            end.setHours(hours, minutes, seconds, 999);
+          } else {
+            end.setHours(23, 59, 59, 999);
+          }
+          params.end_date = end.toISOString();
+        }
+        if (selectedTimeSlot) {
+          const [startTime, endTime] = selectedTimeSlot.split("-");
+          params.start_time = startTime;
+          params.end_time = endTime;
+        }
       }
-
       const data = await fetchRevenueReport(params);
       setReportData(data);
       setHasFilters(!!startDate || !!endDate || !!selectedTimeSlot);
     } catch (err) {
       setError("Không thể tải dữ liệu doanh thu");
+      console.error("Lỗi khi tải dữ liệu:", err);
     } finally {
       setLoading(false);
     }
@@ -260,12 +307,9 @@ const RevenueFieldById = () => {
     <div className="flex flex-col gap-6 p-4">
       <h2 className="text-2xl font-bold mb-4">
         Báo cáo doanh thu sân bóng
-        {reportData?.field?.name && (
-          <span className="ml-2 text-blue-600">- {reportData.field.name}</span>
-        )}
+        {fieldName && <span className="ml-2 text-blue-600">- {fieldName}</span>}
       </h2>
 
-      {/* Filter controls */}
       <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">Từ ngày:</span>
@@ -290,7 +334,13 @@ const RevenueFieldById = () => {
               <Calendar
                 mode="single"
                 selected={startDate || undefined}
-                onSelect={(date) => setStartDate(date ?? null)}
+                onSelect={(date) => {
+                  setStartDate(date ?? null);
+                  setHasStartDate(!!date);
+                  if (date && endDate && date > endDate) {
+                    setEndDate(null); // Reset end date if it's before start date
+                  }
+                }}
                 autoFocus
               />
             </PopoverContent>
@@ -307,24 +357,27 @@ const RevenueFieldById = () => {
                   "w-[180px] justify-start text-left font-normal",
                   !endDate && "text-muted-foreground",
                 )}
+                disabled={!hasStartDate} // Disable khi chưa có start date
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {endDate ? (
                   format(endDate, "dd/MM/yyyy")
                 ) : (
-                  <span>Chọn ngày</span>
+                  <span>{hasStartDate ? "Chọn ngày" : "Chọn ngày "}</span>
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={endDate || undefined}
-                onSelect={(date) => setEndDate(date ?? null)}
-                autoFocus
-                fromDate={startDate || undefined}
-              />
-            </PopoverContent>
+            {hasStartDate && (
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={endDate || undefined}
+                  onSelect={(date) => setEndDate(date ?? null)}
+                  autoFocus
+                  fromDate={startDate || undefined} //
+                />
+              </PopoverContent>
+            )}
           </Popover>
         </div>
 
@@ -361,7 +414,6 @@ const RevenueFieldById = () => {
         )}
       </div>
 
-      {/* Hiển thị dữ liệu */}
       {reportData && (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="p-4 border-b flex justify-between items-center">
@@ -470,50 +522,47 @@ const RevenueFieldById = () => {
                 </tbody>
               </table>
 
-              {/* Pagination controls */}
               <div className="flex items-center justify-center gap-3 px-6 py-4 border-t">
-                
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                  >
-                    Trước
-                  </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                >
+                  Trước
+                </Button>
 
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (page) => (
-                        <Button
-                          key={page}
-                          variant={page === currentPage ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setCurrentPage(page)}
-                          className={
-                            page === currentPage ? "bg-blue-600 text-white" : ""
-                          }
-                        >
-                          {page}
-                        </Button>
-                      ),
-                    )}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages || totalPages === 0}
-                  >
-                    Sau
-                  </Button>
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <Button
+                        key={page}
+                        variant={page === currentPage ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(page)}
+                        className={
+                          page === currentPage ? "bg-blue-600 text-white" : ""
+                        }
+                      >
+                        {page}
+                      </Button>
+                    ),
+                  )}
                 </div>
-              
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages || totalPages === 0}
+                >
+                  Sau
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="p-6 text-center text-gray-500">
