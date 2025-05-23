@@ -14,6 +14,7 @@ const timeSlots: TimeSlot[] = [
   { value: "6-8", label: "06:00 - 08:00", startHour: 6, endHour: 8 },
   { value: "8-10", label: "08:00 - 10:00", startHour: 8, endHour: 10 },
   { value: "10-12", label: "10:00 - 12:00", startHour: 10, endHour: 12 },
+  {value: "12-14", label: "12:00 - 14:00", startHour: 12, endHour: 14 },
   { value: "14-16", label: "14:00 - 16:00", startHour: 14, endHour: 16 },
   { value: "16-18", label: "16:00 - 18:00", startHour: 16, endHour: 18 },
   { value: "18-20", label: "18:00 - 20:00", startHour: 18, endHour: 20 },
