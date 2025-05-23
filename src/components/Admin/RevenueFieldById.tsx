@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
+import { ConfirmModal } from "../Shared_components/ConfirmModal";
 import {
   Select,
   SelectGroup,
@@ -40,7 +41,13 @@ const timeSlots = [
 
 interface Booking {
   id: string;
-  user_id: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone_number: string;
+    address: string;
+  };
   field: {
     id: string;
     name: string;
@@ -77,36 +84,28 @@ const RevenueFieldById = () => {
   const [reportData, setReportData] = useState<RevenueReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasFilters, setHasFilters] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [pendingReceiptId, setPendingReceiptId] = useState<string | null>(null);
 
-  // Lấy ngày mặc định là đầu tháng đến hôm nay
-  useEffect(() => {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    setStartDate(firstDayOfMonth);
-    setEndDate(today);
-  }, []);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
 
-  // Fetch dữ liệu báo cáo
+  // Lấy tất cả dữ liệu khi mới vào trang
   useEffect(() => {
-    const fetchData = async () => {
-      if (!startDate || !endDate || !id) return;
+    const fetchInitialData = async () => {
+      if (!id) return;
 
       setLoading(true);
       setError(null);
 
       try {
-        const [startTime, endTime] = selectedTimeSlot
-          ? selectedTimeSlot.split("-")
-          : ["", ""];
-
         const data = await fetchRevenueReport({
           field_id: id,
-          start_date: format(startDate, "yyyy-MM-dd"),
-          end_date: format(endDate, "yyyy-MM-dd"),
-          start_time: startTime,
-          end_time: endTime,
+          start_date: "",
+          end_date: "",
         });
-
         setReportData(data);
       } catch (err) {
         setError("Không thể tải dữ liệu doanh thu");
@@ -115,56 +114,131 @@ const RevenueFieldById = () => {
       }
     };
 
-    fetchData();
-  }, [id, startDate, endDate, selectedTimeSlot]);
+    fetchInitialData();
+  }, [id]);
 
-  const handleConfirmPayment = async (receiptId: string) => {
-    if (
-      window.confirm("Bạn có chắc chắn muốn xác nhận thanh toán toàn bộ không?")
-    ) {
+  // Fetch dữ liệu khi có filter
+  const applyFilters = async () => {
+    if (!id) return;
+
+    setLoading(true);
+    setError(null);
+    setCurrentPage(1); // Reset to first page when applying new filters
+
+    try {
+      const params: any = {
+        field_id: id,
+      };
+
+      if (startDate) {
+        params.start_date = format(startDate, "yyyy-MM-dd");
+      }
+      if (endDate) {
+        params.end_date = format(endDate, "yyyy-MM-dd");
+      }
+      if (selectedTimeSlot) {
+        const [startTime, endTime] = selectedTimeSlot.split("-");
+        params.start_time = startTime;
+        params.end_time = endTime;
+      }
+
+      const data = await fetchRevenueReport(params);
+      setReportData(data);
+      setHasFilters(!!startDate || !!endDate || !!selectedTimeSlot);
+    } catch (err) {
+      setError("Không thể tải dữ liệu doanh thu");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset tất cả filter
+  const resetFilters = async () => {
+    setStartDate(null);
+    setEndDate(null);
+    setSelectedTimeSlot("");
+    setHasFilters(false);
+    setCurrentPage(1); // Reset to first page when resetting filters
+
+    if (id) {
+      const data = await fetchRevenueReport({
+        field_id: id,
+        start_date: "",
+        end_date: "",
+      });
       try {
-        const token = localStorage.getItem("authToken");
-        await axios.post(
-          `http://127.0.0.1:8000/api/receipts/confirm-full-payment/${receiptId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        toast({
-          title: "Thành công",
-          description: "Xác nhận thanh toán thành công",
-          variant: "success",
+        const data = await fetchRevenueReport({
+          field_id: id,
+          start_date: "",
+          end_date: "",
         });
-
-        // Refresh data after confirmation
-        if (startDate && endDate && id) {
-          const [startTime, endTime] = selectedTimeSlot
-            ? selectedTimeSlot.split("-")
-            : ["", ""];
-          const data = await fetchRevenueReport({
-            field_id: id,
-            start_date: format(startDate, "yyyy-MM-dd"),
-            end_date: format(endDate, "yyyy-MM-dd"),
-            start_time: startTime,
-            end_time: endTime,
-          });
-          setReportData(data);
-        }
-      } catch (error: any) {
-        toast({
-          title: "Lỗi",
-          description:
-            error.response?.data?.message ||
-            "Có lỗi xảy ra khi xác nhận thanh toán",
-          variant: "destructive",
-        });
+        setReportData(data);
+      } catch (err) {
+        setError("Không thể tải dữ liệu doanh thu");
+      } finally {
+        setLoading(false);
       }
     }
   };
+
+  const handleConfirmPayment = (receiptId: string) => {
+    setPendingReceiptId(receiptId);
+    setConfirmModalVisible(true);
+  };
+
+  // Hàm xử lý khi xác nhận trong modal
+  const handleConfirmModal = async () => {
+    if (!pendingReceiptId) return;
+    try {
+      const token = localStorage.getItem("authToken");
+      await axios.post(
+        `http://127.0.0.1:8000/api/receipts/confirm-full-payment/${pendingReceiptId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      toast({
+        title: "Thành công",
+        description: "Xác nhận thanh toán thành công",
+        variant: "success",
+      });
+
+      setConfirmModalVisible(false);
+      setPendingReceiptId(null);
+
+      // Refresh data
+      await applyFilters();
+    } catch (error: any) {
+      toast({
+        title: "Lỗi",
+        description:
+          error.response?.data?.message ||
+          "Có lỗi xảy ra khi xác nhận thanh toán",
+        variant: "destructive",
+      });
+      setConfirmModalVisible(false);
+      setPendingReceiptId(null);
+    }
+  };
+
+  // Hàm xử lý khi hủy modal
+  const handleCancelModal = () => {
+    setConfirmModalVisible(false);
+    setPendingReceiptId(null);
+  };
+
+  // Calculate pagination data
+  const totalBookings = reportData?.bookings?.length || 0;
+  const totalPages = Math.ceil(totalBookings / rowsPerPage);
+  const currentBookings =
+    reportData?.bookings?.slice(
+      (currentPage - 1) * rowsPerPage,
+      currentPage * rowsPerPage,
+    ) || [];
 
   if (loading) {
     return (
@@ -216,11 +290,7 @@ const RevenueFieldById = () => {
               <Calendar
                 mode="single"
                 selected={startDate || undefined}
-                onSelect={(date) => {
-                  setStartDate(date ?? null);
-                  setEndDate(null);
-                  setSelectedTimeSlot(""); // Reset khung giờ khi đổi ngày
-                }}
+                onSelect={(date) => setStartDate(date ?? null)}
                 autoFocus
               />
             </PopoverContent>
@@ -250,141 +320,219 @@ const RevenueFieldById = () => {
               <Calendar
                 mode="single"
                 selected={endDate || undefined}
-                onSelect={(date) => {
-                  setEndDate(date ?? null);
-                  setSelectedTimeSlot(""); // Reset khung giờ khi đổi ngày
-                }}
+                onSelect={(date) => setEndDate(date ?? null)}
                 autoFocus
-                hidden={startDate ? { before: startDate } : undefined}
+                fromDate={startDate || undefined}
               />
             </PopoverContent>
           </Popover>
         </div>
 
-        {/* Chỉ hiện khung giờ khi đã chọn ngày bắt đầu và kết thúc */}
-        {startDate && endDate && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Khung giờ:</span>
-            <Select
-              value={selectedTimeSlot}
-              onValueChange={setSelectedTimeSlot}
-            >
-              <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Chọn khung giờ" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Khung giờ</SelectLabel>
-                  {timeSlots.map((slot) => (
-                    <SelectItem key={slot.value} value={slot.value}>
-                      {slot.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Khung giờ:</span>
+          <Select value={selectedTimeSlot} onValueChange={setSelectedTimeSlot}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Tất cả khung giờ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Khung giờ</SelectLabel>
+                {timeSlots.map((slot) => (
+                  <SelectItem key={slot.value} value={slot.value}>
+                    {slot.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button
+          onClick={applyFilters}
+          disabled={!startDate && !endDate && !selectedTimeSlot}
+        >
+          Áp dụng
+        </Button>
+
+        {hasFilters && (
+          <Button variant="outline" onClick={resetFilters}>
+            Xóa bộ lọc
+          </Button>
         )}
       </div>
 
-      {/* Chỉ hiện dữ liệu khi đã chọn khung giờ */}
-      {selectedTimeSlot && reportData && (
-        <>
-          {reportData.bookings ? (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <h3 className="text-lg font-semibold p-4 border-b">
-                Doanh thu {reportData.bookings[0].field.name}
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ngày đặt
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Khung giờ
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Giá sân
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tiền cọc
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tổng thanh toán
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Trạng thái
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Xác nhận
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {reportData.bookings.map((booking) => (
-                      <tr key={booking.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {format(new Date(booking.date_start), "dd/MM/yyyy")}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {format(new Date(booking.date_start), "HH:mm")} -{" "}
-                            {format(new Date(booking.date_end), "HH:mm")}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(booking.field.price)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatCurrency(booking.receipt.deposit_price)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                          {formatCurrency(booking.receipt.total_price)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${
-                          booking.receipt.is_fully_paid === 1
-                            ? "bg-green-100 text-green-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
+      {/* Hiển thị dữ liệu */}
+      {reportData && (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="p-4 border-b flex justify-between items-center">
+            <h3 className="text-lg font-semibold">
+              {hasFilters ? "Kết quả lọc" : "Tất cả hóa đơn"}
+            </h3>
+            <div className="text-sm text-gray-600">
+              Tổng doanh thu:{" "}
+              <span className="font-bold text-green-600">
+                {formatCurrency(reportData.total_revenue)}
+              </span>
+            </div>
+          </div>
+
+          {reportData.bookings && reportData.bookings.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Người đặt
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ngày đặt
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Khung giờ
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Giá sân
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tiền cọc
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tổng thanh toán
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Trạng thái
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Xác nhận
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentBookings.map((booking) => (
+                    <tr key={booking.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {booking.user.name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {booking.user.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {format(new Date(booking.date_start), "dd/MM/yyyy")}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {format(new Date(booking.date_start), "HH:mm")} -{" "}
+                          {format(new Date(booking.date_end), "HH:mm")}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(booking.field.price)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(booking.receipt.deposit_price)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                        {formatCurrency(booking.receipt.total_price)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${
+                              booking.receipt.is_fully_paid === 1
+                                ? "bg-green-100 text-green-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}
+                        >
+                          {booking.receipt.is_fully_paid === 1
+                            ? "Đã thanh toán toàn bộ"
+                            : "Đã thanh toán cọc"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {booking.receipt.is_fully_paid === 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleConfirmPayment(booking.receipt.id)
+                            }
                           >
-                            {booking.receipt.is_fully_paid === 1
-                              ? "Đã thanh toán toàn bộ"
-                              : "Đã thanh toán cọc"}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {booking.receipt.is_fully_paid === 0 && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleConfirmPayment(booking.receipt.id)
-                              }
-                            >
-                              Xác nhận
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                            Xác nhận
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Pagination controls */}
+              <div className="flex items-center justify-center gap-3 px-6 py-4 border-t">
+                
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                  >
+                    Trước
+                  </Button>
+
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <Button
+                          key={page}
+                          variant={page === currentPage ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className={
+                            page === currentPage ? "bg-blue-600 text-white" : ""
+                          }
+                        >
+                          {page}
+                        </Button>
+                      ),
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages || totalPages === 0}
+                  >
+                    Sau
+                  </Button>
+                </div>
+              
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-              Không có dữ liệu đặt sân trong khoảng thời gian này
+            <div className="p-6 text-center text-gray-500">
+              {hasFilters
+                ? "Không có hóa đơn nào phù hợp với bộ lọc"
+                : "Không có hóa đơn nào cho sân này"}
             </div>
           )}
-        </>
+        </div>
       )}
+      <ConfirmModal
+        visible={confirmModalVisible}
+        title="Xác nhận thanh toán"
+        message="Bạn có chắc chắn muốn xác nhận thanh toán toàn bộ không?"
+        onCancel={handleCancelModal}
+        onConfirm={handleConfirmModal}
+        confirmText="Xác nhận"
+        cancelText="Hủy"
+      />
     </div>
   );
 };
