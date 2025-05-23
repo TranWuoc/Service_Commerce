@@ -134,6 +134,7 @@ export const BookingForm = () => {
       const res = await createBooking(bookingData);
       toast({
         title: "Đặt sân thành công!",
+        variant: "success",
         description: "Đang chuyển đến trang thanh toán...",
       });
       if (res.data?.receipt?.payment_url) {
@@ -238,7 +239,7 @@ export const BookingForm = () => {
                   <br />
                   Giá cọc (30% trên tổng 2 tiếng):{" "}
                   <span className="font-semibold text-amber-700">
-                    {(selectedPrice * 2 * 0.3).toLocaleString("vi-VN")} đ
+                    {(selectedPrice  * 0.3).toLocaleString("vi-VN")} đ
                   </span>
                 </div>
               )}

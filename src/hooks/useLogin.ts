@@ -22,6 +22,7 @@ export const useLogin = () => {
 
       toast.toast({
         title: "Đăng nhập thành công",
+        variant: "success",
         description: "Chào mừng bạn trở lại!",
       });
 

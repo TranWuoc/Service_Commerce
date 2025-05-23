@@ -16,30 +16,46 @@
     useEffect(() => {
       fetchBookings();
     }, []);
+const formatTime = (date: Date) => {
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+};
+const toISODateTime = (datetimeStr: string) => {
+  return datetimeStr.replace(" ", "T");
+};
+const fetchBookings = async () => {
+  try {
+     const res = await axiosInstance.get("/bookings/user");
+      const bookings = res.data.data.map((booking: any) => {
+        const isPaid = booking.receipt?.status === "paid";
 
-    const fetchBookings = async () => {
-      try {
-        const res = await axiosInstance.get("/bookings/user");
-        const bookings = res.data.data.map((booking: any) => {
-          const isPaid = booking.receipt?.status === "paid";
+        const isoStart = toISODateTime(booking.date_start);
+        const isoEnd = toISODateTime(booking.date_end);
 
-          return {
-            id: booking.id,
-            name: booking.field.name,
-            rawDate: booking.date_start,
-            date: formatDate(booking.date_start),
-            price: booking.receipt.total_price ,
-            status: isPaid ? "Đã thanh toán cọc" : "Chưa thanh toán cọc",
-            receiptUrl: isPaid ? null : booking.receipt?.payment_url,
-          
-          };
-        });
-        setAllRows(bookings);
-        setFilteredRows(bookings);
-      } catch (err) {
-        console.error("Lỗi khi tải lịch sử đặt sân:", err);
-      }
-    };
+        const dateStart = new Date(isoStart);
+        const dateEnd = new Date(isoEnd);
+
+        return {
+          id: booking.id,
+          name: booking.field.name,
+          rawDate: isoStart,
+          date: formatDate(isoStart),
+          timeRange: `${formatTime(dateStart)} - ${formatTime(dateEnd)}`,
+          price: booking.receipt.total_price,
+          status: isPaid ? "Đã thanh toán cọc" : "Chưa thanh toán cọc",
+          receiptUrl: isPaid ? null : booking.receipt?.payment_url,
+        };
+      });
+
+    setAllRows(bookings);
+    setFilteredRows(bookings);
+  } catch (err) {
+    console.error("Lỗi khi tải lịch sử đặt sân:", err);
+  }
+};
 
     const formatDate = (datetimeString: string) => {
       const date = new Date(datetimeString);
@@ -97,8 +113,8 @@ const handleSearch = () => {
   return (
     <div className="p-5 space-y-6">
   <div className="flex flex-nowrap gap-6 items-center">
-    {/* SearchBar chiếm 65% chiều ngang, cao 70px */}
-    <div className="flex-[0_0_55%] min-w-[280px] h-[70px]">
+    {/* SearchBar chiếm 555% chiều ngang, cao 70px */}
+    <div className="flex-[0_0_53%] min-w-[280px] h-[70px]">
       <SearchBar
         searchQuery={search}
         onInputChange={setSearch}
@@ -107,7 +123,7 @@ const handleSearch = () => {
     </div>
 
     {/* Phần lọc ngày chiếm 35% chiều ngang, cao 70px, căn giữa */}
-    <div className="flex-[0_0_45%] min-w-[280px] h-[70px] flex items-center gap-4">
+    <div className="flex-[0_0_45%] min-w-[280px] h-[60px] flex items-center gap-4">
       <div className="flex items-center space-x-2 min-w-[120px] h-full">
         <label className="text-sm whitespace-nowrap">Từ ngày:</label>
         <input
@@ -120,7 +136,7 @@ const handleSearch = () => {
               setEndDate("");
             }
           }}
-          className="border rounded px-3 py-2 text-sm h-4/5"
+          className="border  rounded-[10px] px-3 py-2 text-sm h-4/5"
           max={endDate || undefined}
           style={{ minWidth: 0 }}
         />
@@ -132,7 +148,7 @@ const handleSearch = () => {
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="border rounded px-3 py-2 text-sm h-full"
+          className="border  rounded-[10px] px-3 py-2 text-sm h-full"
           min={startDate || undefined}
           style={{ minWidth: 0 }}
         />
