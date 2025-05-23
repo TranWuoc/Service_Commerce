@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { act, useEffect, useMemo, useState } from "react";
 import classNames from "classnames";
 import { format, addDays, startOfWeek } from "date-fns";
 import { fetchWeeklyBookings } from "../../actions/bookingActions";
@@ -157,9 +157,9 @@ export default function FieldTable({ startDate, fieldId, onSelect }: Props) {
                       "border p-2 text-center cursor-pointer transition-colors text-sm",
                       bgColor,
                       {
-                        "hover:bg-amber-100": !booked && !selectedNow && !isPast,
-        "bg-green-400 text-black": selectedNow,
-        "bg-white text-black": !booked && !isPast && !selectedNow,
+                        "hover:bg-amber-100": !booked && !selectedNow && !isPast && status === "active",
+                        "bg-green-400 text-black": selectedNow,
+                        
                       }
                     )}
                     onClick={() => handleCellClick(day.date, value, startHour)}

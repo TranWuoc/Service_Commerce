@@ -34,7 +34,9 @@ interface WeeklyPricingResponse {
 export const fetchFields = async (): Promise<Field[]> => {
   try {
     const res = await axiosInstance.get("/fields");
-    return res.data.data;
+    return res.data.data.filter(
+      (field: any) => field.state?.id === "state-001"
+    );
   } catch (error) {
     console.error("Lỗi khi lấy danh sách sân:", error);
     throw error;
