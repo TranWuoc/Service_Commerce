@@ -3,7 +3,13 @@ import axiosInstance from "../api/axiosInstance";
 
 export const fetchAllFields = async (): Promise<any[]> => {
   try {
-    const response = await axiosInstance.get("/fields");
+    // Nếu API hỗ trợ param limit
+    const response = await axiosInstance.get("/fields", {
+      params: {
+        page: 1,
+        per_page: 100,
+      },
+    });
     return response.data.data.filter(
       (field: any) => field.state?.id === "state-001"
     );
@@ -26,6 +32,7 @@ export const fetchFields = async (
       params.append("longitude", lng);
     }
     params.append("page", "1");
+    params.append("per_page", "100"); // thêm giới hạn 100 sân
 
     const response = await axiosInstance.post(`/fields/filter?${params.toString()}`);
     return response.data.data.filter(
@@ -33,7 +40,6 @@ export const fetchFields = async (
     );
   } catch (error) {
     return fetchAllFields();
-
   }
 };
 

@@ -12,9 +12,13 @@ export const ProfileImage: React.FC<ProfileImageProps> = ({
   onImageChange,
 }) => {
   return (
-    <div className="px-2  relative h-[100px] w-[100px] overflow-hidden rounded-full">
-      <img src={imageUrl} alt="Profile" className="size-full object-cover" />
-      
-    </div>
+<div className="relative w-24 h-24 overflow-hidden rounded-full border border-gray-200">
+  <img
+    src={imageUrl}
+    alt="Profile"
+    className="w-full h-full object-cover"
+  />
+</div>
+
   );
 };

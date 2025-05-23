@@ -30,7 +30,17 @@ export const ProfileInput: React.FC = () => {
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
 
   const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTempFormData(prev => ({ ...prev, [field]: e.target.value }));
+     const value = e.target.value;
+
+  if (field === "phone") {
+    // Chỉ cho phép số và + ở đầu
+    const validPhone = value.replace(/(?!^\+)[^\d]/g, ""); // loại bỏ ký tự không phải số trừ dấu +
+    if (validPhone.length > 0 && !/^(0\d{0,9}|\+84\d{0,9})$/.test(validPhone)) return;
+    setTempFormData(prev => ({ ...prev, [field]: validPhone }));
+  } else {
+    setTempFormData(prev => ({ ...prev, [field]: value }));
+  }
+    
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,11 +113,11 @@ export const ProfileInput: React.FC = () => {
   }, [avatarPreview]);
 
 const getImageUrl = () => {
-  if (!userData.avatar) return ""; // hoặc trả về ảnh mặc định nếu cần
+  if (!userData.avatar) return "../../public/profile-image.jpg"; // hoặc trả về ảnh mặc định nếu cần
 
   return userData.avatar.includes("googleusercontent")
     ? userData.avatar
-    : `http://localhost:8000/${userData.avatar}`;
+    : `http://localhost:8000/${userData.avatar}` || "../../public/profile-image.jpg";
 };
 
   return (
