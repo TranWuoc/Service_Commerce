@@ -2,15 +2,12 @@ import React, { useState, useEffect, use } from "react";
 import Headerbar from "../components/Headerbar";
 import Footer from "../components/Shared_components/Footer";
 import { FindFieldForm } from "../components/FindFields";
-import { Badge } from "../components/ui/badge";
 import { MainHeaderCard } from "../components/Field/MainHeaderCard";
 import Button from "../components/Shared_components/Button";
 import { useNavigate } from "react-router-dom";
 import { Field } from "../types/Field";
-import { useAuth } from "../hooks/useAuth";
 const LandingPage: React.FC = () => {
   const [fields, setFields] = useState<Field[]>([]);
-  const { isAuthenticated, loading } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
   useEffect(() => {
@@ -21,9 +18,11 @@ const LandingPage: React.FC = () => {
         const result = await response.json(); // Lấy dữ liệu trả về từ API
 
         if (Array.isArray(result.data)) {
-          const filteredFields = result.data.data.filter((field:Field) => field.state?.id === "state-001");
+          const filteredFields = result.data.data.filter(
+            (field: Field) => field.state?.id === "state-001",
+          );
           console.log("Filtered fields:", filteredFields); // In ra dữ liệu đã lọc
-          setFields(filteredFields); 
+          setFields(filteredFields);
         } else {
           console.error("Dữ liệu trả về không hợp lệ:");
         }
@@ -35,7 +34,6 @@ const LandingPage: React.FC = () => {
     };
     fetchFields();
   }, []);
-
 
   return (
     <div className="flex flex-col w-full min-h-screen">
@@ -79,7 +77,7 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
       {/* Main Content - Screen 2 */}
-      <div className="flex justify-center bg-black items-center w-full h-[150px]">
+      <div className="flex justify-center bg-slate-500 items-center w-full h-[150px]">
         <img
           src="/football-field-stadium-svgrepo-com.svg"
           alt="Stadium"
@@ -97,7 +95,7 @@ const LandingPage: React.FC = () => {
         />
       </div>
       {/* Main Content - Screen 3 */}
-      <div className="flex flex-col justify-center items-center w-full h-[1250px] gap-6 bg-gray-800 ">
+      {/* <div className="flex flex-col justify-center items-center w-full h-[1250px] gap-6 bg-gray-800 ">
         <div className="flex flex-row">
           <FindFieldForm />
         </div>
@@ -113,7 +111,7 @@ const LandingPage: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Main Content - Screen 4 */}
       <div className="flex flex-row justify-around items-center  w-full h-[500px] bg-stone-950 text-cyan-50 text-6xl font-bold font-['Russo_One'] gap-10">
         <h1>
@@ -127,12 +125,11 @@ const LandingPage: React.FC = () => {
             type="primary"
             onClick={() => navigate("/register")}
           />
-<Button
-  text="Đăng nhập"
-  type="secondary"
-  onClick={()=> navigate("/login")}
-/>
-
+          <Button
+            text="Đăng nhập"
+            type="secondary"
+            onClick={() => navigate("/login")}
+          />
         </div>
       </div>
       {/* Footer */}
