@@ -13,7 +13,7 @@ export interface Field {
   };
   images: {
     id: string;
-    images_url: string;
+    image_url: string;
   }[]; 
 }
 
