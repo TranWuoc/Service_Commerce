@@ -7,6 +7,7 @@ import axiosInstance from "../api/axiosInstance"; // sửa đường dẫn nếu
 import channel from "../listener/channel"; // sửa đường dẫn nếu khác
 import Inforcard from "../components/Bot/InforCard";
 import HistoryCard from "../components/Bot/HistoryCard";
+import { Field } from "../types/Field";
 
 type Props = {
   onClose: () => void;
@@ -26,6 +27,9 @@ const ChatBot: React.FC<Props> = ({ onClose, isVisible }) => {
   const isFirstScroll = useRef(true);
   const fetchedPages = useRef<Set<number>>(new Set());
   const [thread_id, setThreadId] = useState<string>(""); // ID của cuộc trò chuyện
+  const [hasSentFirstReply, setHasSentFirstReply] = useState(false);
+
+
     // Khởi tạo cuộc trò chuyện mới
   const handleNewChat = () => {
     setMessages([
@@ -295,11 +299,12 @@ const formatTimeRange = (date_start: string, date_end: string): string => {
         const response = await axiosInstance.get(
           `/fields/search?keyword=${messageToSend}`,
         );
-        const fields = response.data?.data || [];
+        const fields = (response.data?.data as Field[] || []).filter(item => item.state.id === 'state-001');
+
         if (fields.length === 0) {
           const errorMessage: Message = {
             sender: "bot",
-            content: "🚫 Có lỗi khi kiểm tra sân. Vui lòng thử lại sau.",
+            content: "🙁 Không có sân nào trùng từ khóa. Bạn thử lại nhé!",
             timestamp: new Date().toISOString(),
           };
           setMessages((prev) => [...prev, errorMessage]);
@@ -439,9 +444,6 @@ const formatTimeRange = (date_start: string, date_end: string): string => {
           formData.append("content", messageToSend);
         }
         formData.append("thread_id", thread_id);
-
-        
-
         // Tải từ URL base64 => file blob để gửi đúng dạng multipart
         selectedImages.forEach((dataUrl, idx) => {
           const arr = dataUrl.split(",");
@@ -464,6 +466,8 @@ const formatTimeRange = (date_start: string, date_end: string): string => {
           },
         });
         setThreadId(response.data.data.thread_id); // Cập nhật thread_id từ phản hồi
+
+      if (!hasSentFirstReply) {
         const botReply: Message = {
           sender: "bot",
           content: (
@@ -491,6 +495,9 @@ const formatTimeRange = (date_start: string, date_end: string): string => {
 
         setMessages((prev) => [...prev, botReply]);
         setShouldScrollToBottom(true);
+        setHasSentFirstReply(true); // Đánh dấu đã gửi phản hồi đầu tiên
+      }
+
       } catch (err) {
         console.error("Gửi tin nhắn lỗi:", err);
       }
