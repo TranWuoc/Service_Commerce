@@ -16,7 +16,7 @@ import AdminLayout from "../views/AdminLayout";
 import AdminDashboard from "../components/Admin/AdminDashboard";
 import AdminStatistics from "../components/Admin/AdminStatistic";
 import AdminManageFields from "../components/Admin/AdminManageFields";
-import FieldList from "../views/AdminFiledList";
+
 import { Form } from "../views/FieldForm";
 import { ProtectedRoute } from "./ProtectedRouter";
 import UpdateField from "../components/Admin/AdminComponent/updateField";
@@ -28,250 +28,138 @@ import Chat from "../components/Admin/Chat";
 import { useAuth } from "../hooks/useAuth";
 import RevenueFieldById from "../components/Admin/RevenueFieldById";
 import AdminManageBooking from "../components/Admin/AdminManageBooking";
+import { UserProtectedRoute } from "./UserProtectedRouter";
+
 export const AppRouter: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const { isAuthenticated, loading } = useAuth();
+
   useEffect(() => {
     const storedIsAdmin = localStorage.getItem("isAdmin");
-
     setIsAdmin(storedIsAdmin === "true");
   }, []);
 
   if (isAdmin === null) {
-    return <div>Loading...</div>; // Hoặc có thể trả về loading spinner
+    return <div>Loading...</div>;
   }
+
   return (
     <Routes>
       {/* Public Routes */}
       <Route
         path="/login"
-        element={
-          !isAuthenticated ? (
-            <AuthLayout>
-              <Login />
-            </AuthLayout>
-          ) : isAdmin ? (
-            <Navigate to="/admin" replace />
-          ) : (
-            <Navigate to="/dashboard" replace />
-          )
-        }
+        element={!isAuthenticated ? (
+          <AuthLayout><Login /></AuthLayout>
+        ) : isAdmin ? (
+          <Navigate to="/admin" replace />
+        ) : (
+          <Navigate to="/dashboard" replace />
+        )}
       />
       <Route
         path="/register"
-        element={
-          <AuthLayout>
-            <Register />
-          </AuthLayout>
-        }
+        element={<AuthLayout><Register /></AuthLayout>}
       />
-
       <Route path="/landingpage" element={<LandingPage />} />
-      {/* Dashboard Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <DashboardLayout>
-            <FieldsSummary />
-          </DashboardLayout>
-        }
-      />
-      <Route
-        path="/dashboard/Booking"
-        element={
-          <DashboardLayout>
-            <Booking />
-          </DashboardLayout>
-        }
-      />
-      <Route
-        path="/dashboard/history"
-        element={
-          <DashboardLayout>
-            <BookHistory />
-          </DashboardLayout>
-        }
-      />
-      <Route
-        path="/dashboard/Profile"
-        element={
-          <DashboardLayout>
-            <ProfileInput />
-          </DashboardLayout>
-        }
-      />
-      <Route
-        path="/dashboard/vnpay-return"
-        element={
-          <DashboardLayout>
-            <PaymentSuccessPage />
-          </DashboardLayout>
-        }
-      />
-
-      {/* Google Callback */}
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
-      {/* Admin Routes dùng ProtectedRoute */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <AdminDashboard />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/manage"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <AdminManageFields />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Public Dashboard Access */}
+      <Route path="/dashboard" element={<DashboardLayout><FieldsSummary /></DashboardLayout>} />
+      <Route path="/dashboard/FieldInfo/:id" element={<DashboardLayout><FieldDetails /></DashboardLayout>} />
 
-      <Route
-        path="/admin/manageBooking"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <AdminManageBooking />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
+      {/* User-Protected Routes */}
+      <Route path="/dashboard/Booking" element={
+        <UserProtectedRoute>
+          <DashboardLayout><Booking /></DashboardLayout>
+        </UserProtectedRoute>
+      } />
+      <Route path="/dashboard/history" element={
+        <UserProtectedRoute>
+          <DashboardLayout><BookHistory /></DashboardLayout>
+        </UserProtectedRoute>
+      } />
+      <Route path="/dashboard/Profile" element={
+        <UserProtectedRoute>
+          <DashboardLayout><ProfileInput /></DashboardLayout>
+        </UserProtectedRoute>
+      } />
+      <Route path="/dashboard/vnpay-return" element={
+        <DashboardLayout><PaymentSuccessPage /></DashboardLayout>
+      } />
 
-      <Route
-        path="/admin/manageUser"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <AdminManageUser />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/statistic"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <AdminStatistics />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
+      {/* Admin Routes */}
+      <Route path="/admin" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><AdminDashboard /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manage" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><AdminManageFields /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manageBooking" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><AdminManageBooking /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manageUser" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><AdminManageUser /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/statistic" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><AdminStatistics /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/statistic/revenue" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><RevenueField /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/statistic/revenue/:id" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><RevenueFieldById /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/statistic/top-user" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><TopUsers /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manage/addField" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><Form /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manage/FieldInfo/:id" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><FieldDetails /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manage/FieldInfo/timetable/:id" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><TimeTableField /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/manage/updateField/:fieldId" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><UpdateField /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/chat" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><Chat /></AdminLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/admin/Profile" element={
+        <ProtectedRoute adminOnly>
+          <AdminLayout><ProfileInput /></AdminLayout>
+        </ProtectedRoute>
+      } />
 
-      <Route
-        path="/admin/statistic/revenue"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <RevenueField />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/statistic/revenue/:id"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <RevenueFieldById />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/statistic/top-user"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <TopUsers />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/manage/addField"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <Form />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/manage/FieldInfo/:id"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <FieldDetails />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/manage/FieldInfo/timetable/:id"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <TimeTableField />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/dashboard/FieldInfo/:id"
-        element={
-          <DashboardLayout>
-            <FieldDetails />
-          </DashboardLayout>
-        }
-      />
-      <Route
-        path={isAdmin ? "/admin/Profile" : "/dashboard/Profile"}
-        element={
-          isAdmin ? (
-            <AdminLayout>
-              <ProfileInput />
-            </AdminLayout>
-          ) : (
-            <DashboardLayout>
-              <ProfileInput />
-            </DashboardLayout>
-          )
-        }
-      />
-      <Route
-        path="/admin/manage/updateField/:fieldId"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <UpdateField />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/chat"
-        element={
-          <ProtectedRoute adminOnly>
-            <AdminLayout>
-              <Chat />
-            </AdminLayout>
-          </ProtectedRoute>
-        }
-      />
-      {/* Redirect fallback */}
+      {/* Fallback */}
       <Route path="/" element={<Navigate to="/landingpage" replace />} />
       <Route path="*" element={<Navigate to="/landingpage" replace />} />
     </Routes>

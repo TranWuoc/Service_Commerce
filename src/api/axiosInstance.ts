@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
 let isRefreshing = false;
 let failedQueue: { resolve: Function; reject: Function }[] = [];
 
-const openRoutes = ["/", "/login", "/register", "/dashboard/vnpay-return", "/dashboard/fieldinfo"];
+const openRoutes = ["/", "/login", "/dashboard", "/register", "/dashboard/vnpay-return", "/dashboard/fieldinfo :id", "/auth/google/callback"];
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(

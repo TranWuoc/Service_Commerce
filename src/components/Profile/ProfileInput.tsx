@@ -65,7 +65,7 @@ export const ProfileInput: React.FC = () => {
     const form = new FormData();
     form.append("name", tempFormData.name);
     form.append("email", tempFormData.email);
-    form.append("phone", tempFormData.phone);
+    form.append("phone_number", tempFormData.phone_number);
     form.append("address", tempFormData.address || "");
     if (avatarFile) form.append("avatar", avatarFile);
     return form;
@@ -159,8 +159,8 @@ const getImageUrl = () => {
         <InputField
           label="Phone"
           type="tel"
-          value={tempFormData.phone}
-          onChange={handleInputChange("phone")}
+          value={tempFormData.phone_number}
+          onChange={handleInputChange("phone_number")}
           disabled={!isEditing}
         />
         <InputField

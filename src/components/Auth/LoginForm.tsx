@@ -11,6 +11,7 @@ export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const activeTab = location.pathname === "/register" ? "register" : "login";
   const { login } = useLogin();
+
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -20,18 +21,23 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <section className="flex flex-col items-center px-20 py-8 w-full max-md:px-5 max-md:py-6 h-screen">
-      <header className="mb-4 text-base">
+    <section className="flex flex-col items-center px-6 py-8 w-full max-w-xl mx-auto h-screen">
+      <header className="mb-4 text-lg">
         <span>Welcome to </span>
-        <span className="text-amber-500">SUPPERBOWL</span>
+        <span className="text-amber-500 font-semibold">SUPPERBOWL</span>
       </header>
 
-      <AuthToggle activeTab={activeTab} />
+      {/* Cố định vị trí AuthToggle */}
+      <div className="mb-10">
+        <AuthToggle activeTab={activeTab} />
+      </div>
 
-      <form className="w-full  flex flex-col item-center gap-6 mt-20" onSubmit={handleSubmit}>
+      <form
+        className="w-full flex flex-col gap-6 min-h-[400px]" // giữ chiều cao cố định
+        onSubmit={handleSubmit}
+      >
         <div className="space-y-4">
           <InputField
-            id="email"
             label="Email"
             type="text"
             placeholder="Email Address"
@@ -39,7 +45,6 @@ export const LoginForm: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
           <InputField
-            id="password"
             label="Password"
             type="password"
             placeholder="Enter your password"
@@ -48,18 +53,14 @@ export const LoginForm: React.FC = () => {
           />
         </div>
 
-        <div className="mt-3 flex w-full justify-center items-center space-x-2">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
           <Button
-            text={activeTab === "login" ? "Login" : "Register"}
+            text="Login"
             type="primary"
-            customStyle={{ width: "48%", height: "60px" }} // Chỉnh độ rộng các nút
+            customStyle={{ width: "100%", height: "60px" }}
           />
-
+          <GoogleLoginButton customStyle={{ width: "100%", height: "60px" }} />
         </div>
-        <div className="mt-3 flex w-full justify-center items-center space-x-2">
-          <GoogleLoginButton customStyle={{ width: "48%", height: "60px" }} /> {/* Đảm bảo cả 2 nút cùng chiều rộng */}
-        </div>
-        
       </form>
     </section>
   );
