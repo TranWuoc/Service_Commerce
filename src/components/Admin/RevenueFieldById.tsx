@@ -105,7 +105,6 @@ const RevenueFieldById = () => {
           start_date: "",
           end_date: "",
         });
-        console.log("Data:", data);
         setReportData(data);
         if (data.field?.name) {
           setFieldName(data.field.name);
@@ -341,7 +340,7 @@ const RevenueFieldById = () => {
                     setEndDate(null); // Reset end date if it's before start date
                   }
                 }}
-                autoFocus
+                initialFocus
               />
             </PopoverContent>
           </Popover>
@@ -373,7 +372,7 @@ const RevenueFieldById = () => {
                   mode="single"
                   selected={endDate || undefined}
                   onSelect={(date) => setEndDate(date ?? null)}
-                  autoFocus
+                  initialFocus
                   fromDate={startDate || undefined} //
                 />
               </PopoverContent>
