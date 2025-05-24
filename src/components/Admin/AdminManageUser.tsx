@@ -104,7 +104,6 @@ const AdminManageUser: React.FC = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-
   const SearchIcon = () => (
     <svg
       className="w-4 h-4 text-gray-500 dark:text-gray-400"
@@ -154,12 +153,15 @@ const AdminManageUser: React.FC = () => {
   };
 
   const UserRow = ({ user, isSelected, onSelect }: UserRowProps) => {
+    const defaultAvatar = "/userdefault.png";
     const avatarUrl =
       user?.avatar &&
       typeof user.avatar === "string" &&
       user.avatar.includes("googleusercontent")
         ? user.avatar
-        : `http://localhost:8000/${user?.avatar || ""}`;
+        : user?.avatar
+          ? `http://localhost:8000/${user?.avatar}`
+          : defaultAvatar;
 
     const status = user.status === "1" ? "online" : "offline";
 
@@ -175,7 +177,9 @@ const AdminManageUser: React.FC = () => {
             className="w-10 h-10 rounded-full"
             src={avatarUrl}
             alt={`${user.name} avatar`}
-            onError={(e) => {}}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = defaultAvatar;
+            }}
           />
           <div className="ps-3">
             <div className="text-base font-semibold">{user.name}</div>
@@ -183,9 +187,11 @@ const AdminManageUser: React.FC = () => {
           </div>
         </th>
         <td className="px-11 py-4 text-green-400 font-bold">{position}</td>
-        
-        <td className="py-4 text-base font-semibold pb-4 text-orange-500">{user.phone_number}</td>
-          
+
+        <td className="py-4 text-base font-semibold pb-4 text-orange-500">
+          {user.phone_number}
+        </td>
+
         <td className="px-6 py-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
