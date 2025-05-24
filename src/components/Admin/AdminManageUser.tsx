@@ -104,17 +104,6 @@ const AdminManageUser: React.FC = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const StatusIndicator = ({ status }: { status: "online" | "offline" }) => (
-    <div className="flex items-center">
-      <div
-        className={`h-2.5 w-2.5 rounded-full me-2 ${
-          status === "online" ? "bg-green-500" : "bg-red-500"
-        }`}
-      ></div>
-      {status === "online" ? "Online" : "Offline"}
-    </div>
-  );
-
   const SearchIcon = () => (
     <svg
       className="w-4 h-4 text-gray-500 dark:text-gray-400"
@@ -164,30 +153,19 @@ const AdminManageUser: React.FC = () => {
   };
 
   const UserRow = ({ user, isSelected, onSelect }: UserRowProps) => {
+    const defaultAvatar = "/userdefault.png";
     const avatarUrl =
       user?.avatar &&
       typeof user.avatar === "string" &&
       user.avatar.includes("googleusercontent")
         ? user.avatar
-        : `http://localhost:8000/${user?.avatar || ""}`;
+        : user?.avatar
+          ? `http://localhost:8000/${user?.avatar}`
+          : defaultAvatar;
 
     const status = user.status === "1" ? "online" : "offline";
 
     const position = user.is_admin === 1 ? "Admin" : "User";
-
-    // const handleStatusChange = (value: string) => {
-    //   if (value === "inactive") {
-    //     // Xác nhận trước khi xoá
-    //     if (window.confirm(`Are you sure you want to delete user ${user.name}?`)) {
-    //       deleteUser(user.id);
-    //       toast({
-    //         title: "Success",
-    //         description: `User ${user.name} has been deleted.`,
-    //         variant: "success2",
-    //       });
-    //     }
-    //   }
-    // };
 
     return (
       <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
@@ -199,21 +177,25 @@ const AdminManageUser: React.FC = () => {
             className="w-10 h-10 rounded-full"
             src={avatarUrl}
             alt={`${user.name} avatar`}
-            onError={(e) => {}}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = defaultAvatar;
+            }}
           />
           <div className="ps-3">
             <div className="text-base font-semibold">{user.name}</div>
             <div className="font-normal text-gray-500">{user.email}</div>
           </div>
         </th>
-        <td className="px-6 py-4">{position}</td>
-        <td className="px-6 py-4">
-          <StatusIndicator status={status} />
+        <td className="px-11 py-4 text-green-400 font-bold">{position}</td>
+
+        <td className="py-4 text-base font-semibold pb-4 text-orange-500">
+          {user.phone_number}
         </td>
+
         <td className="px-6 py-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">Action</Button>
+              <Button variant="outline">Thao tác</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuLabel>Chọn trạng thái tài khoản</DropdownMenuLabel>
@@ -223,10 +205,10 @@ const AdminManageUser: React.FC = () => {
                 onValueChange={(value) => handleStatusChange(value, user)}
               >
                 <DropdownMenuRadioItem value="online">
-                  Active
+                  Hoạt động
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="inactive">
-                  Inactive
+                  Ngưng hoạt động
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
@@ -273,17 +255,17 @@ const AdminManageUser: React.FC = () => {
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th scope="col" className="px-6 py-3">
-              Name
+            <th scope="col" className="pl-20 py-3">
+              Tên người dùng
             </th>
             <th scope="col" className="px-6 py-3">
-              Position
+              Quyền hạn
+            </th>
+            <th scope="col" className="px-9 py-3">
+              SĐT
             </th>
             <th scope="col" className="px-6 py-3">
-              Status
-            </th>
-            <th scope="col" className="px-6 py-">
-              Action
+              Thao tác
             </th>
           </tr>
         </thead>

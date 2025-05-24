@@ -79,7 +79,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <AvatarMenu />
           </div>
         <div className="mt-6 ">
-        <h1 className="text-4xl text-center font-serif font-bold text-gray-800 mb-4 ">{getPageTitle()}</h1>
+        <h1 className="text-4xl text-center font-sans font-bold text-gray-800 mb-4 ">{getPageTitle()}</h1>
           {children}
         </div>
         </div>

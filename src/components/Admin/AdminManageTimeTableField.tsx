@@ -356,7 +356,7 @@ const TimeTableField: React.FC = () => {
               mode="single"
               selected={startDate || undefined}
               onSelect={(date) => setStartDate(date ?? null)}
-              autoFocus
+              initialFocus
               locale={vi}
             />
           </PopoverContent>

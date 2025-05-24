@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "../../components/ui/popover";
 import { cn } from "../../lib/utils";
+import { vi } from "date-fns/locale";
 import {
   Select,
   SelectGroup,
@@ -169,7 +170,8 @@ const RevenueField: React.FC = () => {
                 setStartDate(date ?? null);
                 setCurrentPage(1);
               }}
-              autoFocus
+              initialFocus
+              locale={vi}
             />
           </PopoverContent>
         </Popover>
@@ -199,6 +201,7 @@ const RevenueField: React.FC = () => {
               }}
               initialFocus
               fromDate={startDate || undefined}
+              locale={vi}
             />
           </PopoverContent>
         </Popover>
@@ -221,7 +224,7 @@ const RevenueField: React.FC = () => {
                 Địa chỉ
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Giá thuê (VND/giờ)
+                Giá thuê
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Tổng doanh thu

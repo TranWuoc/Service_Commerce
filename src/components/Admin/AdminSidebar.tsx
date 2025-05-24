@@ -78,7 +78,8 @@ const AdminSidebar = () => {
               location.pathname === "/admin/manage/FieldInfo" ||
               location.pathname === "/admin/manage/addField" ||
               matchPath("/admin/manage/updateField/:fieldId", location.pathname) || 
-              matchPath("/admin/manage/timetableField/:fieldId", location.pathname)
+              matchPath("/admin/manage/FieldInfo/timetable/:fieldId", location.pathname)||
+              matchPath("/admin/manage/FieldInfo/:fieldId", location.pathname)
                 ? "text-orange-500"
                 : ""
             }`}
