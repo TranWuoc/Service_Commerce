@@ -27,7 +27,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
 
   // Xác định trạng thái hiển thị theo yêu cầu
   const getDisplayStatus = (row: any) => {
-    if (row.booking_status === "cancel by user" && row.status === "paid") {
+    if (row.booking_status === "cancelled_by_user" && row.status === "paid") {
       return "Đã hủy";
     }
     const isPast = isPastDate(row.rawDate);
@@ -89,7 +89,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
                     <span className="text-gray-400">—</span>
                   )
                 ) : displayStatus === "Đã thanh toán cọc" ? (
-                  row.booking_status !== "cancel by user" ? (
+                  row.booking_status !== "cancelled_by_user" ? (
                     <button
                       onClick={() => onCancel(row.id)}
                       className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200"

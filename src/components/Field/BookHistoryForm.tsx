@@ -35,37 +35,6 @@ const BookHistoryForm: React.FC = () => {
 
   const toISODateTime = (datetimeStr: string) => datetimeStr.replace(" ", "T");
 
-  const fetchBookings = async () => {
-    try {
-      const res = await axiosInstance.get("/bookings/user");
-      const bookings = res.data.data.map((booking: any) => {
-        const isPaid = booking.receipt?.status === "paid";
-
-        const isoStart = toISODateTime(booking.date_start);
-        const isoEnd = toISODateTime(booking.date_end);
-
-        const dateStart = new Date(isoStart);
-        const dateEnd = new Date(isoEnd);
-
-        return {
-          id: booking.id,
-          name: booking.field.name,
-          rawDate: isoStart,
-          date: formatDate(isoStart),
-          timeRange: `${formatTime(dateStart)} - ${formatTime(dateEnd)}`,
-          price: booking.receipt.total_price,
-          status: isPaid ? "Đã thanh toán cọc" : "Chưa thanh toán cọc",
-          receiptUrl: isPaid ? null : booking.receipt?.payment_url,
-        };
-      });
-
-      setAllRows(bookings);
-      setFilteredRows(bookings);
-    } catch (err) {
-      console.error("Lỗi khi tải lịch sử đặt sân:", err);
-    }
-  };
-
   const formatDate = (datetimeString: string) => {
     const date = new Date(datetimeString);
     return date.toLocaleDateString("vi-VN", {
@@ -75,23 +44,64 @@ const BookHistoryForm: React.FC = () => {
     });
   };
 
-  const handleCancel = (id: string) => {
-    setSelectedId(id);
-    setShowConfirm(true);
+  // Hàm kiểm tra ngày quá khứ
+  const isPastDate = (dateStr: string) => {
+    const bookingDate = new Date(dateStr);
+    const now = new Date();
+    return bookingDate < now;
   };
 
-  const confirmCancel = async () => {
-    if (!selectedId) return;
+  // Hàm xác định trạng thái hiển thị tương tự FieldsTable
+  const getDisplayStatus = (booking: any) => {
+    // booking.booking_status từ API (ví dụ: "cancel by user")
+    // booking.receipt.status (ví dụ: "paid" / "pending")
+    if (booking.booking_status === "cancel by user" ) {
+      return "Đã hủy";
+    }
+    if (isPastDate(booking.date_start)) {
+      return "Đã thuê";
+    }
+    if (booking.receipt.status === "pending") {
+      return "Chờ thanh toán";
+    }
+    if (booking.receipt.status === "paid") {
+      return "Đã thanh toán cọc";
+    }
+    return "Chưa thanh toán cọc"; 
+  };
+
+  const fetchBookings = async () => {
     try {
-      await axiosInstance.delete(`/bookings/${selectedId}`);
-      const updated = allRows.filter((r) => r.id !== selectedId);
-      setAllRows(updated);
-      setFilteredRows(updated);
+      const res = await axiosInstance.get("/bookings/user");
+      const bookings = res.data.data.map((booking: any) => {
+        const isoStart = toISODateTime(booking.date_start);
+        const isoEnd = toISODateTime(booking.date_end);
+
+        const dateStart = new Date(isoStart);
+        const dateEnd = new Date(isoEnd);
+
+        // Lấy trạng thái hiển thị ngay khi tạo object
+        const displayStatus = getDisplayStatus(booking);
+
+        return {
+          id: booking.id,
+          name: booking.field.name,
+          rawDate: isoStart,
+          date: formatDate(isoStart),
+          timeRange: `${formatTime(dateStart)} - ${formatTime(dateEnd)}`,
+          price: booking.receipt.total_price,
+          status: displayStatus,
+          receiptUrl:
+            displayStatus === "Chờ thanh toán" ? booking.receipt?.payment_url : null,
+          booking_status: booking.booking_status, // giữ để kiểm tra hủy ở FieldsTable
+          receipt: booking.receipt, // giữ nguyên nếu cần dùng sau
+        };
+      });
+
+      setAllRows(bookings);
+      setFilteredRows(bookings);
     } catch (err) {
-      console.error("Lỗi khi hủy đặt sân:", err);
-    } finally {
-      setShowConfirm(false);
-      setSelectedId(null);
+      console.error("Lỗi khi tải lịch sử đặt sân:", err);
     }
   };
 
@@ -119,6 +129,26 @@ const BookHistoryForm: React.FC = () => {
 
     setFilteredRows(result);
     setCurrentPage(1);
+  };
+
+  const handleCancel = (id: string) => {
+    setSelectedId(id);
+    setShowConfirm(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!selectedId) return;
+    try {
+      await axiosInstance.delete(`/bookings/${selectedId}`);
+      const updated = allRows.filter((r) => r.id !== selectedId);
+      setAllRows(updated);
+      setFilteredRows(updated);
+    } catch (err) {
+      console.error("Lỗi khi hủy đặt sân:", err);
+    } finally {
+      setShowConfirm(false);
+      setSelectedId(null);
+    }
   };
 
   return (
