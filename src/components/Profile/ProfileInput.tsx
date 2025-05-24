@@ -142,7 +142,7 @@ const getImageUrl = () => {
 
       <form className="grid gap-4">
         <InputField
-          label="Full Name"
+          label="Họ và tên"
           type="text"
           value={tempFormData.name}
           onChange={handleInputChange("name")}
@@ -154,17 +154,17 @@ const getImageUrl = () => {
           type="email"
           value={tempFormData.email}
           onChange={handleInputChange("email")}
-          disabled={true} 
+          disabled={true}
         />
         <InputField
-          label="Phone"
+          label="Số điện thoại"
           type="tel"
           value={tempFormData.phone_number}
           onChange={handleInputChange("phone_number")}
           disabled={!isEditing}
         />
         <InputField
-          label="Address"
+          label="Địa chỉ"
           type="text"
           value={tempFormData.address || ""}
           onChange={handleInputChange("address")}

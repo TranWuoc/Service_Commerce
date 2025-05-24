@@ -45,7 +45,7 @@ export const LoginForm: React.FC = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
           <InputField
-            label="Password"
+            label="Mật khẩu"
             type="password"
             placeholder="Enter your password"
             value={password}

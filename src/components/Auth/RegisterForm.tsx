@@ -61,12 +61,12 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onSubmit={handleSubmit}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <InputField label="Name" type="text" value={name} onChange={(e) => setName(e.target.value)} customClass={inputCustomClass} />
+          <InputField label="Họ và tên" type="text" value={name} onChange={(e) => setName(e.target.value)} customClass={inputCustomClass} />
           <InputField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} customClass={inputCustomClass} />
-          <InputField label="Phone Number" type="text" value={phoneNumber} onChange={handlePhoneChange} customClass={inputCustomClass} />
-          <InputField label="Address" type="text" value={address} onChange={(e) => setAddress(e.target.value)} customClass={inputCustomClass} />
-          <InputField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} customClass={inputCustomClass} />
-          <InputField label="Confirm Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} customClass={inputCustomClass} />
+          <InputField label="Số điện thoại" type="text" value={phoneNumber} onChange={handlePhoneChange} customClass={inputCustomClass} />
+          <InputField label="Địa chỉ" type="text" value={address} onChange={(e) => setAddress(e.target.value)} customClass={inputCustomClass} />
+          <InputField label="Mật khẩu" type="password" value={password} onChange={(e) => setPassword(e.target.value)} customClass={inputCustomClass} />
+          <InputField label="Xác nhận mật khẩu" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} customClass={inputCustomClass} />
         </div>
 
         <div className="mb-4">
@@ -80,10 +80,7 @@ const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
 
         <div className="mt-auto flex flex-col items-center">
-          <p className="mb-2 text-sm text-center">
-            By signing up you agree to{" "}
-            <a href="#" className="text-amber-500">terms and conditions</a>
-          </p>
+          
 
           <Button
             text="Register"
