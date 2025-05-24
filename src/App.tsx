@@ -1,7 +1,7 @@
 // App.tsx
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
-import { AppRouter } from "./router/AppRouter"; // Đảm bảo bạn import đúng AppRouter
+import AppRouter from "./router/AppRouter";
 import { Toaster } from "./components/ui/toaster";
 import { ToastProvider } from "./components/ui/toast";
 import { UserProvider } from "./Provider/UserProvider"; 

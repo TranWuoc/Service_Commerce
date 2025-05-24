@@ -18,7 +18,7 @@ import AdminStatistics from "../components/Admin/AdminStatistic";
 import AdminManageFields from "../components/Admin/AdminManageFields";
 
 import { Form } from "../views/FieldForm";
-import { ProtectedRoute } from "./ProtectedRouter";
+import ProtectedRoute from "./ProtectedRouter";
 import UpdateField from "../components/Admin/AdminComponent/updateField";
 import AdminManageUser from "../components/Admin/AdminManageUser";
 import RevenueField from "../components/Admin/RevenueField";
@@ -28,7 +28,7 @@ import Chat from "../components/Admin/Chat";
 import { useAuth } from "../Context/AuthContext";
 import RevenueFieldById from "../components/Admin/RevenueFieldById";
 import AdminManageBooking from "../components/Admin/AdminManageBooking";
-import { UserProtectedRoute } from "./UserProtectedRouter";
+import UserProtectedRoute from "./UserProtectedRouter";
 
 const AppRouter: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();
