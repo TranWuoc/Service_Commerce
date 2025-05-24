@@ -383,81 +383,74 @@ const RevenueFieldById = () => {
 
           {reportData.bookings && reportData.bookings.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full bg-white rounded-lg shadow border border-gray-200">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Người đặt
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Ngày đặt
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Khung giờ
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Giá sân
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Tiền cọc
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Tổng thanh toán
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Trạng thái
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Xác nhận
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody>
                   {currentBookings.map((booking) => (
-                    <tr key={booking.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                    <tr
+                      key={booking.id}
+                      className="hover:bg-blue-50 transition-colors border-b border-gray-100"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">
                           {booking.user.name}
                         </div>
                         <div className="text-xs text-gray-500">
                           {booking.user.email}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {format(new Date(booking.date_start), "dd/MM/yyyy")}
-                        </div>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-800">
+                        {format(new Date(booking.date_start), "dd/MM/yyyy")}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {format(new Date(booking.date_start), "HH:mm")} -{" "}
-                          {format(new Date(booking.date_end), "HH:mm")}
-                        </div>
+                      <td className="px-4 py-3 whitespace-nowrap text-gray-800">
+                        {format(new Date(booking.date_start), "HH:mm")} -{" "}
+                        {format(new Date(booking.date_end), "HH:mm")}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(booking.field.price)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-right text-gray-700">
                         {formatCurrency(booking.receipt.deposit_price)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                      <td className="px-4 py-3 whitespace-nowrap text-right font-semibold text-green-700">
                         {formatCurrency(booking.receipt.total_price)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
                         <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${
-                              booking.receipt.is_fully_paid === 1
-                                ? "bg-green-100 text-green-800"
-                                : "bg-blue-100 text-blue-800"
-                            }`}
+                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                ${
+                  booking.receipt.is_fully_paid === 1
+                    ? "bg-green-100 text-green-800"
+                    : "bg-blue-100 text-blue-800"
+                }`}
                         >
                           {booking.receipt.is_fully_paid === 1
                             ? "Đã thanh toán toàn bộ"
                             : "Đã thanh toán cọc"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
                         {booking.receipt.is_fully_paid === 0 && (
                           <Button
                             variant="outline"
@@ -475,6 +468,7 @@ const RevenueFieldById = () => {
                 </tbody>
               </table>
 
+              {/* Pagination giữ nguyên */}
               <div className="flex items-center justify-center gap-3 px-6 py-4 border-t">
                 <Button
                   variant="outline"
@@ -486,7 +480,6 @@ const RevenueFieldById = () => {
                 >
                   Trước
                 </Button>
-
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                     (page) => (
@@ -504,7 +497,6 @@ const RevenueFieldById = () => {
                     ),
                   )}
                 </div>
-
                 <Button
                   variant="outline"
                   size="sm"
@@ -540,4 +532,3 @@ const RevenueFieldById = () => {
 };
 
 export default RevenueFieldById;
-
