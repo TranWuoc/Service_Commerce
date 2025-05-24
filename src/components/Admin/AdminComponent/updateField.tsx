@@ -325,7 +325,7 @@ const UpdateField: React.FC = () => {
         placeholder="Nhập mô tả về sân ..."
         value={fieldData.description || ""}
         name="description"
-        style={{ marginBottom: "1.5rem", height: "100px" }}
+        style={{ marginBottom: "1.5rem" }}
         onChange={handleInputChange}
       />
       <div className="mb-4 flex flex-col pl-[190px]">
