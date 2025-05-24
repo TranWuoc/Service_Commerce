@@ -6,19 +6,22 @@ import { Toaster } from "./components/ui/toaster";
 import { ToastProvider } from "./components/ui/toast";
 import { UserProvider } from "./Provider/UserProvider"; 
 import { FieldProvider } from "./Provider/FieldProvider";
+import { AuthProvider } from "./Context/AuthContext";
 
 const App: React.FC = () => {
   return (
     <div className="bg-gray-100 w-full min-h-screen ">
       <ToastProvider>
-    <FieldProvider> {/* Bao bọc AppRouter trong FieldProvider */}
-        <UserProvider> {/* Bao bọc AppRouter trong UserProvider */}
+    <FieldProvider>
+      <AuthProvider>
+        <UserProvider>
           <BrowserRouter>
             <Toaster />
-            <AppRouter /> {/* Đây là nơi bạn định nghĩa các route */}
+            <AppRouter /> 
           </BrowserRouter>
         </UserProvider>
-    </FieldProvider> {/* Đóng FieldProvider ở đây */}
+      </AuthProvider>
+    </FieldProvider>
       </ToastProvider>
 
     </div>

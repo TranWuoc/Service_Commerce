@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from "react";
+// src/router/ProtectedRouter.tsx
+import React from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = false }) => {
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null); // State to store admin status
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  adminOnly = false,
+}) => {
+  const { user, isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    const adminStatus = localStorage.getItem("isAdmin") === "true";
-    setIsAdmin(adminStatus);
-  }, []); // Only runs once after component mounts
+  if (loading) return <div>Loading...</div>;
 
-  // While the isAdmin state is not set yet, we can render null or loading state
-  if (isAdmin === null) {
-    return null; // Or show a loading spinner here
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Nếu là route adminOnly mà không phải admin → chuyển về dashboard
-  if (adminOnly && !isAdmin) {
+  if (adminOnly && user?.id !== "admin_000") {
     return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
 };
+
+export default ProtectedRoute;
