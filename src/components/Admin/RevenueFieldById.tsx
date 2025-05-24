@@ -19,7 +19,7 @@ import {
 } from "../ui/select";
 import { fetchRevenueReport } from "../../api/revenueApi";
 import { toast } from "../../hooks/use-toast";
-
+import { vi } from "date-fns/locale";
 // Định dạng tiền tệ
 const formatCurrency = (amount: number): string =>
   new Intl.NumberFormat("vi-VN", {
@@ -36,6 +36,7 @@ const timeSlots = [
   { value: "16:00:00-18:00:00", label: "16:00 - 18:00" },
   { value: "18:00:00-20:00:00", label: "18:00 - 20:00" },
   { value: "20:00:00-22:00:00", label: "20:00 - 22:00" },
+  { value: "22:00:00-00:00:00", label: "22:00 - 24:00" },
 ];
 
 interface Booking {
@@ -86,7 +87,6 @@ const RevenueFieldById = () => {
   const [hasFilters, setHasFilters] = useState(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [pendingReceiptId, setPendingReceiptId] = useState<string | null>(null);
-  const [hasStartDate, setHasStartDate] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
@@ -105,6 +105,7 @@ const RevenueFieldById = () => {
           start_date: "",
           end_date: "",
         });
+        console.log("Data:", data);
         setReportData(data);
         if (data.field?.name) {
           setFieldName(data.field.name);
@@ -127,72 +128,32 @@ const RevenueFieldById = () => {
   const applyFilters = async () => {
     if (!id) return;
 
-    // Kiểm tra ngày kết thúc không được trước ngày bắt đầu
-    if (startDate && endDate && startDate > endDate) {
-      toast({
-        title: "Lỗi",
-        description: "Ngày kết thúc không thể trước ngày bắt đầu",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
     setError(null);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page when applying new filters
 
     try {
       const params: any = {
         field_id: id,
       };
 
-      if (
-        startDate &&
-        endDate &&
-        selectedTimeSlot &&
-        startDate.getTime() === endDate.getTime()
-      ) {
+      if (startDate) {
+        params.start_date = format(startDate, "yyyy-MM-dd");
+      }
+      if (endDate) {
+        params.end_date = format(endDate, "yyyy-MM-dd");
+      }
+      if (selectedTimeSlot) {
         const [startTime, endTime] = selectedTimeSlot.split("-");
-        const dateStr = format(startDate, "yyyy-MM-dd");
-        params.start_date = `${dateStr}T${startTime}`;
-        params.end_date = `${dateStr}T${endTime}`;
         params.start_time = startTime;
         params.end_time = endTime;
-      } else {
-        if (startDate) {
-          const start = new Date(startDate);
-          if (selectedTimeSlot) {
-            const [startTime] = selectedTimeSlot.split("-");
-            const [hours, minutes, seconds] = startTime.split(":").map(Number);
-            start.setHours(hours, minutes, seconds, 0);
-          } else {
-            start.setHours(0, 0, 0, 0);
-          }
-          params.start_date = start.toISOString();
-        }
-        if (endDate) {
-          const end = new Date(endDate);
-          if (selectedTimeSlot) {
-            const [, endTime] = selectedTimeSlot.split("-");
-            const [hours, minutes, seconds] = endTime.split(":").map(Number);
-            end.setHours(hours, minutes, seconds, 999);
-          } else {
-            end.setHours(23, 59, 59, 999);
-          }
-          params.end_date = end.toISOString();
-        }
-        if (selectedTimeSlot) {
-          const [startTime, endTime] = selectedTimeSlot.split("-");
-          params.start_time = startTime;
-          params.end_time = endTime;
-        }
       }
+
       const data = await fetchRevenueReport(params);
       setReportData(data);
       setHasFilters(!!startDate || !!endDate || !!selectedTimeSlot);
     } catch (err) {
       setError("Không thể tải dữ liệu doanh thu");
-      console.error("Lỗi khi tải dữ liệu:", err);
     } finally {
       setLoading(false);
     }
@@ -333,14 +294,9 @@ const RevenueFieldById = () => {
               <Calendar
                 mode="single"
                 selected={startDate || undefined}
-                onSelect={(date) => {
-                  setStartDate(date ?? null);
-                  setHasStartDate(!!date);
-                  if (date && endDate && date > endDate) {
-                    setEndDate(null); // Reset end date if it's before start date
-                  }
-                }}
+                onSelect={(date) => setStartDate(date ?? null)}
                 initialFocus
+                locale={vi}
               />
             </PopoverContent>
           </Popover>
@@ -356,27 +312,25 @@ const RevenueFieldById = () => {
                   "w-[180px] justify-start text-left font-normal",
                   !endDate && "text-muted-foreground",
                 )}
-                disabled={!hasStartDate} // Disable khi chưa có start date
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {endDate ? (
                   format(endDate, "dd/MM/yyyy")
                 ) : (
-                  <span>{hasStartDate ? "Chọn ngày" : "Chọn ngày "}</span>
+                  <span>Chọn ngày</span>
                 )}
               </Button>
             </PopoverTrigger>
-            {hasStartDate && (
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={endDate || undefined}
-                  onSelect={(date) => setEndDate(date ?? null)}
-                  initialFocus
-                  fromDate={startDate || undefined} //
-                />
-              </PopoverContent>
-            )}
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={endDate || undefined}
+                onSelect={(date) => setEndDate(date ?? null)}
+                initialFocus
+                fromDate={startDate || undefined}
+                locale={vi}
+              />
+            </PopoverContent>
           </Popover>
         </div>
 
@@ -586,3 +540,4 @@ const RevenueFieldById = () => {
 };
 
 export default RevenueFieldById;
+
