@@ -79,7 +79,7 @@ export const InputField: React.FC<InputFieldProps> = ({
           onChange={onChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={`px-8 pr-10 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
+          className={` px-8 pr-10 w-full text-2xl bg-white rounded-xl border-[2.5px] border-neutral-300 h-[40px] text-black-900 placeholder:text-gray-400 max-sm:text-xl max-sm:h-[70px] focus:outline-none focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed ${customClass}`}
           style={style}
           {...rest}
         />
@@ -97,7 +97,7 @@ export const InputField: React.FC<InputFieldProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-[800px] mx-auto mb-6" style={style}>
+    <div className="flex flex-col items-center w-full max-w-[900px] mx-auto" style={style}>
       <label className="self-start mb-2 text-xl text-black max-sm:text-xl">
         {label}
       </label>
