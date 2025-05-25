@@ -81,6 +81,7 @@ const SearchLocation: React.FC<SearchLocationProps> = ({
         type="text"
         placeholder="Nhập tên địa điểm"
         value={query}
+        style={{ marginBottom: "1.5rem" }}
         onChange={handleInputChange}
         required
       />
