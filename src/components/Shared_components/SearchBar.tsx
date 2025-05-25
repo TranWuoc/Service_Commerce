@@ -23,28 +23,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className="relative mb-6">
- <div className="flex items-center  py-3 rounded-2xl w-full gap-4">
-  <div className="flex items-center bg-white rounded-xl gap-2 px-3 py-1 h-[50px] w-full max-w-[calc(100%-140px)]">
-    <Search className="text-gray-500 flex-shrink-0" />
-    <InputField
+<div className="flex items-center py-3 rounded-2xl w-full gap-4">
+  <div className="flex items-center bg-white rounded-xl px-3 h-[50px] w-full max-w-[calc(100%-140px)]">
+    <Search className="text-gray-500 w-5 h-5" />
+    <input
       type="text"
       placeholder="Tìm kiếm"
       value={searchQuery}
       onChange={(e) => onInputChange(e.target.value)}
       onKeyDown={handleKeyDown}
-      style={{
-        border: "none",
-        boxShadow: "none",
-        width: "100%",
-        height: "100%",
-        fontSize: "1rem",
-        padding: "0",
-        margin: "0",
-        outline: "none",
-        backgroundColor: "transparent",
-        display: "inline-block",
-      }}
-      className="flex-1"
+      className="ml-2 w-full h-full text-sm placeholder-gray-400 outline-none border-none bg-transparent"
     />
   </div>
 

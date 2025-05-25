@@ -44,52 +44,28 @@ const BookHistoryForm: React.FC = () => {
     });
   };
 
-  // Hàm kiểm tra ngày quá khứ
-  const isPastDate = (dateStr: string) => {
-    const bookingDate = new Date(dateStr);
-    const now = new Date();
-    return bookingDate < now;
+  const getDisplayStatus = (booking: any) => {
+    const receiptStatus = booking.receipt?.status;
+    const isFullyPaid = booking.receipt?.is_fully_paid === 1;
+    const bookingStatus = booking.booking_status;
+
+    if (bookingStatus === "cancelled_by_user") return "Đã hủy";
+    if (receiptStatus === "cancelled") return "Đã hủy";
+    if (receiptStatus === "expired") return "Đã hết hạn";
+    if (receiptStatus === "paid") return isFullyPaid ? "Đã thanh toán toàn bộ" : "Đã thanh toán cọc";
+    if (receiptStatus === "pending") return "Chờ thanh toán";
+    return "Không xác định";
   };
 
-  // Hàm xác định trạng thái hiển thị tương tự FieldsTable
-const getDisplayStatus = (booking: any) => {
-  const receiptStatus = booking.receipt?.status;
-  const isFullyPaid = booking.receipt?.is_fully_paid === 1;
-  const bookingStatus = booking.booking_status;
-
-  if (bookingStatus === "cancel by user") {
-    return "Đã hủy";
-  }
-
-  if (receiptStatus === "cancelled") {
-    return "Đã hủy";
-  }
-
-  if (receiptStatus === "expired") {
-    return "Đã hết hạn";
-  }
-
-  if (receiptStatus === "paid") {
-    return isFullyPaid ? "Đã thanh toán toàn bộ" : "Đã thanh toán cọc";
-  }
-
-  if (receiptStatus === "pending") {
-    return "Chờ thanh toán";
-  }
-
-  return "Không xác định";
-};
   const fetchBookings = async () => {
     try {
       const res = await axiosInstance.get("/bookings/user");
       const bookings = res.data.data.map((booking: any) => {
         const isoStart = toISODateTime(booking.date_start);
         const isoEnd = toISODateTime(booking.date_end);
-
         const dateStart = new Date(isoStart);
         const dateEnd = new Date(isoEnd);
 
-        // Lấy trạng thái hiển thị ngay khi tạo object
         const displayStatus = getDisplayStatus(booking);
 
         return {
@@ -99,11 +75,10 @@ const getDisplayStatus = (booking: any) => {
           date: formatDate(isoStart),
           timeRange: `${formatTime(dateStart)} - ${formatTime(dateEnd)}`,
           price: booking.receipt.total_price,
-          status: displayStatus,
-          receiptUrl:
-            displayStatus === "Chờ thanh toán" ? booking.receipt?.payment_url : null,
-          booking_status: booking.booking_status, // giữ để kiểm tra hủy ở FieldsTable
-          receipt: booking.receipt, // giữ nguyên nếu cần dùng sau
+          deposit_price: booking.receipt.deposit_price,
+          displayStatus,
+          receiptUrl: displayStatus === "Chờ thanh toán" ? booking.receipt?.payment_url : null,
+          booking_status: booking.booking_status,
         };
       });
 
