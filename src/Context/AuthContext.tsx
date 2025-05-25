@@ -15,6 +15,7 @@ interface AuthContextType {
   loading: boolean;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   checkAuth: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,7 +48,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }
   };
-
+  const logout = async () => {
+    try {
+      await axiosInstance.post("/auth/logout"); // Optional: gọi API logout
+    } catch (error) {
+      console.warn("Logout request failed (safe to ignore)", error);
+    } finally {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      localStorage.removeItem("isAdmin");
+      setUser(null);
+    }
+  };
   useEffect(() => {
     checkAuth();
 
@@ -63,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, setUser, checkAuth }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, setUser, checkAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );
