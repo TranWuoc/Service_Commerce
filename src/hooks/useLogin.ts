@@ -3,11 +3,12 @@ import { useToast} from "./use-toast";
 import { useUser } from "./useUser";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
+import { useAuth } from "../context/AuthContext"; 
 export const useLogin = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const { setUser } = useUser();
-
+const { checkAuth } = useAuth();
   const login = async (email: string, password: string) => {
     try {
       const response = await axiosInstance.post("/auth/login", { email, password });
@@ -25,7 +26,7 @@ export const useLogin = () => {
         variant: "success",
         description: "Chào mừng bạn trở lại!",
       });
-
+      await checkAuth();
       // Giải mã access_token
       const decodedToken: any = jwtDecode(access_token);
       console.log(decodedToken);

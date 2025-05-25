@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
+      console.log("CheckAuth - response.data:", response.data);
     } catch (error) {
       console.error("Auth check failed", error);
       setUser(null);

@@ -11,19 +11,18 @@ import { AuthProvider } from "./Context/AuthContext";
 const App: React.FC = () => {
   return (
     <div className="bg-gray-100 w-full min-h-screen ">
-      <ToastProvider>
-    <FieldProvider>
-      <AuthProvider>
-        <UserProvider>
-          <BrowserRouter>
-            <Toaster />
-            <AppRouter /> 
-          </BrowserRouter>
-        </UserProvider>
-      </AuthProvider>
-    </FieldProvider>
-      </ToastProvider>
-
+      <BrowserRouter>
+        <ToastProvider>
+          <FieldProvider>
+            <AuthProvider>
+              <UserProvider>
+                <Toaster />
+                <AppRouter />
+              </UserProvider>
+            </AuthProvider>
+          </FieldProvider>
+        </ToastProvider>
+      </BrowserRouter>
     </div>
   );
 };
