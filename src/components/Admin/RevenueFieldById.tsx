@@ -41,6 +41,7 @@ const timeSlots = [
 
 interface Booking {
   id: string;
+  booking_status: string;
   user: {
     id: string;
     name: string;
@@ -437,31 +438,38 @@ const RevenueFieldById = () => {
                         {formatCurrency(booking.receipt.total_price)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        <span
-                          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                ${
-                  booking.receipt.is_fully_paid === 1
-                    ? "bg-green-100 text-green-800"
-                    : "bg-blue-100 text-blue-800"
-                }`}
-                        >
-                          {booking.receipt.is_fully_paid === 1
-                            ? "Đã thanh toán toàn bộ"
-                            : "Đã thanh toán cọc"}
-                        </span>
+                        {booking.booking_status === "cancelled_by_user" ? (
+                          <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-700">
+                            Đã huỷ
+                          </span>
+                        ) : (
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+        ${
+          booking.receipt.is_fully_paid === 1
+            ? "bg-green-100 text-green-800"
+            : "bg-blue-100 text-blue-800"
+        }`}
+                          >
+                            {booking.receipt.is_fully_paid === 1
+                              ? "Đã thanh toán toàn bộ"
+                              : "Đã thanh toán cọc"}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
-                        {booking.receipt.is_fully_paid === 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              handleConfirmPayment(booking.receipt.id)
-                            }
-                          >
-                            Xác nhận
-                          </Button>
-                        )}
+                        {booking.booking_status !== "cancelled_by_user" &&
+                          booking.receipt.is_fully_paid === 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleConfirmPayment(booking.receipt.id)
+                              }
+                            >
+                              Xác nhận
+                            </Button>
+                          )}
                       </td>
                     </tr>
                   ))}

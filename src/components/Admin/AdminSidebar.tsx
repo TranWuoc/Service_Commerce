@@ -149,18 +149,6 @@ const AdminSidebar = () => {
           >
             <Mail className="mr-2" /> Trò chuyện
           </li>
-          <li
-            className="flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500"
-            onClick={() => navigate("/admin/help")}
-          >
-            <Help className="mr-2" /> Trợ giúp
-          </li>
-          <li
-            className="flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500"
-            onClick={() => navigate("/admin/settings")}
-          >
-            <Settings className="mr-2" /> Cài đặt
-          </li>
         </ul>
       </nav>
     </div>
