@@ -52,24 +52,33 @@ const BookHistoryForm: React.FC = () => {
   };
 
   // Hàm xác định trạng thái hiển thị tương tự FieldsTable
-  const getDisplayStatus = (booking: any) => {
-    // booking.booking_status từ API (ví dụ: "cancel by user")
-    // booking.receipt.status (ví dụ: "paid" / "pending")
-    if (booking.booking_status === "cancel by user" ) {
-      return "Đã hủy";
-    }
-    if (isPastDate(booking.date_start)) {
-      return "Đã thuê";
-    }
-    if (booking.receipt.status === "pending") {
-      return "Chờ thanh toán";
-    }
-    if (booking.receipt.status === "paid") {
-      return "Đã thanh toán cọc";
-    }
-    return "Chưa thanh toán cọc"; 
-  };
+const getDisplayStatus = (booking: any) => {
+  const receiptStatus = booking.receipt?.status;
+  const isFullyPaid = booking.receipt?.is_fully_paid === 1;
+  const bookingStatus = booking.booking_status;
 
+  if (bookingStatus === "cancel by user") {
+    return "Đã hủy";
+  }
+
+  if (receiptStatus === "cancelled") {
+    return "Đã hủy";
+  }
+
+  if (receiptStatus === "expired") {
+    return "Đã hết hạn";
+  }
+
+  if (receiptStatus === "paid") {
+    return isFullyPaid ? "Đã thanh toán toàn bộ" : "Đã thanh toán cọc";
+  }
+
+  if (receiptStatus === "pending") {
+    return "Chờ thanh toán";
+  }
+
+  return "Không xác định";
+};
   const fetchBookings = async () => {
     try {
       const res = await axiosInstance.get("/bookings/user");

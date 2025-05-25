@@ -13,17 +13,18 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ rows, onCancel }) => {
   };
 
   // Map trạng thái sang style màu
-  const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, string> = {
-      "Đã thanh toán cọc": "bg-blue-100 text-blue-600",
-      "Chưa thanh toán cọc": "bg-yellow-100 text-yellow-700",
-      "Đã thanh toán": "bg-blue-100 text-blue-600",
-      "Đã thuê": "bg-green-200 text-green-600",
-      "Chờ thanh toán": "bg-yellow-100 text-yellow-700",
-      "Đã hủy": "bg-red-100 text-red-600",
-    };
-    return statusMap[status.trim()] || "bg-gray-100 text-gray-500";
+const getStatusBadge = (status: string) => {
+  const statusMap: Record<string, string> = {
+    "Đã thanh toán toàn bộ": "bg-green-300 text-green-800",
+    "Đã thanh toán cọc": "bg-blue-100 text-blue-600",
+    "Chờ thanh toán": "bg-yellow-100 text-yellow-700",
+    
+    "Đã hủy": "bg-red-100 text-red-600",
+    "Đã hết hạn": "bg-gray-200 text-gray-600",
+    "Không xác định": "bg-gray-100 text-gray-500",
   };
+  return statusMap[status.trim()] || "bg-gray-100 text-gray-500";
+};
 
   // Xác định trạng thái hiển thị theo yêu cầu
   const getDisplayStatus = (row: any) => {
