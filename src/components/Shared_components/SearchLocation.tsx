@@ -61,7 +61,7 @@ const SearchLocation: React.FC<SearchLocationProps> = ({
     setQuery(place.display_name);
     setSuggestions([]);
     onLocationSelect(selectedLocation);
-        console.log("Selected location:", selectedLocation); // Log thông tin địa điểm đã chọn
+      
 
   };
 

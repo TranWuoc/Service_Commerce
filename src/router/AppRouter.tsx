@@ -36,8 +36,7 @@ const AppRouter: React.FC = () => {
   if (loading) return <div>Loading...</div>;
 
   const isAdmin = user?.id === "admin_000";
-console.log("User ID:", user?.id); // thêm dòng này để debug
-console.log("Is Admin:", user?.id === "admin_000");
+
   return (
     <Routes>
       {/* Nếu chưa đăng nhập */}

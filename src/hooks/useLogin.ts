@@ -29,7 +29,7 @@ const { checkAuth } = useAuth();
       await checkAuth();
       // Giải mã access_token
       const decodedToken: any = jwtDecode(access_token);
-      console.log(decodedToken);
+
 
       if (decodedToken.sub === "admin_000") {
         localStorage.setItem("isAdmin", "true");

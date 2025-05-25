@@ -59,7 +59,7 @@
 
     const handleLogout = async () => {
       await logout();
-      navigate("/login");
+      navigate("/landingpage");
       handleClose();
     };
 

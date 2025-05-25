@@ -41,7 +41,7 @@ export const sendComment = async (
   formData.append("field_id", String(fieldId));
   formData.append("content", comment);
   formData.append("status", "active");
- console.log("Parent ID in sendComment:", parentId); 
+
   // Nếu có parentId thì thêm parent_comment_id vào formData
   if (parentId) {
     formData.append("parent_id", parentId);
