@@ -387,25 +387,25 @@ const RevenueFieldById = () => {
               <table className="min-w-full bg-white rounded-lg shadow border border-gray-200">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="pl-12 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Người đặt
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="pl-5 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Ngày đặt
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="pl-5 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Khung giờ
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Tiền cọc
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="pl-6 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Tổng thanh toán
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="pl-11 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Trạng thái
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase bg-gray-100 border-b border-gray-200">
                       Xác nhận
                     </th>
                   </tr>
@@ -414,9 +414,9 @@ const RevenueFieldById = () => {
                   {currentBookings.map((booking) => (
                     <tr
                       key={booking.id}
-                      className="hover:bg-blue-50 transition-colors border-b border-gray-100"
+                      className="hover:bg-blue-50 transition-colors border-b border-gray-100 text-base"
                     >
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="pl-12 py-4 whitespace-nowrap align-middle">
                         <div className="font-medium text-gray-900">
                           {booking.user.name}
                         </div>
@@ -424,20 +424,20 @@ const RevenueFieldById = () => {
                           {booking.user.email}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-gray-800">
+                      <td className="pl-5 py-4 whitespace-nowrap text-gray-800 align-middle">
                         {format(new Date(booking.date_start), "dd/MM/yyyy")}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-gray-800">
+                      <td className="pl-5 py-4 whitespace-nowrap text-gray-800 align-middle">
                         {format(new Date(booking.date_start), "HH:mm")} -{" "}
                         {format(new Date(booking.date_end), "HH:mm")}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right text-gray-700">
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-700 align-middle">
                         {formatCurrency(booking.receipt.deposit_price)}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right font-semibold text-green-700">
+                      <td className="pl-6 py-4 whitespace-nowrap font-semibold text-green-700 align-middle">
                         {formatCurrency(booking.receipt.total_price)}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                      <td className="pl-11 py-4 whitespace-nowrap align-middle">
                         {booking.booking_status === "cancelled_by_user" ? (
                           <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-700">
                             Đã huỷ
@@ -445,11 +445,11 @@ const RevenueFieldById = () => {
                         ) : (
                           <span
                             className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-        ${
-          booking.receipt.is_fully_paid === 1
-            ? "bg-green-100 text-green-800"
-            : "bg-blue-100 text-blue-800"
-        }`}
+                ${
+                  booking.receipt.is_fully_paid === 1
+                    ? "bg-green-100 text-green-800"
+                    : "bg-blue-100 text-blue-800"
+                }`}
                           >
                             {booking.receipt.is_fully_paid === 1
                               ? "Đã thanh toán toàn bộ"
@@ -457,7 +457,7 @@ const RevenueFieldById = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center">
+                      <td className="px-4 py-4 whitespace-nowrap align-middle">
                         {booking.booking_status !== "cancelled_by_user" &&
                           booking.receipt.is_fully_paid === 0 && (
                             <Button

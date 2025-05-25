@@ -269,7 +269,7 @@ const FieldForm: React.FC<FieldFormProps> = ({ onSubmit }) => {
           {previews.map((preview, index) => (
             <div key={index} className="relative">
               <img
-                src={preview} // URL xem trước của ảnh mới
+                src={preview} 
                 alt="New"
                 className="w-20 h-20 object-cover rounded"
               />
