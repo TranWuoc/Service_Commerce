@@ -12,7 +12,7 @@ import { Mail } from "lucide-react";
 import { useNavigate, useLocation, matchPath } from "react-router-dom";
 import { AvatarMenu } from "../Profile/Avatar";
 import { useState, useEffect } from "react";
-import { match } from "react-router-dom";
+// import { match } from "react-router-dom";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -113,7 +113,7 @@ const AdminSidebar = () => {
               <BookmarkAdded className="mr-2" /> Quản lý đặt sân
             </a>
           </li>
-          <li
+          {/* <li
             className={`flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500 ${
               location.pathname === "/admin/manageUser" ? "text-orange-500" : ""
             }`}
@@ -128,7 +128,7 @@ const AdminSidebar = () => {
             >
               <ManageAccounts className="mr-2" /> Quản lý người dùng 
             </a>
-          </li>
+          </li> */}
 
           <li
             className={`flex items-center py-3 px-2 cursor-pointer hover:text-orange-500 active:text-orange-500 ${
