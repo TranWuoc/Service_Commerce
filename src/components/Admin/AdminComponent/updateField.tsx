@@ -113,6 +113,8 @@ const handleInputChange = (
     formData.append("description", fieldData.description || "");
     formData.append("category_id", fieldData.category.id);
     formData.append("state_id", fieldData.state.id);
+    formData.append("latitude", String(fieldData.latitude || 0));
+    formData.append("longitude", String(fieldData.longitude || 0));
 
     const existingImages = fieldData.images.map((image) => ({
       id: image.id,
