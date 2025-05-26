@@ -36,7 +36,7 @@ export const fetchFieldById = async (fieldId: string) => {
 
 // Lấy ra danh sách kiểu sân 
 export const fetchCategories = async () => {
-    const response = await axiosInstance.get("/fields");
+    const response = await axiosInstance.get("/fields?per_page=100");
     const fields = response.data.data;
     const allCategories = fields.map((field: any) => ({
       id: field.category.id,
@@ -51,7 +51,7 @@ export const fetchCategories = async () => {
 
 
 export const fetchStates = async () => {
-    const response = await axiosInstance.get("/fields");
+    const response = await axiosInstance.get("/fields?per_page=100");
     const fields = response.data.data;
     const allStates = fields.map((field: any) => ({
       id: field.state.id,

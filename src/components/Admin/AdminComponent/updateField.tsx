@@ -49,47 +49,43 @@ const UpdateField: React.FC = () => {
     loadData();
   }, [fieldId]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => {
-    const { name, value } = e.target;
+const handleInputChange = (
+  e: React.ChangeEvent<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >,
+) => {
+  const { name, value } = e.target;
 
-    if (name === "category.name") {
-      const selectedCategory = categories.find(
-        (category) => category.name === value,
-      );
-      setFieldData((prev) =>
-        prev
-          ? {
-              ...prev,
-              category: {
-                ...prev.category,
-                name: value,
-                id: selectedCategory ? selectedCategory.id : "", // Lấy `id` từ danh sách `categories`
-              },
-            }
-          : null,
-      );
-    } else if (name === "state.name") {
-      const selectedState = states.find((state) => state.name === value);
-      setFieldData((prev) =>
-        prev
-          ? {
-              ...prev,
-              state: {
-                ...prev.state,
-                name: value,
-                id: selectedState ? selectedState.id : "", // Lấy `id` từ danh sách `states`
-              },
-            }
-          : null,
-      );
-    } else {
-      setFieldData((prev) => (prev ? { ...prev, [name]: value } : null));
-    }
-  };
+  if (name === "category" || name === "category.id") {
+    // Lấy category theo id
+    const selectedCategory = categories.find((category) => category.id === value);
+    setFieldData((prev) =>
+      prev
+        ? {
+            ...prev,
+            category: selectedCategory
+              ? { id: selectedCategory.id, name: selectedCategory.name }
+              : { id: "", name: "" },
+          }
+        : null,
+    );
+  } else if (name === "state" || name === "state.id") {
+    // Lấy state theo id
+    const selectedState = states.find((state) => state.id === value);
+    setFieldData((prev) =>
+      prev
+        ? {
+            ...prev,
+            state: selectedState
+              ? { id: selectedState.id, name: selectedState.name }
+              : { id: "", name: "" },
+          }
+        : null,
+    );
+  } else {
+    setFieldData((prev) => (prev ? { ...prev, [name]: value } : null));
+  }
+};
 
   const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleImageChange(e, images, setImages, setPreviews);
@@ -124,11 +120,10 @@ const UpdateField: React.FC = () => {
     }));
     formData.append("existing_images", JSON.stringify(existingImages));
 
-    // Thêm file ảnh mới vào FormData
-    console.log("Images to upload:", images);
+    // console.log("Images to upload:", images);
     images.forEach((image) => {
       console.log("Appending image:", image);
-      formData.append("image[]", image); // Sử dụng key đúng là `image[]`
+      formData.append("image[]", image); 
     });
 
     // Gửi danh sách ID của các ảnh đã bị xóa
@@ -295,7 +290,7 @@ const UpdateField: React.FC = () => {
           value: state.id,
           label: state.name,
         }))}
-        type="text"
+        type="select"
         placeholder="Điền tình trạng sân ..."
         value={fieldData.state.id}
         required

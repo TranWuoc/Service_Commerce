@@ -127,7 +127,7 @@ const { fields, setFields, setSelectedField } = useField();
                   <span
                     className={`inline-block w-16 h-3 rounded ${
                       field.state.name === "Active"
-                        ? "bg-green-500"
+                        ? "bg-green-500"          
                         : field.state.name === "Maintenance"
                           ? "bg-amber-400"
                           : field.state.name === "Deactivated"
