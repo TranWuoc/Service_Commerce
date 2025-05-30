@@ -10,20 +10,21 @@ let failedQueue: { resolve: Function; reject: Function }[] = [];
 
 const openRoutes = ["/", "/login", "/dashboard", "/register", "/dashboard/vnpay-return", "/dashboard/fieldinfo :id", "/auth/google/callback"];
 
+const optionalTokenRoutes = ["/dashboard"];
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
     const currentPath = window.location.pathname;
     const isOpenRoute = openRoutes.includes(currentPath);
-
-    if (!isOpenRoute && !token) {
+  const isOptionalTokenRoute = optionalTokenRoutes.includes(currentPath);
+    if (!isOpenRoute && !token && !isOptionalTokenRoute) {
       console.warn("🚫 Không có token. Chuyển hướng login.");
       window.location.href = "/login";
       return Promise.reject(new Error("Chưa đăng nhập"));
     }
 
-    if (!isOpenRoute && token) {
+    if ((!isOpenRoute || isOptionalTokenRoute) && token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 

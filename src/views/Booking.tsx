@@ -1,4 +1,5 @@
 "use client";
+import IconChatBot from "../components/Bot/IconChatBot1";
 import { BookingForm } from "../components/Field/BookingForm";
 
 export const Booking = () => {
@@ -7,6 +8,7 @@ export const Booking = () => {
       <div className="flex-1 ">
         <BookingForm />
       </div>
+      
     </main>
   );
 };

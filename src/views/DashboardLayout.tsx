@@ -115,6 +115,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 </div>
                 <div className="flex-shrink-0">
                   {user ? <AvatarMenu /> :null}
+
+                  
                 </div>
               </div>
             </div>
@@ -136,7 +138,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
         </main>
       </div> 
-       <IconChatBot />
+      {user && <IconChatBot />}
     </div>
   
   );
