@@ -202,7 +202,7 @@ const AdminDashboard: React.FC = () => {
         {/* Thẻ tổng số người dùng */}
         <div
           className="w-auto bg-white shadow-[0px_0px_15px_rgba(0,0,0,0.09)] p-9 space-y-3 relative overflow-hidden rounded cursor-pointer hover:shadow-lg transition"
-          onClick={() => navigate("/admin/manageUser")}
+          // onClick={() => navigate("/admin/manageUser")}
         >
           <div className="w-24 h-24 bg-purple-500 rounded-full absolute -right-4 -top-10">
             <img
