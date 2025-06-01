@@ -3,12 +3,14 @@ import { fetchFields } from "../../api/fieldApi";
 import { Field } from "../../types/Field";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Input } from "../../components/ui/input";
 
 const AdminManageBooking: React.FC = () => {
   const [fields, setFields] = useState<Field[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState<string>("");
   const rowsPerPage = 6;
   const navigate = useNavigate();
 
@@ -32,9 +34,14 @@ const AdminManageBooking: React.FC = () => {
     navigate(`/admin/statistic/revenue/${fieldId}`);
   };
 
-  const totalItems = fields.length;
+  const filteredFields = fields.filter((field) =>
+    field.name.toLowerCase().includes(search.toLowerCase()) ||
+    field.category.name.toLowerCase().includes(search.toLowerCase()),
+);
+
+  const totalItems = filteredFields.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
-  const currentFields = fields.slice(
+  const currentFields = filteredFields.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage,
   );
@@ -50,6 +57,18 @@ const AdminManageBooking: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
+         <div className="p-4">
+          <Input
+            type="text"
+            placeholder="Tìm kiếm theo tên sân hoặc kiểu sân..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-1/2 px-4 py-2 border border-gray-300 rounded mb-4"
+          />
+        </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -86,15 +105,15 @@ const AdminManageBooking: React.FC = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-  ${
-    field.state.name === "Active"
-      ? "bg-green-100 text-green-800"
-      : field.state.name === "Maintenance"
-        ? "bg-yellow-100 text-yellow-800"
-        : field.state.name === "Suspended"
-          ? "bg-red-100 text-red-800"
-          : "bg-gray-100 text-gray-800"
-  }`}
+                    ${
+                      field.state.name === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : field.state.name === "Maintenance"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : field.state.name === "Suspended"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                    }`}
                   >
                     {field.state.name}
                   </span>
@@ -109,10 +128,10 @@ const AdminManageBooking: React.FC = () => {
                     variant="outline"
                     size="sm"
                     className="text-blue-600 hover:text-blue-900"
-                     onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewRevenue(field.id);
-                }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewRevenue(field.id);
+                    }}
                   >
                     Xem chi tiết
                   </Button>
