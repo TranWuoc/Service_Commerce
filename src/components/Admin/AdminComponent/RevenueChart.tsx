@@ -27,8 +27,6 @@ const RevenueLineChart: React.FC = () => {
         rawData.forEach((item: any) => {
           const fieldName = item.field?.name || 'Không tên';
           const receipts = item.receipts || [];
-          const totalRevenue = item.total_revenue || 0;
-
           allFieldNames.add(fieldName);
 
           if (receipts.length === 0) return;
