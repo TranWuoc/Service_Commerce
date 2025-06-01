@@ -112,7 +112,6 @@ const RevenueLineChart: React.FC = () => {
             <YAxis
               tickFormatter={(value) => new Intl.NumberFormat('vi-VN').format(value)}
               label={{
-                value: 'Doanh thu (VND)',
                 angle: -90,
                 position: 'insideLeft',
                 style: { fontSize: 14 }
