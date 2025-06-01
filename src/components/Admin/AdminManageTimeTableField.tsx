@@ -66,6 +66,7 @@ const TimeTableField: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldName, setFieldName] = useState("");
   const [fieldPrice, setFieldPrice] = useState(0);
+  const [priceError, setPriceError] = useState<string>("");
   const [weeklyData, setWeeklyData] = useState<any>(null);
 
   // Lấy thông tin sân khi fieldId thay đổi
@@ -158,7 +159,7 @@ const TimeTableField: React.FC = () => {
 
           return {
             id: slot.time_slot_id,
-            status: status, 
+            status: status,
             price: slot.price,
             note: "",
             isBooked: slot.booked,
@@ -400,7 +401,7 @@ const TimeTableField: React.FC = () => {
                       className={`border text-center font-bold border-gray-300 p-2 ${
                         (slot.status === "inactive" &&
                           !slot.isManualInactive) ||
-                          slot.booked
+                        slot.booked
                           ? "cursor-not-allowed"
                           : "cursor-pointer"
                       } hover:opacity-80 ${getCellColor(slot, fieldPrice)}`}
@@ -484,31 +485,52 @@ const TimeTableField: React.FC = () => {
                 <label className="block mb-2 font-medium">Giá (VND):</label>
                 <input
                   type="number"
-                  value={selectedSlot?.price || 0}
-                  onChange={(e) =>
+                  min={1000}
+                  value={selectedSlot?.price}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/[^0-9]/g, "");
+                    let numericValue = Number(value);
+                    if (numericValue < 100000) {
+                      setPriceError(
+                        "Bạn không thể để giá tiền dưới 100.000 VND",
+                      );
+                    } else {
+                      setPriceError("");
+                    }
                     setSelectedSlot((prev) =>
-                      prev ? { ...prev, price: Number(e.target.value) } : null,
-                    )
-                  }
+                      prev ? { ...prev, price: numericValue } : null,
+                    );
+                  }}
                   className="w-full p-2 border border-gray-300 rounded"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                 />
+                {priceError && (
+                  <div className="text-red-600 text-sm mt-1">{priceError}</div>
+                )}
               </div>
             )}
             <div className="flex justify-end gap-2">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
                 disabled={isLoading}
               >
-                Hủy
-              </button>
-              <button
+                Huỷ
+              </Button>
+
+              <Button
+                variant="secondary"
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                disabled={isLoading}
+                disabled={
+                  isLoading ||
+                  !!priceError ||
+                  (selectedSlot?.status === "active" &&
+                    (selectedSlot?.price ?? 0) < 100000)
+                }
               >
                 {isLoading ? "Đang lưu..." : "Lưu"}
-              </button>
+              </Button>
             </div>
           </Dialog.Panel>
         </div>

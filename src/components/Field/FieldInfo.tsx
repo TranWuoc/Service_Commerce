@@ -86,7 +86,7 @@ const FieldInfo: React.FC = () => {
     <>
       {isAdmin ? (
         <div className="self-stretch w-full max-md:mt-8">
-          <div className="flex flex-col py-4 px-6 w-full h-[300px] bg-gray-100 rounded-lg shadow-md">
+          <div className="flex flex-col py-4 px-6 w-full h-auto bg-gray-100 rounded-lg shadow-md">
             <div className="flex gap-1 text-lg text-slate-800">
               <div className="font-medium">{field.name}</div>
             </div>
