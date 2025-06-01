@@ -2,7 +2,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext";
-
 const UserProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, loading } = useAuth();
 
@@ -12,5 +11,4 @@ const UserProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
-
 export default UserProtectedRoute;

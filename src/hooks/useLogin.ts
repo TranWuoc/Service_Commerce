@@ -1,14 +1,15 @@
+// src/hooks/useLogin.ts
 import { jwtDecode } from "jwt-decode";
-import { useToast} from "./use-toast";
-import { useUser } from "./useUser";
+import { useToast } from "./use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../api/axiosInstance";
-import { useAuth } from "../context/AuthContext"; 
+
 export const useLogin = () => {
   const toast = useToast();
   const navigate = useNavigate();
-  const { setUser } = useUser();
-const { checkAuth } = useAuth();
+  const { setUser } = useAuth();
+
   const login = async (email: string, password: string) => {
     try {
       const response = await axiosInstance.post("/auth/login", { email, password });
@@ -21,39 +22,30 @@ const { checkAuth } = useAuth();
       localStorage.setItem("authToken", access_token);
       localStorage.setItem("refreshToken", refresh_token);
 
-      toast.toast({
-        title: "Đăng nhập thành công",
-        variant: "success",
-        description: "Chào mừng bạn trở lại!",
-      });
-      await checkAuth();
-      // Giải mã access_token
       const decodedToken: any = jwtDecode(access_token);
+      const isAdmin = decodedToken.sub === "admin_000";
 
-
-      if (decodedToken.sub === "admin_000") {
-        localStorage.setItem("isAdmin", "true");
-        navigate("/admin");
-      } else {
-        localStorage.setItem("isAdmin", "false");
-        navigate("/dashboard");
-      }
-
+      // Lấy thông tin người dùng
       const userInfo = await axiosInstance.get("/auth/profile", {
         headers: { Authorization: `Bearer ${access_token}` },
       });
 
       localStorage.setItem("user", JSON.stringify(userInfo.data));
+      localStorage.setItem("isAdmin", isAdmin ? "true" : "false");
       setUser(userInfo.data);
 
-    } catch (error: any) {
-      const backendCode = error.response?.data?.code || "UNKNOWN_ERROR";
-      const backendMessage = error.response?.data?.message || "Đã xảy ra lỗi không xác định.";
+      toast.toast({
+        title: "Đăng nhập thành công",
+        variant: "success",
+        description: "Chào mừng bạn trở lại!",
+      });
 
+      navigate(isAdmin ? "/admin" : "/dashboard");
+    } catch (error: any) {
       toast.toast({
         variant: "destructive",
-        title: `Lỗi ${backendCode}`,
-        description: backendMessage,
+        title: `Lỗi ${error.response?.data?.code || "Đăng nhập thất bại"}`,
+        description: error.response?.data?.message || "Vui lòng thử lại.",
       });
     }
   };

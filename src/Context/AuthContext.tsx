@@ -1,6 +1,6 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import axiosInstance from "../api/axiosInstance"; // Đường dẫn tùy dự án
+import axiosInstance from "../api/axiosInstance";
 
 interface User {
   id: string;
@@ -21,12 +21,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   const checkAuth = async () => {
     setLoading(true);
     const token = localStorage.getItem("authToken");
+
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -34,50 +38,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
+      // Ưu tiên dùng user từ localStorage
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+
+      // Gọi lại API để đồng bộ
       const response = await axiosInstance.get("/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
-      console.log("CheckAuth - response.data:", response.data);
+      localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
       console.error("Auth check failed", error);
       setUser(null);
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+      localStorage.clear();
     } finally {
       setLoading(false);
     }
   };
+
   const logout = async () => {
     try {
-      await axiosInstance.post("/auth/logout"); // Optional: gọi API logout
+      await axiosInstance.post("/auth/logout");
     } catch (error) {
-      console.warn("Logout request failed (safe to ignore)", error);
+      console.warn("Logout request failed", error);
     } finally {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
-      localStorage.removeItem("isAdmin");
       setUser(null);
+      localStorage.clear();
     }
   };
+
   useEffect(() => {
     checkAuth();
-
-    // Tự động check lại khi localStorage thay đổi (như đăng xuất tab khác)
-    const onStorageChange = (event: StorageEvent) => {
-      if (event.key === "authToken") {
-        checkAuth();
-      }
-    };
-    window.addEventListener("storage", onStorageChange);
-
-    return () => window.removeEventListener("storage", onStorageChange);
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, setUser, checkAuth, logout }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated: !!user, loading, setUser, checkAuth, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
