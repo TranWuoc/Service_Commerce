@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
+import { format } from "date-fns";
 
 const RevenueCard: React.FC = () => {
   const [totalRevenue, setTotalRevenue] = useState<number | null>(null);
@@ -26,7 +27,27 @@ const RevenueCard: React.FC = () => {
 
   // Thêm option "Tất cả"
   months.unshift({ value: "", label: "Tất cả các tháng" });
+const handleViewDetail = () => {
+  let startDate = new Date();
+  let endDate = new Date();
 
+  if (selectedMonth) {
+    const year = new Date().getFullYear();
+    const month = parseInt(selectedMonth);
+
+    startDate = new Date(year, month - 1, 1);
+    endDate = new Date(year, month, 0); // Ngày cuối cùng của tháng
+  } else {
+    const year = new Date().getFullYear();
+    startDate = new Date(year, 0, 1);
+    endDate = new Date(year, 11, 31);
+  }
+
+  const startStr = format(startDate, "yyyy-MM-dd");
+  const endStr = format(endDate, "yyyy-MM-dd");
+
+  navigate(`/admin/statistic/revenue?start=${startStr}&end=${endStr}`);
+};
   useEffect(() => {
     const loadRevenue = async () => {
       setLoading(true);
@@ -69,7 +90,7 @@ const RevenueCard: React.FC = () => {
 
   return (
     <div className="flex flex-col justify-between items-center bg-white h-1/2 rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-2">Doanh thu</h2>
+      <h2 className="text-xl font-bold text-gray-800 mb-2">Doanh thu năm nay </h2>
       <div className="mb-4 w-full">
         <label
           htmlFor="month-select"
@@ -109,7 +130,7 @@ const RevenueCard: React.FC = () => {
       <Button
         text="Xem chi tiết"
         type="primary"
-        onClick={() => navigate("/admin/statistic/revenue")}
+        onClick={handleViewDetail}
         customStyle={{ marginTop: "10px" }}
       />
     </div>

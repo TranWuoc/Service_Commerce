@@ -23,7 +23,12 @@ import {
   SelectItem,
 } from "../../components/ui/select";
 
+import { useSearchParams } from "react-router-dom";
+import { parseISO } from "date-fns";
+
+
 const RevenueField: React.FC = () => {
+   const [searchParams] = useSearchParams();
   const [revenueData, setRevenueData] = useState<RevenueByFieldItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,16 +57,30 @@ const RevenueField: React.FC = () => {
       loadData();
     }
   }, [startDate, endDate]);
+  useEffect(() => {
+    const startParam = searchParams.get("start");
+    const endParam = searchParams.get("end");
+
+    if (startParam && endParam) {
+      setStartDate(parseISO(startParam));
+      setEndDate(parseISO(endParam));
+    } else {
+      // Nếu không có query param thì lấy mặc định đầu năm tới cuối năm
+      const year = new Date().getFullYear();
+      setStartDate(new Date(year, 0, 1));
+      setEndDate(new Date(year, 11, 31));
+    }
+  }, [searchParams]);
 
   const loadData = async () => {
-  try {
-    setLoading(true);
-    setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-    if (!startDate || !endDate) return;
+      if (!startDate || !endDate) return;
 
-    // Kiểm tra nếu cùng ngày
-    const isSameDay = startDate.toDateString() === endDate.toDateString();
+      // Kiểm tra nếu cùng ngày
+      const isSameDay = startDate.toDateString() === endDate.toDateString();
 
     // Tạo timestamp
     const startDateTime = new Date(startDate);
