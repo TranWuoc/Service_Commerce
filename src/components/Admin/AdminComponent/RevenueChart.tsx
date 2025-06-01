@@ -33,9 +33,6 @@ const RevenueLineChart: React.FC = () => {
 
           if (receipts.length === 0) return;
 
-          // Phân phối doanh thu đều cho mỗi receipt (mỗi tháng)
-          const revenuePerReceipt = totalRevenue / receipts.length;
-
           receipts.forEach((receipt: any) => {
             const date = parseISO(receipt.created_at);
             const monthKey = format(date, 'yyyy-MM');
@@ -43,7 +40,7 @@ const RevenueLineChart: React.FC = () => {
             if (!revenueMap[monthKey]) revenueMap[monthKey] = {};
             if (!revenueMap[monthKey][fieldName]) revenueMap[monthKey][fieldName] = 0;
 
-            revenueMap[monthKey][fieldName] += revenuePerReceipt;
+            receipt.is_fully_paid == 0 ? revenueMap[monthKey][fieldName] += receipt.deposit_price : revenueMap[monthKey][fieldName] += receipt.total_price;
           });
         });
 
